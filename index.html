@@ -358,7 +358,8 @@
         
         <!-- 入力フォーム -->
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。
+                部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -405,8 +406,7 @@
         <!-- 登録済み論題の一覧・管理エリア -->
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
             <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
-            <p class="note">登録されている論題の検索、修正、削除が行えます。
-                部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
+            <p class="note">登録されている論題の検索、修正、削除が行えます。</p>
             
             <!-- 管理用キーワード検索欄 -->
             <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
