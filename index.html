@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>チーム分け＆論題管理ツール</title>
+    <title>英語ディベート 割り当て＆論題管理ツール</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -145,14 +145,21 @@
         .hidden {
             display: none;
         }
+        .motion-selection-area {
+            margin-top: 10px;
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>チーム分け&論題選択ページ</h1>
+    <h1>英語ディベート 割り当て＆論題管理ツール</h1>
 
-    <!-- ホーム画面（2つのボタンのみ） -->
+    <!-- ホーム画面 -->
     <div class="card" id="homeView">
         <h2>メニュー</h2>
         <p class="note">行いたい操作のボタンを押してください。</p>
@@ -170,8 +177,8 @@
         <div class="grid-2">
             <div>
                 <label for="participants">参加者リスト (改行区切り)</label>
-                <textarea id="participants"></textarea>
-                <div class="note">※定員を超えた場合は自動的にジャッジに回ります</div>
+                <textarea id="participants" placeholder=""></textarea>
+                <div class="note">※定員を超えた余剰メンバーは自動的にジャッジに回ります</div>
             </div>
             <div>
                 <label for="judges">ジャッジリスト (改行区切り)</label>
@@ -181,8 +188,19 @@
 
         <div class="grid-2">
             <div>
-                <label for="targetTeams">作成するチーム数（試合数など）</label>
-                <input type="number" id="targetTeams" value="2" min="1">
+                <label for="targetPairs">作成する試合数 (組)</label>
+                <select id="targetPairs">
+                    <option value="1">1組 (2チーム)</option>
+                    <option value="2" selected>2組 (4チーム)</option>
+                    <option value="3">3組 (6チーム)</option>
+                    <option value="4">4組 (8チーム)</option>
+                    <option value="5">5組 (10チーム)</option>
+                    <option value="6">6組 (12チーム)</option>
+                    <option value="7">7組 (14チーム)</option>
+                    <option value="8">8組 (16チーム)</option>
+                    <option value="9">9組 (18チーム)</option>
+                    <option value="10">10組 (20チーム)</option>
+                </select>
             </div>
             <div>
                 <label for="membersPerTeam">1チームあたりの人数</label>
@@ -203,7 +221,7 @@
     <div class="card hidden" id="motionView">
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2>新規論題の追加（データベースへ保存）</h2>
-        <p class="note">論題集データベースに論題を追加できます。</p>
+        <p class="note">GitHubトークン不要で、誰でも安全に `motions.json` に論題を追加できます。</p>
         
         <label for="newMotion">論題 (Motion) <span style="color:red;">*</span></label>
         <input type="text" id="newMotion" placeholder="This house would...">
@@ -227,7 +245,6 @@
 <script>
     let motionsCache = [];
 
-    // 起動時に motions.json を読み込む
     window.addEventListener('DOMContentLoaded', async () => {
         try {
             const res = await fetch('motions.json');
@@ -239,7 +256,6 @@
         }
     });
 
-    // 画面の切り替え関数
     function switchView(viewId) {
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('assignView').classList.add('hidden');
@@ -249,11 +265,10 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 割り当て実行ロジック
     function generateAssignments() {
         const participantsText = document.getElementById('participants').value.trim();
         const judgesText = document.getElementById('judges').value.trim();
-        const targetTeams = parseInt(document.getElementById('targetTeams').value) || 2;
+        const targetPairs = parseInt(document.getElementById('targetPairs').value) || 1;
         const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value) || 2;
 
         if (!participantsText) {
@@ -275,18 +290,20 @@
         shuffle(participants);
         shuffle(judges);
 
-        // 定員の計算と超過分のジャッジへの繰り越し処理
-        const totalCapacity = targetTeams * membersPerTeam;
+        // 1組につき2チーム必要なので、必要なチーム数は targetPairs * 2
+        const requiredTeams = targetPairs * 2;
+        const totalCapacity = requiredTeams * membersPerTeam;
         let overflowNotice = "";
+
         if (participants.length > totalCapacity) {
             const extraCount = participants.length - totalCapacity;
             const extraParticipants = participants.splice(totalCapacity);
             judges = judges.concat(extraParticipants);
-            overflowNotice = `<p style="color: #d97706; font-weight: bold; font-size: 0.9rem;">参加者が定員（${totalCapacity}人）より ${extraCount} 人多いため、あふれたメンバーを自動的にジャッジに割り振りました。</p>`;
+            overflowNotice = `<p style="color: #d97706; font-weight: bold; font-size: 0.9rem;">⚠️ 参加者が定員（${totalCapacity}人）より ${extraCount} 人多いため、あふれたメンバーを自動的にジャッジに割り振りました。</p>`;
         }
 
         let teams = [];
-        for (let i = 0; i < targetTeams; i++) {
+        for (let i = 0; i < requiredTeams; i++) {
             let members = participants.splice(0, membersPerTeam);
             if (members.length > 0) {
                 teams.push({
@@ -300,36 +317,95 @@
         let matchCount = Math.floor(teams.length / 2);
 
         if (matchCount === 0) {
-            html += `<p>チームを組むのに十分な参加者がいません（最低でも1チーム分の人数が必要です）。</p>`;
+            html += `<p>チームを組むのに十分な参加者がいません（最低でも1組＝2チーム分の人数が必要です）。</p>`;
         } else {
             for (let i = 0; i < matchCount; i++) {
                 const gov = teams[i * 2];
                 const opp = teams[i * 2 + 1];
 
-                let randomMotionInfo = "ランダム論題が割り当てられました";
+                // 組ごとのジャッジを割り当てる（ジャッジが足りる場合は1人ずつ割り振り、余りは最初の組などに分けるかプール表示）
+                // ここでは各組に1人ずつ割り振るロジック（足りない場合は「未割当」）
+                const assignedJudge = judges.length > 0 ? judges.shift() : 'ジャッジ不足（追加してください）';
+
+                // ランダムに3つ抽出
+                let sampleMotions = [];
                 if (motionsCache.length > 0) {
-                    const m = motionsCache[Math.floor(Math.random() * motionsCache.length)];
-                    randomMotionInfo = `[ID: ${m.id}] 大会: ${m.tournament || '-'} (${m.year || '-'})`;
+                    let shuffledMotions = [...motionsCache];
+                    shuffle(shuffledMotions);
+                    sampleMotions = shuffledMotions.slice(0, 3);
                 }
 
+                let optionsHtml = `<option value="">-- 3つの候補から選択または下の検索欄を活用 --</option>`;
+                sampleMotions.forEach(m => {
+                    optionsHtml += `<option value="${m.motion}">[候補] ${m.motion} (${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</option>`;
+                });
+
                 html += `
-                    <div class="result-box">
-                        <strong>Match ${i + 1}</strong><br>
+                    <div class="result-box" id="match-box-${i}">
+                        <strong>Match ${i + 1} (第 ${i + 1} 組)</strong><br>
                         🔹 <strong>Government:</strong> ${gov.members.join(', ')}<br>
                         🔸 <strong>Opposition:</strong> ${opp.members.join(', ')}<br>
-                        📜 <strong>Assigned Motion:</strong> <span class="badge">秘密（試合開始後に発表）</span> <span style="font-size:0.85rem; color:#64748b;">(${randomMotionInfo})</span>
+                        👨‍⚖️ <strong>Assigned Judge:</strong> <span style="color: #2563eb; font-weight: bold;">${assignedJudge}</span><br>
+                        📜 <strong>Assigned Motion:</strong> <span class="badge" id="selected-badge-${i}">未選択</span>
+                        
+                        <div class="motion-selection-area">
+                            <label style="font-size: 0.85rem; margin-bottom: 4px;">🔍 キーワード検索で論題を探す</label>
+                            <input type="text" id="search-input-${i}" placeholder="キーワードを入力して検索..." oninput="filterMotions(${i})" style="margin-bottom: 6px; padding: 6px; font-size: 0.9rem;">
+
+                            <label style="font-size: 0.85rem; margin-bottom: 4px;">📌 割り当て論題を選ぶ（ランダム3選 ＋ 検索結果）</label>
+                            <select id="motion-select-${i}" onchange="selectMotion(${i})" style="margin-bottom: 0; padding: 6px; font-size: 0.9rem;">
+                                ${optionsHtml}
+                            </select>
+                        </div>
                     </div>
                 `;
             }
         }
 
-        html += `<div style="margin-top: 20px;"><strong>👨‍⚖️ Assigned Judges:</strong> ${judges.length > 0 ? judges.join(', ') : 'なし'}</div>`;
+        // 余ったジャッジがいる場合の表示
+        if (judges.length > 0) {
+            html += `<div style="margin-top: 20px;"><strong>👨‍⚖️ その他の待機ジャッジ:</strong> ${judges.join(', ')}</div>`;
+        }
 
         document.getElementById('resultContent').innerHTML = html;
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 新規論題追加処理
+    function filterMotions(matchIndex) {
+        const keyword = document.getElementById(`search-input-${matchIndex}`).value.toLowerCase();
+        const selectEl = document.getElementById(`motion-select-${matchIndex}`);
+
+        const filtered = motionsCache.filter(m => {
+            const text = (m.motion || '').toLowerCase();
+            const tournament = (m.tournament || '').toLowerCase();
+            const year = (m.year || '').toLowerCase();
+            return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
+        });
+
+        let optionsHtml = `<option value="">-- 検索結果 (${filtered.length}件) --</option>`;
+        filtered.forEach(m => {
+            optionsHtml += `<option value="${m.motion}">${m.motion} (${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</option>`;
+        });
+
+        selectEl.innerHTML = optionsHtml;
+    }
+
+    function selectMotion(matchIndex) {
+        const selectEl = document.getElementById(`motion-select-${matchIndex}`);
+        const badgeEl = document.getElementById(`selected-badge-${matchIndex}`);
+        const selectedValue = selectEl.value;
+
+        if (selectedValue) {
+            badgeEl.style.backgroundColor = '#2563eb';
+            badgeEl.style.color = '#ffffff';
+            badgeEl.innerText = selectedValue;
+        } else {
+            badgeEl.style.backgroundColor = '#e2e8f0';
+            badgeEl.style.color = '#1e293b';
+            badgeEl.innerText = '未選択';
+        }
+    }
+
     async function addNewMotion() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
@@ -355,7 +431,7 @@
 
             if (res.ok) {
                 statusEl.style.color = '#16a34a';
-                statusEl.innerText = '論題が正常に追加されました！';
+                statusEl.innerText = '✨ 論題が正常に追加されました！';
                 document.getElementById('newMotion').value = '';
                 document.getElementById('newTournament').value = '';
                 document.getElementById('newYear').value = '';
@@ -374,5 +450,3 @@
 
 </body>
 </html>
-
-        
