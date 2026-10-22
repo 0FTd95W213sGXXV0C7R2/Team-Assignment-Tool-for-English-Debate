@@ -162,10 +162,29 @@
             word-break: break-all;
             margin-top: 4px;
         }
+        /* ステータスメッセージ用スタイリング */
         #submitStatus {
-            margin-top: 10px;
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 8px;
             font-weight: bold;
             text-align: center;
+            font-size: 1rem;
+        }
+        .status-success {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+        .status-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+        .status-loading {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
         }
         .hidden {
             display: none;
@@ -359,7 +378,8 @@
         <!-- 入力フォーム -->
         <div id="motionFormArea">
             <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。
-                部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
+                部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。
+            </p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -401,7 +421,8 @@
             </div>
         </div>
 
-        <div id="submitStatus"></div>
+        <!-- 結果メッセージ通知エリア -->
+        <div id="submitStatus" class="hidden"></div>
 
         <!-- 登録済み論題の一覧・管理エリア -->
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
@@ -456,11 +477,29 @@
         if (viewId === 'motionView') {
             cancelEdit();
             document.getElementById('manage-search-input').value = '';
+            clearStatus();
             renderManagementList();
         }
 
         document.getElementById(viewId).classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setStatus(text, type) {
+        const statusEl = document.getElementById('submitStatus');
+        statusEl.className = ''; // クラスリセット
+        statusEl.innerText = text;
+        if (type === 'success') statusEl.classList.add('status-success');
+        else if (type === 'error') statusEl.classList.add('status-error');
+        else if (type === 'loading') statusEl.classList.add('status-loading');
+        
+        statusEl.classList.remove('hidden');
+    }
+
+    function clearStatus() {
+        const statusEl = document.getElementById('submitStatus');
+        statusEl.innerText = '';
+        statusEl.className = 'hidden';
     }
 
     function redrawPreMotions() {
@@ -625,7 +664,6 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 登録済み一覧の表示（検索対応）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const keyword = document.getElementById('manage-search-input').value.toLowerCase();
@@ -640,7 +678,7 @@
             const text = (m.motion || '').toLowerCase();
             const tournament = (m.tournament || '').toLowerCase();
             const year = (m.year || '').toLowerCase();
-            m._originalIndex = originalIndex; // 元のインデックスを保持
+            m._originalIndex = originalIndex;
             return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
         });
 
@@ -672,7 +710,6 @@
         container.innerHTML = html;
     }
 
-    // 編集モードを開始
     function startEdit(index, motion, tournament, year) {
         document.getElementById('editIndex').value = index;
         document.getElementById('newMotion').value = motion;
@@ -681,11 +718,10 @@
 
         document.getElementById('formTitle').innerText = '論題の編集';
         document.getElementById('editCancelContainer').classList.remove('hidden');
-        
+        clearStatus();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 編集をキャンセル
     function cancelEdit() {
         document.getElementById('editIndex').value = -1;
         document.getElementById('newMotion').value = '';
@@ -695,10 +731,8 @@
         document.getElementById('formTitle').innerText = '新規論題の追加';
         document.getElementById('editCancelContainer').classList.add('hidden');
         hidePreview();
-        document.getElementById('submitStatus').innerText = '';
     }
 
-    // 確認画面を表示
     function showPreview() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
@@ -730,16 +764,13 @@
         document.getElementById('motionFormArea').classList.remove('hidden');
     }
 
-    // 追加または更新を実行
     async function addNewMotion() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
         const editIndex = parseInt(document.getElementById('editIndex').value);
-        const statusEl = document.getElementById('submitStatus');
 
-        statusEl.style.color = '#2563eb';
-        statusEl.innerText = editIndex >= 0 ? '更新中...' : '追加中...';
+        setStatus(editIndex >= 0 ? '更新中...' : '追加中...', 'loading');
 
         let updatedList = [...motionsCache];
         if (editIndex >= 0) {
@@ -758,8 +789,8 @@
             const data = await res.json();
 
             if (res.ok) {
-                statusEl.style.color = '#16a34a';
-                statusEl.innerText = editIndex >= 0 ? '論題が正常に更新されました！' : '論題が正常に追加されました！';
+                const msg = editIndex >= 0 ? '✅ 論題が正常に更新されました！' : '✅ 論題は正常に追加されました！';
+                setStatus(msg, 'success');
                 
                 cancelEdit();
                 await fetchMotions();
@@ -767,12 +798,10 @@
                 throw new Error(data.error || '処理に失敗しました。');
             }
         } catch (err) {
-            statusEl.style.color = '#dc2626';
-            statusEl.innerText = `エラー: ${err.message}`;
+            setStatus(`❌ エラー: ${err.message}`, 'error');
         }
     }
 
-    // 削除を実行
     async function deleteMotion(index) {
         if (!confirm(`「${motionsCache[index].motion}」を削除してもよろしいですか？`)) {
             return;
@@ -781,9 +810,7 @@
         let updatedList = [...motionsCache];
         updatedList.splice(index, 1);
 
-        const statusEl = document.getElementById('submitStatus');
-        statusEl.style.color = '#2563eb';
-        statusEl.innerText = '削除中...';
+        setStatus('削除中...', 'loading');
 
         try {
             const res = await fetch('/api/add-motion', {
@@ -795,15 +822,13 @@
             const data = await res.json();
 
             if (res.ok) {
-                statusEl.style.color = '#16a34a';
-                statusEl.innerText = '論題を削除しました。';
+                setStatus('🗑️ 論題を削除しました。', 'success');
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
             }
         } catch (err) {
-            statusEl.style.color = '#dc2626';
-            statusEl.innerText = `エラー: ${err.message}`;
+            setStatus(`❌ エラー: ${err.message}`, 'error');
         }
     }
 </script>
