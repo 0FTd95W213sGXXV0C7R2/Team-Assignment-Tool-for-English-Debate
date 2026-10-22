@@ -358,7 +358,7 @@
         
         <!-- 入力フォーム -->
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -405,7 +405,12 @@
         <!-- 登録済み論題の一覧・管理エリア -->
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
             <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
-            <p class="note">登録されている論題の修正や削除が行えます。</p>
+            <p class="note">登録されている論題の検索、修正、削除が行えます。
+                部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
+            
+            <!-- 管理用キーワード検索欄 -->
+            <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
+
             <div id="managementListContainer" class="management-list">
                 <p style="font-size: 0.9rem; color: #64748b;">読み込み中...</p>
             </div>
@@ -450,6 +455,7 @@
 
         if (viewId === 'motionView') {
             cancelEdit();
+            document.getElementById('manage-search-input').value = '';
             renderManagementList();
         }
 
@@ -619,9 +625,10 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 登録済み一覧の表示
+    // 登録済み一覧の表示（検索対応）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
+        const keyword = document.getElementById('manage-search-input').value.toLowerCase();
         if (!container) return;
 
         if (motionsCache.length === 0) {
@@ -629,8 +636,22 @@
             return;
         }
 
+        const filtered = motionsCache.filter((m, originalIndex) => {
+            const text = (m.motion || '').toLowerCase();
+            const tournament = (m.tournament || '').toLowerCase();
+            const year = (m.year || '').toLowerCase();
+            m._originalIndex = originalIndex; // 元のインデックスを保持
+            return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">一致する論題が見つかりませんでした。</p>`;
+            return;
+        }
+
         let html = '';
-        motionsCache.forEach((m, index) => {
+        filtered.forEach((m) => {
+            const originalIndex = m._originalIndex;
             const safeMotion = (m.motion || '').replace(/'/g, "\\'");
             const safeTourney = (m.tournament || '').replace(/'/g, "\\'");
             const safeYear = (m.year || '').replace(/'/g, "\\'");
@@ -642,8 +663,8 @@
                         <span style="font-size:0.85rem; color:#64748b;">大会: ${m.tournament || '-'} / 年度: ${m.year || '-'}</span>
                     </div>
                     <div class="management-actions">
-                        <button class="btn-secondary" onclick="startEdit(${index}, '${safeMotion}', '${safeTourney}', '${safeYear}')">編集</button>
-                        <button class="btn-danger" onclick="deleteMotion(${index})">削除</button>
+                        <button class="btn-secondary" onclick="startEdit(${originalIndex}, '${safeMotion}', '${safeTourney}', '${safeYear}')">編集</button>
+                        <button class="btn-danger" onclick="deleteMotion(${originalIndex})">削除</button>
                     </div>
                 </div>
             `;
@@ -709,7 +730,7 @@
         document.getElementById('motionFormArea').classList.remove('hidden');
     }
 
-    // 追加または更新を実行（今回はシンプルに「全データを再送信して上書き」する形になります）
+    // 追加または更新を実行
     async function addNewMotion() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
@@ -728,7 +749,6 @@
         }
 
         try {
-            // 全データをサーバーに送り直してmotions.jsonを更新する仕組み
             const res = await fetch('/api/add-motion', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
