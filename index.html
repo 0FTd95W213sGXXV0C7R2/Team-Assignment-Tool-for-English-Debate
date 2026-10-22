@@ -262,12 +262,6 @@
             <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
             <input type="text" id="pre-search-input" placeholder="キーワードを入力して検索..." oninput="filterPreMotions()" style="margin-bottom: 4px; padding: 12px; font-size: 16px;">
             <div id="pre-search-results"></div>
-
-            <!-- 現在選択されている論題 -->
-            <div style="margin-top: 14px; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <strong>選択中の論題:</strong><br>
-                <span class="badge" id="selected-pre-motion">未選択（ランダム抽出または検索から選択してください）</span>
-            </div>
         </div>
 
         <h3 style="font-size: 1.05rem; color: var(--primary-color); margin-top: 24px; margin-bottom: 12px;">2. メンバー・チーム設定</h3>
@@ -423,7 +417,7 @@
                 html += `
                     <div class="motion-candidate-item">
                         <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">選択する</button>
+                        <button class="btn-secondary" id="btn-select-${safeMotionText}" onclick="selectPreMotion('${safeMotionText}', this)">選択する</button>
                     </div>
                 `;
             });
@@ -462,7 +456,7 @@
             resHtml += `
                 <div class="search-result-item">
                     <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '-'}, ${m.year || '-'})</span></span>
-                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">選択</button>
+                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}', this)">選択</button>
                 </div>
             `;
         });
@@ -470,11 +464,21 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 論題を選択して保持する関数
-    function selectPreMotion(motionText) {
+    // 論題を選択して保持する関数（選択時にボタンの表示を更新）
+    function selectPreMotion(motionText, btnElement) {
         selectedMotionText = motionText;
-        const badgeEl = document.getElementById('selected-pre-motion');
-        badgeEl.innerText = motionText;
+
+        // 全ての選択ボタンの見た目をリセット
+        document.querySelectorAll('.motion-candidate-item button, .search-result-item button').forEach(b => {
+            b.innerText = "選択する";
+            b.style.backgroundColor = "";
+        });
+
+        // 押されたボタンを選択済みの表示に変更
+        if (btnElement) {
+            btnElement.innerText = "選択中 ✓";
+            btnElement.style.backgroundColor = "#16a34a";
+        }
     }
 
     // チーム割り振り実行
