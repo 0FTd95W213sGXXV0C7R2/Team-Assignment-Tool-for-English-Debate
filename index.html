@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>チーム分け・論題選択　/ 新規論題追加ページ</title>
+    <title>チーム分け・論題抽出/新規論題追加ページ</title>
     <style>
         body {
             font-family: sans-serif;
@@ -33,7 +33,7 @@
             margin-bottom: 6px;
             font-weight: bold;
         }
-        input[type="text"], input[type="password"], select, textarea {
+        input[type="text"], select, textarea {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
@@ -121,7 +121,7 @@
     <!-- 上：チーム分け / 論題選択ツール -->
     <!-- ========================================== -->
     <div class="section-card">
-        <h2>チーム分け ＆ 論題選択ツール</h2>
+        <h2> チーム分け ＆ 論題選択ツール</h2>
         <p id="load-status">データベース読込中...</p>
 
         <!-- キーワード検索 ＆ 論題候補 -->
@@ -133,7 +133,7 @@
 
         <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label style="margin: 0;"> 抽出された論題（クリックで選択 / 3つ表示）:</label>
+                <label style="margin: 0;">抽出された論題候補（クリックで選択 / 3つ表示）:</label>
                 <button type="button" onclick="pickRandomMotions()" style="width: auto; padding: 4px 12px; font-size: 14px;">🔄 再抽出</button>
             </div>
             <div id="motions-candidates"></div>
@@ -145,13 +145,13 @@
         <div class="row">
             <div class="col">
                 <div class="form-group">
-                    <label for="participants">メンバー（1人入力するごとに改行）:</label>
+                    <label for="participants">参加者名（1人入力するごとに改行）:</label>
                     <textarea id="participants" oninput="saveInputs()"></textarea>
                 </div>
             </div>
             <div class="col">
                 <div class="form-group">
-                    <label for="judges"> 事前指定ジャッジ(1人入力するごとに改行・任意）:</label>
+                    <label for="judges">事前指定ジャッジ（1人入力するごとに改行・任意）:</label>
                     <textarea id="judges" oninput="saveInputs()"></textarea>
                 </div>
             </div>
@@ -172,7 +172,6 @@
                 <div class="form-group">
                     <label for="team-count">チーム数（組数）:</label>
                     <select id="team-count" onchange="saveInputs()">
-                        <!-- 2チーム(1組) 〜 100チーム(50組) -->
                         <script>
                             for(let i=2; i<=100; i+=2) {
                                 document.write(`<option value="${i}">${i} チーム (${i/2} 組)</option>`);
@@ -195,13 +194,7 @@
     <!-- ========================================== -->
     <div class="section-card">
         <h2> 新規論題追加ページ</h2>
-        <p>GitHub API経由で <code>motions.json</code> に新しい論題を追加します。</p>
-        
-        <div class="form-group">
-            <label for="github-token">GitHub Personal Access Token (PAT):</label>
-            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxx">
-            <small style="color: #666;">※ repo権限が必要です（ブラウザには保存されません）</small>
-        </div>
+        <p>サーバー経由で論題集データベースに新しい論題を追加します。</p>
 
         <div class="form-group">
             <label for="new-motion">論題テキスト (Motion): <span style="color:red;">*必須</span></label>
@@ -230,29 +223,21 @@
     </div>
 
 <script>
-    // ▼▼▼ ご自身のGitHubリポジトリ情報に書き換えてください ▼▼▼
-    const GITHUB_OWNER = "0FTd95W213sGXXV0C7R2";
-    const GITHUB_REPO = "motions.json";
-    const FILE_PATH = "motions.json";
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
     let allMotions = [];
     let selectedMotionObj = null;
-    let lastGeneratedData = null; // シャッフル用
+    let lastGeneratedData = null;
 
-    // 起動時の初期化
     window.onload = function() {
         loadSavedInputs();
         fetchMotions();
     };
 
-    // データの取得
     function fetchMotions() {
         fetch('motions.json?' + new Date().getTime())
             .then(res => res.json())
             .then(data => {
                 allMotions = data;
-                document.getElementById('load-status').textContent = `✅ 論題集データベース 読込完了（全 ${allMotions.length} 件）`;
+                document.getElementById('load-status').textContent = `✅ 論題集データベース読込完了（全 ${allMotions.length} 件）`;
                 document.getElementById('load-status').style.color = '#27ae60';
                 pickRandomMotions();
             })
@@ -262,7 +247,6 @@
             });
     }
 
-    // 入力値のローカルストレージ保存
     function saveInputs() {
         localStorage.setItem('debate_participants', document.getElementById('participants').value);
         localStorage.setItem('debate_judges', document.getElementById('judges').value);
@@ -285,7 +269,6 @@
         }
     }
 
-    // ランダム論題3つ抽出
     function pickRandomMotions() {
         if (allMotions.length === 0) return;
         const shuffled = [...allMotions].sort(() => 0.5 - Math.random());
@@ -305,10 +288,9 @@
             };
             container.appendChild(div);
         });
-        selectedMotionObj = candidates[0]; // デフォルトは1つ目
+        selectedMotionObj = candidates[0];
     }
 
-    // キーワード検索
     function searchMotions() {
         const keyword = document.getElementById('search-keyword').value.trim().toLowerCase();
         const box = document.getElementById('search-results-box');
@@ -347,7 +329,6 @@
         }
     }
 
-    // チーム分け実行
     function generateTeams() {
         const errBox = document.getElementById('team-error');
         const resBox = document.getElementById('team-result');
@@ -363,7 +344,6 @@
         const teamSize = parseInt(document.getElementById('team-size').value);
         const targetTeamCount = parseInt(document.getElementById('team-count').value);
 
-        // バリデーション：最低1組（2チーム）必要
         const minParticipants = teamSize * 2;
         if (participants.length < minParticipants) {
             errBox.textContent = `エラー: 選択されたチーム人数(${teamSize}人)で最低1組(2チーム、計${minParticipants}人)結成するための人数が足りません。（現在 ${participants.length} 人）`;
@@ -371,10 +351,7 @@
             return;
         }
 
-        // シャッフルして割り当て
         const shuffledParticipants = [...participants].sort(() => 0.5 - Math.random());
-        
-        // 必要な人数分だけ切り取る（あるいは最大数）
         const maxPossibleTeams = Math.floor(shuffledParticipants.length / teamSize);
         const actualTeamCount = Math.min(targetTeamCount, maxPossibleTeams);
 
@@ -392,7 +369,7 @@
             teams.push(members);
         }
 
-        lastGeneratedData = { teams, judges, motion: selectedMotionObj };
+        lastGeneratedData = { teams, judges };
         renderTeamResult(lastGeneratedData);
     }
 
@@ -401,7 +378,6 @@
             generateTeams();
             return;
         }
-        // 再度参加者をシャッフルしてチームを組み直す
         const participantsRaw = document.getElementById('participants').value.trim();
         let participants = participantsRaw.split('\n').map(n => n.trim()).filter(n => n);
         participants.sort(() => 0.5 - Math.random());
@@ -414,7 +390,7 @@
                 teams.push(participants.slice(currentIndex, currentIndex + teamSize));
                 currentIndex += teamSize;
             } else {
-                teams.push(participants.slice(currentIndex)); // 余り
+                teams.push(participants.slice(currentIndex));
                 break;
             }
         }
@@ -426,25 +402,20 @@
         const resBox = document.getElementById('team-result');
         resBox.style.display = 'block';
 
-        const m = data.motion;
-        let html = `<strong>【論題】</strong><br>` +
-                   `[${m.year || '-'}/${m.tournament || '-'}] ${m.motion}<br><br>` +
-                   `<strong>ジャッジ:</strong> ${data.judges.length > 0 ? data.judges.join(', ') : '（なし）'}<br><br>` +
+        let html = `<strong>⚖️ ジャッジ:</strong> ${data.judges.length > 0 ? data.judges.join(', ') : '（なし）'}<br><br>` +
                    `<strong>--- チーム分け結果 ---</strong><br>`;
 
         for (let i = 0; i < data.teams.length; i++) {
             const teamNum = i + 1;
             const sideName = (teamNum % 2 !== 0) ? `Government ${Math.ceil(teamNum/2)}` : `Opposition ${teamNum/2}`;
-            const sideLabel = (teamNum % 2 !== 0) ? 'Government side' : 'Opposition Side';
+            const sideLabel = (teamNum % 2 !== 0) ? '🟢 Government side' : '🔴 Opposition Side';
             
             html += `<b>${sideLabel} (${sideName}):</b> ${data.teams[i].join(', ')}<br>`;
         }
         resBox.innerHTML = html;
     }
 
-    // 新規論題追加 (GitHub API)
     async function addMotionToGitHub() {
-        const token = document.getElementById('github-token').value.trim();
         const motion = document.getElementById('new-motion').value.trim();
         const tournament = document.getElementById('new-tournament').value.trim() || "-";
         const year = document.getElementById('new-year').value.trim() || "-";
@@ -460,58 +431,24 @@
             return;
         }
 
-        successBox.textContent = '⏳ データベースからデータを取得・更新中...';
+        successBox.textContent = 'サーバー経由で論題集データベースに登録中...';
         successBox.style.display = 'block';
 
-        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-
         try {
-            const getRes = await fetch(apiUrl, {
+            const res = await fetch('/api/add-motion', {
+                method: 'POST',
                 headers: {
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-
-            if (!getRes.ok) throw new Error('データベースからのデータ取得に失敗しました。トークンやリポジトリ名を確認してください。');
-            
-            const fileData = await getRes.json();
-            const sha = fileData.sha;
-
-            const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
-            let motionsArray = JSON.parse(decodedContent);
-
-            const maxId = motionsArray.length > 0 ? Math.max(...motionsArray.map(m => m.id)) : 0;
-            const newId = maxId + 1;
-
-            motionsArray.push({
-                "id": newId,
-                "motion": motion,
-                "tournament": tournament,
-                "year": year
-            });
-
-            const updatedContentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(motionsArray, null, 2))));
-
-            const putRes = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    message: `Add new motion ID: ${newId} via Web Tool`,
-                    content: updatedContentBase64,
-                    sha: sha
-                })
+                body: JSON.stringify({ motion, tournament, year })
             });
 
-            if (!putRes.ok) throw new Error('データベースへの保存に失敗しました。');
+            const data = await res.json();
 
-            successBox.textContent = `反映完了 (ID: ${newId} を追加し、論題集の更新を確認しました)`;
+            if (!res.ok) throw new Error(data.error || 'サーバーエラーが発生しました。');
+
+            successBox.textContent = `✨ 反映完了！ (ID: ${data.id} を追加しました)`;
             
-            // フォームをクリアしてデータを再取得
             document.getElementById('new-motion').value = '';
             document.getElementById('new-tournament').value = '';
             document.getElementById('new-year').value = '';
@@ -520,7 +457,7 @@
         } catch (error) {
             console.error(error);
             successBox.style.display = 'none';
-            errBox.textContent = `エラー: ${error.message}`;
+            errBox.textContent = `❌ エラー: ${error.message}`;
             errBox.style.display = 'block';
         }
     }
