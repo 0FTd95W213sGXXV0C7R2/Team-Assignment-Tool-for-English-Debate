@@ -3,11 +3,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { motion, tournament, year } = req.body;
-
-    if (!motion) {
-        return res.status(400).json({ error: 'Motion is required' });
-    }
+    const { motion, tournament, year, action, motions } = req.body;
 
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_OWNER;
@@ -21,7 +17,6 @@ export default async function handler(req, res) {
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
     try {
-        // 1. 現在の motions.json の内容を取得
         const getRes = await fetch(url, {
             headers: {
                 'Authorization': `token ${token}`,
@@ -36,18 +31,29 @@ export default async function handler(req, res) {
 
         const fileData = await getRes.json();
         const sha = fileData.sha;
-        const currentContent = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
+        let currentContent = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
 
-        // 2. 新しい論題を追加
-        currentContent.push({
-            motion: motion.trim(),
-            tournament: tournament ? tournament.trim() : '',
-            year: year ? year.trim() : ''
-        });
+        let commitMessage = '';
+
+        if (action === 'overwrite' && Array.isArray(motions)) {
+            // まとめて上書き（追加・編集・削除共通）
+            currentContent = motions;
+            commitMessage = 'Update, edit, or delete motions via web tool';
+        } else {
+            // 単体追加用（旧形式の互換性維持）
+            if (!motion) {
+                return res.status(400).json({ error: 'Motion is required' });
+            }
+            currentContent.push({
+                motion: motion.trim(),
+                tournament: tournament ? tournament.trim() : '',
+                year: year ? year.trim() : ''
+            });
+            commitMessage = `Add new motion via web tool: ${motion.substring(0, 30)}...`;
+        }
 
         const updatedContentBase64 = Buffer.from(JSON.stringify(currentContent, null, 2)).toString('base64');
 
-        // 3. GitHubにファイルを更新（コミット）
         const putRes = await fetch(url, {
             method: 'PUT',
             headers: {
@@ -57,7 +63,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                message: `Add new motion via web tool: ${motion.substring(0, 30)}...`,
+                message: commitMessage,
                 content: updatedContentBase64,
                 sha: sha
             })
@@ -73,4 +79,3 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: error.message });
     }
 }
-
