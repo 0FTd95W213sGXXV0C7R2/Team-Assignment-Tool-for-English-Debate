@@ -73,7 +73,7 @@
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 16px; /* スマホでの自動ズーム防止 */
+            font-size: 16px;
             box-sizing: border-box;
             margin-bottom: 12px;
             background-color: #fff;
@@ -162,7 +162,6 @@
             word-break: break-all;
             margin-top: 4px;
         }
-        /* ステータスメッセージ用スタイリング */
         #submitStatus {
             margin-top: 16px;
             padding: 14px;
@@ -241,6 +240,23 @@
         }
         .search-result-item:last-child {
             border-bottom: none;
+        }
+        .selected-box {
+            background: #e0f2fe;
+            border: 1px solid #38bdf8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .selected-box button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            min-height: auto;
         }
         .preview-box {
             background: #f8fafc;
@@ -323,6 +339,15 @@
             <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
             <input type="text" id="pre-search-input" placeholder="キーワードを入力して検索..." oninput="filterPreMotions()" style="margin-bottom: 4px; padding: 12px; font-size: 16px;">
             <div id="pre-search-results"></div>
+
+            <!-- 選択中の論題状態表示エリア -->
+            <div id="selectedMotionArea" class="selected-box hidden">
+                <div>
+                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">選択中 ✓</span><br>
+                    <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
+                </div>
+                <button class="btn-danger" onclick="clearSelectedMotion()">選択を取り消す</button>
+            </div>
         </div>
 
         <h3 style="font-size: 1.05rem; color: var(--primary-color); margin-top: 24px; margin-bottom: 12px;">2. メンバー・チーム設定</h3>
@@ -377,9 +402,7 @@
         
         <!-- 入力フォーム -->
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。
-                部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。
-            </p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -487,7 +510,7 @@
 
     function setStatus(text, type) {
         const statusEl = document.getElementById('submitStatus');
-        statusEl.className = ''; // クラスリセット
+        statusEl.className = '';
         statusEl.innerText = text;
         if (type === 'success') statusEl.classList.add('status-success');
         else if (type === 'error') statusEl.classList.add('status-error');
@@ -523,7 +546,7 @@
                 html += `
                     <div class="motion-candidate-item">
                         <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}', this)">選択する</button>
+                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">選択する</button>
                     </div>
                 `;
             });
@@ -561,7 +584,7 @@
             resHtml += `
                 <div class="search-result-item">
                     <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '-'}, ${m.year || '-'})</span></span>
-                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}', this)">選択</button>
+                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">選択</button>
                 </div>
             `;
         });
@@ -569,16 +592,18 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    function selectPreMotion(motionText, btnElement) {
+    // 論題を選択して即時記録・保存する関数
+    function selectPreMotion(motionText) {
         selectedMotionText = motionText;
-        document.querySelectorAll('.motion-candidate-item button, .search-result-item button').forEach(b => {
-            b.innerText = "選択する";
-            b.style.backgroundColor = "";
-        });
-        if (btnElement) {
-            btnElement.innerText = "選択中 ✓";
-            btnElement.style.backgroundColor = "#16a34a";
-        }
+        document.getElementById('selectedMotionDisplay').innerText = motionText;
+        document.getElementById('selectedMotionArea').classList.remove('hidden');
+    }
+
+    // 選択を取り消す（リセットする）関数
+    function clearSelectedMotion() {
+        selectedMotionText = "未選択";
+        document.getElementById('selectedMotionDisplay').innerText = '';
+        document.getElementById('selectedMotionArea').classList.add('hidden');
     }
 
     function generateAssignments() {
