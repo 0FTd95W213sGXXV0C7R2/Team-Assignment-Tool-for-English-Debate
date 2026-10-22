@@ -1,1 +1,76 @@
+export default async function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const { motion, tournament, year } = req.body;
+
+    if (!motion) {
+        return res.status(400).json({ error: 'Motion is required' });
+    }
+
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+
+    if (!token || !owner || !repo) {
+        return res.status(500).json({ error: 'Server environment variables are not set properly.' });
+    }
+
+    const path = 'motions.json';
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+    try {
+        // 1. 現在の motions.json の内容を取得
+        const getRes = await fetch(url, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'User-Agent': 'Debate-Tool'
+            }
+        });
+
+        if (!getRes.ok) {
+            throw new Error('Failed to fetch motions.json from GitHub');
+        }
+
+        const fileData = await getRes.json();
+        const sha = fileData.sha;
+        const currentContent = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
+
+        // 2. 新しい論題を追加
+        currentContent.push({
+            motion: motion.trim(),
+            tournament: tournament ? tournament.trim() : '',
+            year: year ? year.trim() : ''
+        });
+
+        const updatedContentBase64 = Buffer.from(JSON.stringify(currentContent, null, 2)).toString('base64');
+
+        // 3. GitHubにファイルを更新（コミット）
+        const putRes = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'User-Agent': 'Debate-Tool',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `Add new motion via web tool: ${motion.substring(0, 30)}...`,
+                content: updatedContentBase64,
+                sha: sha
+            })
+        });
+
+        if (!putRes.ok) {
+            const errorData = await putRes.json();
+            throw new Error(errorData.message || 'Failed to update motions.json on GitHub');
+        }
+
+        return res.status(200).json({ success: true });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
 
