@@ -3,7 +3,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { motion, tournament, year, action, motions } = req.body;
+    const { motion, tournament, year, action, motions, selectedMotions } = req.body;
 
     const token = process.env.GITHUB_TOKEN;
     const owner = process.env.GITHUB_OWNER;
@@ -34,20 +34,43 @@ export default async function handler(req, res) {
         let currentContent = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf8'));
 
         let commitMessage = '';
+        const nowIso = new Date().toISOString();
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        if (action === 'overwrite' && Array.isArray(motions)) {
-            // まとめて上書き（追加・編集・削除共通）
-            currentContent = motions;
-            commitMessage = 'Update, edit, or delete motions via web tool';
+        // クリーンアップ関数（6ヶ月より古い履歴を除外）
+        const filterHistory = (historyArr) => {
+            if (!Array.isArray(historyArr)) return [];
+            return historyArr.filter(dateStr => new Date(dateStr) >= sixMonthsAgo);
+        };
+
+        if (action === 'recordUsage' && Array.isArray(selectedMotions)) {
+            // 使用履歴の記録
+            currentContent = currentContent.map(m => {
+                const cleanHistory = filterHistory(m.history);
+                if (selectedMotions.includes(m.motion)) {
+                    cleanHistory.push(nowIso);
+                }
+                return { ...m, history: cleanHistory };
+            });
+            commitMessage = `Record motion usage: ${selectedMotions.length} motions selected`;
+        } else if (action === 'overwrite' && Array.isArray(motions)) {
+            // 全体上書き（編集・削除・追加）
+            currentContent = motions.map(m => ({
+                ...m,
+                history: filterHistory(m.history)
+            }));
+            commitMessage = 'Update motions database via web tool';
         } else {
-            // 単体追加用（旧形式の互換性維持）
+            // 単体追加
             if (!motion) {
                 return res.status(400).json({ error: 'Motion is required' });
             }
             currentContent.push({
                 motion: motion.trim(),
                 tournament: tournament ? tournament.trim() : '',
-                year: year ? year.trim() : ''
+                year: year ? year.trim() : '',
+                history: []
             });
             commitMessage = `Add new motion via web tool: ${motion.substring(0, 30)}...`;
         }
