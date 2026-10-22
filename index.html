@@ -133,7 +133,7 @@
 
         <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label style="margin: 0;"> 抽出された論題候補（クリックで選択 / 3つ表示）:</label>
+                <label style="margin: 0;"> 抽出された論題（クリックで選択 / 3つ表示）:</label>
                 <button type="button" onclick="pickRandomMotions()" style="width: auto; padding: 4px 12px; font-size: 14px;">🔄 再抽出</button>
             </div>
             <div id="motions-candidates"></div>
@@ -145,13 +145,13 @@
         <div class="row">
             <div class="col">
                 <div class="form-group">
-                    <label for="participants">参加者名（改行）:</label>
+                    <label for="participants">メンバー（1人入力するごとに改行）:</label>
                     <textarea id="participants" oninput="saveInputs()"></textarea>
                 </div>
             </div>
             <div class="col">
                 <div class="form-group">
-                    <label for="judges"> 事前指定ジャッジ（改行区切り・任意）:</label>
+                    <label for="judges"> 事前指定ジャッジ(1人入力するごとに改行・任意）:</label>
                     <textarea id="judges" oninput="saveInputs()"></textarea>
                 </div>
             </div>
