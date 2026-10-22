@@ -323,16 +323,16 @@
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2>チーム分け ＆ 論題選択ツール</h2>
         
-        <!-- 【事前選択】論題選択セクション -->
+        <!-- 【事前選択】論題選択セクション（最大4個表示） -->
         <div class="motion-selection-area">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の選択</h3>
+                <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の選択 (最大4候補)</h3>
                 <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="redrawPreMotions()">🔄 シャッフル</button>
             </div>
             
             <p class="note" style="margin-bottom: 10px;">事前に以下の候補または検索から論題を1つ選択してください。</p>
             
-            <!-- ランダム抽出3件エリア -->
+            <!-- ランダム抽出4件エリア -->
             <div id="pre-candidates-container"></div>
 
             <!-- 検索エリア -->
@@ -343,7 +343,7 @@
             <!-- 選択中の論題状態表示エリア -->
             <div id="selectedMotionArea" class="selected-box hidden">
                 <div>
-                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">選択中 ✓</span><br>
+                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">選択中 ✓ (DB記録予定)</span><br>
                     <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
                 </div>
                 <button class="btn-danger" onclick="clearSelectedMotion()">選択を取り消す</button>
@@ -400,7 +400,6 @@
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2 id="formTitle">新規論題の追加</h2>
         
-        <!-- 入力フォーム -->
         <div id="motionFormArea">
             <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
             
@@ -428,7 +427,6 @@
             </div>
         </div>
 
-        <!-- 確認画面エリア（デフォルト非表示） -->
         <div id="motionPreviewArea" class="hidden">
             <p class="note" style="color: #2563eb; font-weight: bold;" id="previewTitle">以下の内容でデータベースに追加します。よろしいですか？</p>
             
@@ -444,15 +442,12 @@
             </div>
         </div>
 
-        <!-- 結果メッセージ通知エリア -->
         <div id="submitStatus" class="hidden"></div>
 
-        <!-- 登録済み論題の一覧・管理エリア -->
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
             <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
             <p class="note">登録されている論題の検索、修正、削除が行えます。</p>
             
-            <!-- 管理用キーワード検索欄 -->
             <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
 
             <div id="managementListContainer" class="management-list">
@@ -525,6 +520,7 @@
         statusEl.className = 'hidden';
     }
 
+    // シャッフルして最大4件表示する関数
     function redrawPreMotions() {
         const container = document.getElementById('pre-candidates-container');
         if (!container) return;
@@ -536,7 +532,7 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            sampleMotions = shuffled.slice(0, 3);
+            sampleMotions = shuffled.slice(0, 4); // 最大4個に変更
         }
 
         let html = '';
@@ -592,14 +588,24 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 論題を選択して即時記録・保存する関数
-    function selectPreMotion(motionText) {
+    // 論題を選択して即時記録＆DB（GitHub）へ使用履歴として送信する関数
+    async function selectPreMotion(motionText) {
         selectedMotionText = motionText;
         document.getElementById('selectedMotionDisplay').innerText = motionText;
         document.getElementById('selectedMotionArea').classList.remove('hidden');
+
+        // バックグラウンドでデータベースに選択された履歴を記録
+        try {
+            await fetch('/api/add-motion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'recordUsage', selectedMotions: [motionText] })
+            });
+        } catch (e) {
+            console.error('使用履歴の記録に失敗しました', e);
+        }
     }
 
-    // 選択を取り消す（リセットする）関数
     function clearSelectedMotion() {
         selectedMotionText = "未選択";
         document.getElementById('selectedMotionDisplay').innerText = '';
@@ -799,9 +805,9 @@
 
         let updatedList = [...motionsCache];
         if (editIndex >= 0) {
-            updatedList[editIndex] = { motion, tournament, year };
+            updatedList[editIndex] = { ...updatedList[editIndex], motion, tournament, year };
         } else {
-            updatedList.push({ motion, tournament, year });
+            updatedList.push({ motion, tournament, year, history: [] });
         }
 
         try {
