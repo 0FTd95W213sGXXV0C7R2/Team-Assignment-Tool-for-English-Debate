@@ -3,5329 +3,6223 @@
     "id": 1,
     "motion": "That the Japanese government should eliminate all tariffs on imported rice.",
     "tournament": "HEnDA 全国大会 (第21回)",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 0
   },
   {
     "id": 2,
     "motion": "That the Japanese Government should ban children under 16 years old from using social media.",
     "tournament": "HEnDA 全国大会 (第20回)",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 1
   },
   {
     "id": 3,
     "motion": "That the Japanese government should abolish all nuclear power plants in Japan.",
     "tournament": "HEnDA 全国大会 (第19回)",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 2
   },
   {
     "id": 4,
     "motion": "That the Japanese government should legalize gestational surrogacy.",
     "tournament": "HEnDA 全国大会 (第18回)",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 3
   },
   {
     "id": 5,
     "motion": "That the Japanese Government should abolish the mandatory retirement age systems.",
     "tournament": "HEnDA 全国大会 (第17回)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 4
   },
   {
     "id": 6,
     "motion": "That the Japanese Government should relocate the capital functions out of Tokyo.",
     "tournament": "HEnDA 全国大会 (第16回)",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 5
   },
   {
     "id": 7,
     "motion": "That the Japanese Government should ban production and sales of fossil-fueled cars, including hybrid cars, by 2035.",
     "tournament": "HEnDA 全国大会 (第15回)",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 6
   },
   {
     "id": 8,
     "motion": "THW impose criminal liability on parents who do not vaccinate their children.",
     "tournament": "JWSDC R1/R2",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 7
   },
   {
     "id": 9,
     "motion": "THW require citizens to pass a knowledge test on current affairs as a condition for voting in elections.",
     "tournament": "JWSDC R3",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 8
   },
   {
     "id": 10,
     "motion": "THW allow high school students to fire their teachers.",
     "tournament": "JWSDC R4",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 9
   },
   {
     "id": 11,
     "motion": "THW allow police to use entrapment as a law enforcement tactic.",
     "tournament": "JWSDC R5",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 10
   },
   {
     "id": 12,
     "motion": "THW prioritize palliative care over curative care for patients suffering from painful and critical issues.",
     "tournament": "JWSDC R6",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 11
   },
   {
     "id": 13,
     "motion": "In countries with a system of mandatory military service, THBT the feminist movement should actively advocate for women to be conscripted like men.",
     "tournament": "JWSDC QF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 12
   },
   {
     "id": 14,
     "motion": "THBT after meeting their basic needs, individuals should donate their wealth towards poverty alleviation.",
     "tournament": "JWSDC SF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 13
   },
   {
     "id": 15,
     "motion": "THW break up megacities.",
     "tournament": "JWSDC GF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 14
   },
   {
     "id": 16,
     "motion": "The Japanese government should limit the weekly maximum average working hours, including overtime, to 48 hours (following the E.U.).",
     "tournament": "HEnDA 全国大会 (第14回)",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 15
   },
   {
     "id": 17,
     "motion": "Japan should legalize voluntary active euthanasia.",
     "tournament": "HEnDA 全国大会 (第13回)",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 16
   },
   {
     "id": 18,
     "motion": "Japan should significantly relax its immigration policies.",
     "tournament": "HEnDA 全国大会 (第12回)",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 17
   },
   {
     "id": 19,
     "motion": "The Japanese government should adopt a social security system that provides a basic income to all Japanese citizens.",
     "tournament": "HEnDA 全国大会 (第11回)",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 18
   },
   {
     "id": 20,
     "motion": "Japan should contribute more actively to the United Nations Peacekeeping Operations by relaxing its restrictions for the Self-Defense Forces.",
     "tournament": "HEnDA 全国大会 (第10回)",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 19
   },
   {
     "id": 21,
     "motion": "The Japanese government should abolish nuclear power plants.",
     "tournament": "HEnDA 全国大会 (第9回)",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 20
   },
   {
     "id": 22,
     "motion": "The Japanese government should remove the tariff on rice imports.",
     "tournament": "HEnDA 全国大会 (第8回)",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 21
   },
   {
     "id": 23,
     "motion": "Japanese universities should start their academic year in September.",
     "tournament": "HEnDA 全国大会 (第7回)",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 22
   },
   {
     "id": 24,
     "motion": "Japan should abolish capital punishment.",
     "tournament": "HEnDA 全国大会 (第6回)",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 23
   },
   {
     "id": 25,
     "motion": "Japan should significantly relax its immigration policies.",
     "tournament": "HEnDA 全国大会 (第5回)",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 24
   },
   {
     "id": 26,
     "motion": "The Japanese government should prohibit worker dispatching.",
     "tournament": "HEnDA 全国大会 (第4回)",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 25
   },
   {
     "id": 27,
     "motion": "Japan should lower the age of adulthood to 18.",
     "tournament": "HEnDA 全国大会 (第3回)",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 26
   },
   {
     "id": 28,
     "motion": "All elementary and secondary schools in Japan should have classes on Saturday.",
     "tournament": "HEnDA 全国大会 (第2回)",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 27
   },
   {
     "id": 29,
     "motion": "Japan should make English its second official language.",
     "tournament": "HEnDA 全国大会 (第1回)",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 28
   },
   {
     "id": 30,
     "motion": "THW allow gifted students to skip grades in schools.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 29
   },
   {
     "id": 31,
     "motion": "THW stop teaching English in elementary schools.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 30
   },
   {
     "id": 32,
     "motion": "THBT teachers’ salaries should be based on students’ academic performance.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 31
   },
   {
     "id": 33,
     "motion": "THBT schools should ban animal dissection.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 32
   },
   {
     "id": 34,
     "motion": "THBT it is better for high school students to have a part-time job.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 33
   },
   {
     "id": 35,
     "motion": "THW introduce a fat tax on junk foods.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 34
   },
   {
     "id": 36,
     "motion": "THW ban tobacco.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 35
   },
   {
     "id": 37,
     "motion": "THW ban cosmetic surgery.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 36
   },
   {
     "id": 38,
     "motion": "THW ban children from becoming professional models.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 37
   },
   {
     "id": 39,
     "motion": "THBT watching movies at home is better than watching movies at the theater.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 38
   },
   {
     "id": 40,
     "motion": "THBT television does more harm than good.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 39
   },
   {
     "id": 41,
     "motion": "THW ban violent video games.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 40
   },
   {
     "id": 42,
     "motion": "THW ban combat sports.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 41
   },
   {
     "id": 43,
     "motion": "THBT the use of animals for public entertainment should be banned.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 42
   },
   {
     "id": 44,
     "motion": "THW make voting compulsory.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 43
   },
   {
     "id": 45,
     "motion": "THBT the prime minister of Japan should be directly elected by citizens’ vote.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 44
   },
   {
     "id": 46,
     "motion": "THW abolish the House of Councilors.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 45
   },
   {
     "id": 47,
     "motion": "THW introduce mandatory retirement age for politicians.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 46
   },
   {
     "id": 48,
     "motion": "THW set quotas for women in the Diet.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 47
   },
   {
     "id": 49,
     "motion": "THW require all Internet users to use their real names.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 48
   },
   {
     "id": 50,
     "motion": "THW restrict advertising aimed at children.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 49
   },
   {
     "id": 51,
     "motion": "THBT criminals trials should be broadcasted on TV.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 50
   },
   {
     "id": 52,
     "motion": "THW abolish death penalty.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 51
   },
   {
     "id": 53,
     "motion": "THBT torture is justified for national security.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 52
   },
   {
     "id": 54,
     "motion": "THBT all violent juvenile offenders should be treated as adults in the criminal justice system.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 53
   },
   {
     "id": 55,
     "motion": "THBT governments should never pay ransom to save hostage.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 54
   },
   {
     "id": 56,
     "motion": "THW introduce conscription.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 55
   },
   {
     "id": 57,
     "motion": "THW legalize active euthanasia.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 56
   },
   {
     "id": 58,
     "motion": "THW legalize selling organs.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 57
   },
   {
     "id": 59,
     "motion": "THW ban abortion.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 58
   },
   {
     "id": 60,
     "motion": "THW abolish zoos.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 59
   },
   {
     "id": 61,
     "motion": "THW ban whaling.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 60
   },
   {
     "id": 62,
     "motion": "THW legalize genetically modified foods.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 61
   },
   {
     "id": 63,
     "motion": "THW ban animal experiments.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 62
   },
   {
     "id": 64,
     "motion": "THBT Japan should introduce the carbon tax.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 63
   },
   {
     "id": 65,
     "motion": "THBT Japan should stop using nuclear power plants.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 64
   },
   {
     "id": 66,
     "motion": "THBT Japan should remove import restrictions on farm products.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 65
   },
   {
     "id": 67,
     "motion": "THW raise the consumption tax.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 66
   },
   {
     "id": 68,
     "motion": "THW set a maximum limit on salaries.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 67
   },
   {
     "id": 69,
     "motion": "THW stop sending humans into space.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 68
   },
   {
     "id": 70,
     "motion": "THBT Japan should make English the second official language.",
     "tournament": "HPDU推奨",
-    "year": "-"
+    "year": "-",
+    "_originalIndex": 69
   },
   {
     "id": 71,
     "motion": "THBT the feminist movement should advocate for male quotas in female dominated fields (nursing, teaching, etc).",
     "tournament": "新緑杯 Championship",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 70
   },
   {
     "id": 72,
     "motion": "This house would ban tax havens.",
     "tournament": "新緑杯 Championship",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 71
   },
   {
     "id": 73,
     "motion": "THW ban homework.",
     "tournament": "新緑杯 West",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 72
   },
   {
     "id": 74,
     "motion": "THW abolish the juvenile justice system.",
     "tournament": "新緑杯 West",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 73
   },
   {
     "id": 75,
     "motion": "THBT educators should actively teach children to focus on process over results.",
     "tournament": "新緑杯 West",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 74
   },
   {
     "id": 76,
     "motion": "THW allow professional sports players to enhance their abilities by using drugs.",
     "tournament": "新緑杯 West",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 75
   },
   {
     "id": 77,
     "motion": "This house would ban fast fashion.",
     "tournament": "新緑杯 East",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 76
   },
   {
     "id": 78,
     "motion": "This house prefer a world where political candidates are required to livestream their life.",
     "tournament": "新緑杯 East",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 77
   },
   {
     "id": 79,
     "motion": "THBT it is better to be optimistic than pessimistic.",
     "tournament": "新緑杯 East",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 78
   },
   {
     "id": 80,
     "motion": "This house would replace human judges with AI judges in courts.",
     "tournament": "新緑杯 East",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 79
   },
   {
     "id": 81,
     "motion": "In states with significant gang and cartel presence, this house would criminalize membership.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 80
   },
   {
     "id": 82,
     "motion": "This house believes that schools should teach children to have a logical approach to life, even at the expense of reducing their emotional bandwidth (e.g. trying to react in less emotional ways, prioritizing logic over emotions when approaching problem-solving, etc.).",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 81
   },
   {
     "id": 83,
     "motion": "This house believes that the United States government should significantly shrink the size and budgets of its military.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 82
   },
   {
     "id": 84,
     "motion": "This house opposes the narrative that familial love should be unconditional.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 83
   },
   {
     "id": 85,
     "motion": "This house, as a country attempting to transition away from fossil fuels, would prioritize nuclear power over renewable energy (hydro, wind, solar, etc.).",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 84
   },
   {
     "id": 86,
     "motion": "This house would continue to reject the government’s demands.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 85
   },
   {
     "id": 87,
     "motion": "This house prefers the narrative that debating is an art to the narrative that debating is a sport.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 86
   },
   {
     "id": 88,
     "motion": "THBT governments should prioritize policies to reduce income inequality over economic growth.",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 87
   },
   {
     "id": 89,
     "motion": "TH, as a parent of an average child, would rather be a free-range parent as opposed to a helicopter parent.",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 88
   },
   {
     "id": 90,
     "motion": "THS the rising trend of women using chatbots as emotional companions instead of pursuing emotional companionship with men.",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 89
   },
   {
     "id": 91,
     "motion": "This house opposes the industrialization of science.",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 90
   },
   {
     "id": 92,
     "motion": "This house regrets the glorification of inventors in films/biography/books whose inventions got used for negative impact on human history.",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 91
   },
   {
     "id": 93,
     "motion": "THR the rise of “cut-off culture”",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 92
   },
   {
     "id": 94,
     "motion": "Assuming the technology was safe and feasible, THS a widespread adoption of the severance technology.",
     "tournament": "SOLA CUP",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 93
   },
   {
     "id": 95,
     "motion": "This house regrets the rise of parenting influencers.",
     "tournament": "新緑杯 Championship",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 94
   },
   {
     "id": 96,
     "motion": "This House regrets the recent trend in American films of recasting iconic fairy-tale characters such as Snow White or Ariel with minority actors.",
     "tournament": "新緑杯 Championship",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 95
   },
   {
     "id": 97,
     "motion": "THW make voting mandatory.",
     "tournament": "新緑杯 West",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 96
   },
   {
     "id": 98,
     "motion": "THW require doctors to report all cases of suspected domestic violence.",
     "tournament": "新緑杯 West",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 97
   },
   {
     "id": 99,
     "motion": "THBT the narrative “experience of hardship and agony is necessary for success” does more harm than good.",
     "tournament": "新緑杯 West",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 98
   },
   {
     "id": 100,
     "motion": "THBT developing countries should require their citizens to work for a minimum period of time in their country of origin after graduating from university",
     "tournament": "新緑杯 West",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 99
   },
   {
     "id": 101,
     "motion": "THBT AI does more harm than good.",
     "tournament": "新緑杯 East",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 100
   },
   {
     "id": 102,
     "motion": "THW rather be a jpop idol over being an average Japanese citizen.",
     "tournament": "新緑杯 East",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 101
   },
   {
     "id": 103,
     "motion": "THBT schools should prioritize the teaching of classic literature over contemporary literature.",
     "tournament": "新緑杯 East",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 102
   },
   {
     "id": 104,
     "motion": "THW ban the research and development of technology that can erase memories.",
     "tournament": "新緑杯 East",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 103
   },
   {
     "id": 105,
     "motion": "THBT all children should raise a pet.",
     "tournament": "新芽杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 104
   },
   {
     "id": 106,
     "motion": "THBT confessing love face to face is better than confessing online.",
     "tournament": "新芽杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 105
   },
   {
     "id": 107,
     "motion": "THBT schools should not give out homework during the summer break.",
     "tournament": "新芽杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 106
   },
   {
     "id": 108,
     "motion": "THW ban all advertising of consumer goods or services",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 107
   },
   {
     "id": 109,
     "motion": "THW legalize child labor in developing nations.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 108
   },
   {
     "id": 110,
     "motion": "THR the decline of family values in western liberal democracies.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 109
   },
   {
     "id": 111,
     "motion": "THR the stigmatization of political discussions in Japan",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 110
   },
   {
     "id": 112,
     "motion": "THW make university tuition free.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 111
   },
   {
     "id": 113,
     "motion": "THBT religious institutions should embrace the usage of AI.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 112
   },
   {
     "id": 114,
     "motion": "THBT globalism has failed the working class.",
     "tournament": "連盟杯",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 113
   },
   {
     "id": 115,
     "motion": "Assuming feasibility, THW have all states temporarily cede their sovereignty to international organizations in times of protracted global crisis (e.g. global recessions, pandemics).",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 114
   },
   {
     "id": 116,
     "motion": "THBT developing countries should nationalize all mining and resource extraction industries.",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 115
   },
   {
     "id": 117,
     "motion": "This house believes that the public’s right to know ought to be valued above the right to privacy of candidates for public office.",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 116
   },
   {
     "id": 118,
     "motion": "Motion: Assuming feasibility, THBT the leaders of large global cooperations should be democratically chosen by elections.",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 117
   },
   {
     "id": 119,
     "motion": "This house would choose to live as an average salary worker in Japan over becoming a globally recognized anime creator",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 118
   },
   {
     "id": 120,
     "motion": "This house would introduce racial quotas for healthcare professionals (e.g. doctors, nurses)",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 119
   },
   {
     "id": 121,
     "motion": "This house believes that popular media should portray climate change optimistically, emphasizing progress which has been made over alarming predictions",
     "tournament": "SOLA CUP",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 120
   },
   {
     "id": 122,
     "motion": "This House believes that media should not broadcast bloody sports.",
     "tournament": "新緑杯 Championship",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 121
   },
   {
     "id": 123,
     "motion": "This House Would require politicians to disclose their health records to the public.",
     "tournament": "新緑杯 Championship",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 122
   },
   {
     "id": 124,
     "motion": "THW ban all forms of gambling.",
     "tournament": "新緑杯 West",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 123
   },
   {
     "id": 125,
     "motion": "THBT animal meat products should be banned.",
     "tournament": "新緑杯 West",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 124
   },
   {
     "id": 126,
     "motion": "TH supports the rise of language generative AI.",
     "tournament": "新緑杯 West",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 125
   },
   {
     "id": 127,
     "motion": "THW pay all elected politicians the median wage in their country.",
     "tournament": "新緑杯 West",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 126
   },
   {
     "id": 128,
     "motion": "This House Would support the use of performance-enhancing drugs under medical supervision.",
     "tournament": "新緑杯 East",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 127
   },
   {
     "id": 129,
     "motion": "This House Believes That long-distance relationships can be as successful as relationships where couples live close to each other.",
     "tournament": "新緑杯 East",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 128
   },
   {
     "id": 130,
     "motion": "This House Would make physical education classes (not health education classes) optional in senior high schools.",
     "tournament": "新緑杯 East",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 129
   },
   {
     "id": 131,
     "motion": "This House Believes That the growth of international tourism contributes positively to the conservation of cultural heritage, such as that of Kyoto.",
     "tournament": "新緑杯 East",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 130
   },
   {
     "id": 132,
     "motion": "THBT it's more enjoyable to watch a movie with friends at someone's house than at a movie theater with friends.",
     "tournament": "新芽杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 131
   },
   {
     "id": 133,
     "motion": "THBT underaged individuals should not become YouTubers.",
     "tournament": "新芽杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 132
   },
   {
     "id": 134,
     "motion": "THBT love is more important than money for a good marriage.",
     "tournament": "新芽杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 133
   },
   {
     "id": 135,
     "motion": "This house believes that schools should allow students to use generative artificial intelligence (e.g. ChatGPT, Gemini, etc)",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 134
   },
   {
     "id": 136,
     "motion": "This house would allow public servants to strike.",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 135
   },
   {
     "id": 137,
     "motion": "This house would also punish parents when their children commit a crime.",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 136
   },
   {
     "id": 138,
     "motion": "This house would abolish affirmative actions.",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 137
   },
   {
     "id": 139,
     "motion": "This house believes that SNS does more harm than good to democracy.",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 138
   },
   {
     "id": 140,
     "motion": "This house believes that developing countries should limit rural-urban migration.",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 139
   },
   {
     "id": 141,
     "motion": "This house believes that randomly selected citizens should judge in the debate tournaments.",
     "tournament": "連盟杯",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 140
   },
   {
     "id": 142,
     "motion": "THBT the customer’s needs and desires should always come first.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 141
   },
   {
     "id": 143,
     "motion": "THBT Cram school culture does more harm than good for students.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 142
   },
   {
     "id": 144,
     "motion": "THW ban all plastic products.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 143
   },
   {
     "id": 145,
     "motion": "THBT parents should not say anything about their children’s future job.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 144
   },
   {
     "id": 146,
     "motion": "This house believes that commercial feminism has done more harm than good.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 145
   },
   {
     "id": 147,
     "motion": "This house supports the rise of art produced by artificial intelligence.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 146
   },
   {
     "id": 148,
     "motion": "This house believes that in countries with social healthcare systems, the government should not cover medical expenses for individuals who do not take preventive measures to take care of their own health.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 147
   },
   {
     "id": 149,
     "motion": "This house supports the shaming of individuals as a tactic for the environmental movement to catalyze change.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 148
   },
   {
     "id": 150,
     "motion": "This house believes that immigrants should assimilate in the culture of their host country even at the expense of losing their original culture.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 149
   },
   {
     "id": 151,
     "motion": "This house supports the rise of online schooling.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 150
   },
   {
     "id": 152,
     "motion": "This house supports the live-streaming of war.",
     "tournament": "SOLA CUP",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 151
   },
   {
     "id": 153,
     "motion": "This house believes that prisoners should be given the right to vote in national elections.",
     "tournament": "新緑杯 Championship",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 152
   },
   {
     "id": 154,
     "motion": "This house believes that, assuming compliance, we should globally cap military spending to 1% of GDP.",
     "tournament": "新緑杯 Championship",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 153
   },
   {
     "id": 155,
     "motion": "THW give more votes to citizens according to their performance on a current affairs test.",
     "tournament": "新緑杯 West",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 154
   },
   {
     "id": 156,
     "motion": "THBT governments in developing countries should limit migration to megacities.",
     "tournament": "新緑杯 West",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 155
   },
   {
     "id": 157,
     "motion": "TH, as a large company, should reflect the racial diversity of the national population in employee diversity.",
     "tournament": "新緑杯 West",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 156
   },
   {
     "id": 158,
     "motion": "THW allow the police full and unrestricted access to social media.",
     "tournament": "新緑杯 West",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 157
   },
   {
     "id": 159,
     "motion": "This house would remove all gender-based quotas in university admissions.",
     "tournament": "新緑杯 East",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 158
   },
   {
     "id": 160,
     "motion": "This house believes that international sporting events divide rather than unite.",
     "tournament": "新緑杯 East",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 159
   },
   {
     "id": 161,
     "motion": "This house believes that couples should have access to each other’s social media accounts and personal devices.",
     "tournament": "新緑杯 East",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 160
   },
   {
     "id": 162,
     "motion": "This house would introduce an internet voting system in Japan.",
     "tournament": "新緑杯 East",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 161
   },
   {
     "id": 163,
     "motion": "This house believes that parents should not use rewards to get their children to study.",
     "tournament": "新芽杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 162
   },
   {
     "id": 164,
     "motion": "This house believes that love at first sight will bring more harm than benefits.",
     "tournament": "新芽杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 163
   },
   {
     "id": 165,
     "motion": "This house believes that being a school teacher is a good job.",
     "tournament": "新芽杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 164
   },
   {
     "id": 166,
     "motion": "THBT big businesses should encourage their employees to work from home even after pandemics are no longer a threat to public health and safety.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 165
   },
   {
     "id": 167,
     "motion": "TH prefers a world without extreme emotions (falling madly in love, extreme grief, boiling rage) is a better world.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 166
   },
   {
     "id": 168,
     "motion": "THBT feminism is incompatible with capitalism.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 167
   },
   {
     "id": 169,
     "motion": "THBT multinational companies should equalize wages for their workers in developing countries with those in their home countries.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 168
   },
   {
     "id": 170,
     "motion": "THW ban tobacco.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 169
   },
   {
     "id": 171,
     "motion": "THBT assassination is a justifiable response to the human rights abuses and political oppression committed by political leaders.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 170
   },
   {
     "id": 172,
     "motion": "THBT the present condition of humanity is better than it would be in 100 years.",
     "tournament": "連盟杯",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 171
   },
   {
     "id": 173,
     "motion": "THW ban homework.",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 172
   },
   {
     "id": 174,
     "motion": "THW ban countries with poor human rights records from hosting major international sporting events (ie. the Olympics, World Cup)",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 173
   },
   {
     "id": 175,
     "motion": "Given the choice, THW choose to be immortal",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 174
   },
   {
     "id": 176,
     "motion": "THBT the portrayal of the \"autistic genius\" in pop culture does more harm than good.",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 175
   },
   {
     "id": 177,
     "motion": "This house supports Universal Basic Income as a tool for poverty alleviation.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 176
   },
   {
     "id": 178,
     "motion": "This house, as the feminism movement, would actively encourage girls to attend same-sex schools.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 177
   },
   {
     "id": 179,
     "motion": "This house believes the Just Stop Oil protests are justified.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 178
   },
   {
     "id": 180,
     "motion": "This house would require individuals to use all their wealth beyond $5 million USD for philanthropic projects.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 179
   },
   {
     "id": 181,
     "motion": "This house regrets the rise of colorblind casting.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 180
   },
   {
     "id": 182,
     "motion": "This house believes that the existence of strong emotion in political discourse does more harm than good.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 181
   },
   {
     "id": 183,
     "motion": "This house regrets the commercialization of the Sustainable Development Goals.",
     "tournament": "SOLA Cup",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 182
   },
   {
     "id": 184,
     "motion": "This House believes that film versions are never as good as the original books.",
     "tournament": "新緑杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 183
   },
   {
     "id": 185,
     "motion": "This House believes that community service is a better punishment than prison for non-violent crimes.",
     "tournament": "新緑杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 184
   },
   {
     "id": 186,
     "motion": "This House supports countries offering citizenship based on sporting ability.",
     "tournament": "新緑杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 185
   },
   {
     "id": 187,
     "motion": "This House believes that seventy years on, the United Nations is a disappointment.",
     "tournament": "新緑杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 186
   },
   {
     "id": 188,
     "motion": "To compensate for the school days lost due to the COVID-19 pandemic, THBT the high school summer holiday this year should be half as long.",
     "tournament": "新芽杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 187
   },
   {
     "id": 189,
     "motion": "Assuming COVID-19 is over, THBT traveling abroad is better than domestic travel for your honeymoon.",
     "tournament": "新芽杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 188
   },
   {
     "id": 190,
     "motion": "THBT women should be given two votes in national elections",
     "tournament": "新芽杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 189
   },
   {
     "id": 191,
     "motion": "THBT the tourism industry does more harm than good for the citizens of developing countries.",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 190
   },
   {
     "id": 192,
     "motion": "TH, as the feminist movement, would advocate for the abolishment of boys-only and girls-only schools.",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 191
   },
   {
     "id": 193,
     "motion": "THW grant senior military officers a veto over military decisions made by politicians (e.g. troop deployments, specific missions).",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 192
   },
   {
     "id": 194,
     "motion": "THW make the number of votes an individual has inversely proportional to their wealth (i.e. the more wealth an individual has the fewer votes that individual has).",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 193
   },
   {
     "id": 195,
     "motion": "This House prefers a world in which those accused of crimes remain completely anonymous to the public unless they receive a guilty verdict.",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 194
   },
   {
     "id": 196,
     "motion": "This House believes that the assassination of political leaders is a legitimate tool of foreign policy.",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 195
   },
   {
     "id": 197,
     "motion": "This House supports athletes using international sporting events (the Olympics, World Baseball Classic, FIFA World Cup, etc.) as platforms to protest and raise political stances.",
     "tournament": "連盟杯",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 196
   },
   {
     "id": 198,
     "motion": "THW implement female quotas in parliament.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 197
   },
   {
     "id": 199,
     "motion": "THBT discussion-based classes are better than lecture classes.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 198
   },
   {
     "id": 200,
     "motion": "THW ban cars in cities.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 199
   },
   {
     "id": 201,
     "motion": "THW allow performance enhancing drugs in professional sports.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 200
   },
   {
     "id": 202,
     "motion": "This house would require all voters to pass a basic political literacy test.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 201
   },
   {
     "id": 203,
     "motion": "This house would opt for a strategy of adaptation rather than mitigation when dealing with climate change.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 202
   },
   {
     "id": 204,
     "motion": "This house believes that criminal courts should treat minors who commit serious and violent crimes as adults.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 203
   },
   {
     "id": 205,
     "motion": "This house would set a quota for female entrepreneurs when allocating government subsidies for startup businesses.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 204
   },
   {
     "id": 206,
     "motion": "Assuming technology exists, This house would force all political candidates to provide public access to their personal beliefs.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 205
   },
   {
     "id": 207,
     "motion": "This house would actively promote non-marital childbearing.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 206
   },
   {
     "id": 208,
     "motion": "This house supports the narrative that individuals should prioritize the alleviation of universal suffering over their own self-interest.",
     "tournament": "SOLA Cup",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 207
   },
   {
     "id": 209,
     "motion": "This house would designate one city to permanently host the Olympics.",
     "tournament": "新緑杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 208
   },
   {
     "id": 210,
     "motion": "This house would aggressively prioritize the posting of female diplomats to countries with poor women's rights records.",
     "tournament": "新緑杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 209
   },
   {
     "id": 211,
     "motion": "This house would ban the display of art created with the intended purpose or reasonably likely outcome of creating offence.",
     "tournament": "新緑杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 210
   },
   {
     "id": 212,
     "motion": "This house believes that if technology permitted us to identify people who are genetically predisposed to commit crimes, it would be appropriate for the state to monitor them and limit their activities.",
     "tournament": "新緑杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 211
   },
   {
     "id": 213,
     "motion": "THBT giving money as a birthday is good for both parents and their children in high school.",
     "tournament": "新芽杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 212
   },
   {
     "id": 214,
     "motion": "In order for high school students to confess their love, THBT sending message on smartphone is better than face-to-face talk.",
     "tournament": "新芽杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 213
   },
   {
     "id": 215,
     "motion": "THW ban too skinny models (with a BMI below 18.5) from showing up in media.",
     "tournament": "新芽杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 214
   },
   {
     "id": 216,
     "motion": "This house believes that the age of digital information (e.g. social media, online news, etc.) has done more harm than good in protecting democracy.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 215
   },
   {
     "id": 217,
     "motion": "Given the technology, this house would erase society's memory and evidence of the criminal past of former convicts after their release from prison.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 216
   },
   {
     "id": 218,
     "motion": "This house prefers a world without lying.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 217
   },
   {
     "id": 219,
     "motion": "This house believes that, assuming Personal Protective Equipment is sufficiently available, medical workers during a pandemic should have the right to opt out of service.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 218
   },
   {
     "id": 220,
     "motion": "This house believes that spouses of political figures should not be recognized as public figures.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 219
   },
   {
     "id": 221,
     "motion": "Instead of leaving the decision up to the producing company, this house would legally require that Self-Driving Cars produced by companies always choose to maximize the number of lives saved, even if it leads to the death of the passengers.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 220
   },
   {
     "id": 222,
     "motion": "This house believes that hacking is a legitimate way of protest against multinational corporations.",
     "tournament": "連盟杯",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 221
   },
   {
     "id": 223,
     "motion": "THW allow performance-enhancing drugs in professional sporting events.",
     "tournament": "中学生全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 222
   },
   {
     "id": 224,
     "motion": "TH prefers a world in which there are no restrictions on student’s appearances in schools. *uniforms are an exception",
     "tournament": "中学生全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 223
   },
   {
     "id": 225,
     "motion": "THW ban Valentine’s Day in schools.",
     "tournament": "中学生全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 224
   },
   {
     "id": 226,
     "motion": "THBT online learning is better than offline learning.",
     "tournament": "中学生全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 225
   },
   {
     "id": 227,
     "motion": "This house would pay all elected politicians the median wage in the their countries.",
     "tournament": "新緑杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 226
   },
   {
     "id": 228,
     "motion": "This house would give national treasures (like the Rosetta Stone in the British Museum) back to their countries of origin.",
     "tournament": "新緑杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 227
   },
   {
     "id": 229,
     "motion": "This house believes that only countries with good human rights records should be allowed to host the Olympics.",
     "tournament": "新緑杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 228
   },
   {
     "id": 230,
     "motion": "This house would legalize surrogacy for profit in liberal democracies.",
     "tournament": "新緑杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 229
   },
   {
     "id": 231,
     "motion": "THW ban eating contests",
     "tournament": "新芽杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 230
   },
   {
     "id": 232,
     "motion": "THBT holding a gorgeous wedding ceremony is better than holding a simple one.",
     "tournament": "新芽杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 231
   },
   {
     "id": 233,
     "motion": "THBT criminal trials should be publicly broadcasted on TV and other media (like YouTube).",
     "tournament": "新芽杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 232
   },
   {
     "id": 234,
     "motion": "THW abolish the Olympic Games.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 233
   },
   {
     "id": 235,
     "motion": "THW prohibit criminals from publishing descriptions of their crimes.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 234
   },
   {
     "id": 236,
     "motion": "THBT the state should not subsidize art.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 235
   },
   {
     "id": 237,
     "motion": "THBT feminist movement should oppose affirmative action for women.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 236
   },
   {
     "id": 238,
     "motion": "THBT humanitarian aid does more harm than good to active conflict zones.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 237
   },
   {
     "id": 239,
     "motion": "THW prohibit corporations from sponsoring academic research.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 238
   },
   {
     "id": 240,
     "motion": "THW abolish private property.",
     "tournament": "連盟杯",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 239
   },
   {
     "id": 241,
     "motion": "THBT teachers should be punished for bullying in their classrooms.",
     "tournament": "中学生全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 240
   },
   {
     "id": 242,
     "motion": "THBT parents should have full access to their children’s social media.",
     "tournament": "中学生全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 241
   },
   {
     "id": 243,
     "motion": "THW ban films and music which glamorize socially undesirable conducts e.g. drug, abuse, racism",
     "tournament": "中学生全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 242
   },
   {
     "id": 244,
     "motion": "TH, as Japan, would accept all refugees.",
     "tournament": "中学生全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 243
   },
   {
     "id": 245,
     "motion": "This House believes that professional sports players should be allowed to enhance abilities by using drugs.",
     "tournament": "新緑杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 244
   },
   {
     "id": 246,
     "motion": "This House, as an individual, would not consume works produced by immoral artists.",
     "tournament": "新緑杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 245
   },
   {
     "id": 247,
     "motion": "This House believes that debating skills matter in getting a boyfriend or a girlfriend.",
     "tournament": "新緑杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 246
   },
   {
     "id": 248,
     "motion": "This House would mandate retirement from the National Diet at age 65.",
     "tournament": "新緑杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 247
   },
   {
     "id": 249,
     "motion": "THW ban beauty contest.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 248
   },
   {
     "id": 250,
     "motion": "THW introduce conscription.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 249
   },
   {
     "id": 251,
     "motion": "THW completely ban broadcasting of suicide.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 250
   },
   {
     "id": 252,
     "motion": "THW ban all forms of gambling.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 251
   },
   {
     "id": 253,
     "motion": "THW ban use of combat drones.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 252
   },
   {
     "id": 254,
     "motion": "THW trade with oppressive regimes.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 253
   },
   {
     "id": 255,
     "motion": "THBT free speech should include the right to offend.",
     "tournament": "連盟杯",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 254
   },
   {
     "id": 256,
     "motion": "THW ban giving of chocolate and other gifts on Valentine's Day at junior and senior high schools.",
     "tournament": "中学生全国大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 255
   },
   {
     "id": 257,
     "motion": "THBT new movies, or new TV shows which contain smoking scenes should be banned.",
     "tournament": "中学生全国大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 256
   },
   {
     "id": 258,
     "motion": "THP world without social networking services such as Facebook, Twitter and Instagram.",
     "tournament": "中学生全国大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 257
   },
   {
     "id": 259,
     "motion": "THBT all major political parties in Japan should list an equal number of men and women candidates.",
     "tournament": "中学生全国大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 258
   },
   {
     "id": 260,
     "motion": "THW ban cosmetic surgery.",
     "tournament": "連盟杯",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 259
   },
   {
     "id": 261,
     "motion": "THW require doctors to report all cases of suspected domestic violence.",
     "tournament": "連盟杯",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 260
   },
   {
     "id": 262,
     "motion": "THW give right to vote to prisoners.",
     "tournament": "連盟杯",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 261
   },
   {
     "id": 263,
     "motion": "THW legalize active euthanasia.",
     "tournament": "連盟杯",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 262
   },
   {
     "id": 264,
     "motion": "THW give national treasures back to its people.",
     "tournament": "連盟杯",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 263
   },
   {
     "id": 265,
     "motion": "THW criminalize paying ransom to hostages.",
     "tournament": "連盟杯",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 264
   },
   {
     "id": 266,
     "motion": "THW ban alcohol.",
     "tournament": "連盟杯",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 265
   },
   {
     "id": 267,
     "motion": "THW abolish escalator system in schools (such as Keio, Waseda).",
     "tournament": "連盟杯",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 266
   },
   {
     "id": 268,
     "motion": "THW legalize organ transplant for profit.",
     "tournament": "連盟杯",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 267
   },
   {
     "id": 269,
     "motion": "THBT US military bases should be removed from Japan.",
     "tournament": "連盟杯",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 268
   },
   {
     "id": 270,
     "motion": "THW abolish all laws restricting free speech.",
     "tournament": "連盟杯",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 269
   },
   {
     "id": 271,
     "motion": "TH prefers the world without marriage.",
     "tournament": "連盟杯",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 270
   },
   {
     "id": 272,
     "motion": "THW require broadcasters to devote equal time and prominence to coverage of female sports games as male sports games.",
     "tournament": "連盟杯",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 271
   },
   {
     "id": 273,
     "motion": "THW pay all elected politicians the median wage in their electoral district.",
     "tournament": "連盟杯",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 272
   },
   {
     "id": 274,
     "motion": "THW allow prisoners to donate their organs in exchange for shortening of their sentences.",
     "tournament": "連盟杯",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 273
   },
   {
     "id": 275,
     "motion": "THBT, upon request by the authority, smart phone companies should be forced to unlock their products usually by criminals.",
     "tournament": "連盟杯",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 274
   },
   {
     "id": 276,
     "motion": "THBT the EU should abandon its commitment to the principle of open borders between member states.",
     "tournament": "連盟杯",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 275
   },
   {
     "id": 277,
     "motion": "THBT democratic countries should not attend sporting events in countries with bad human rights records.",
     "tournament": "連盟杯",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 276
   },
   {
     "id": 278,
     "motion": "THW require all the Internet users to use the real names.",
     "tournament": "連盟杯",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 277
   },
   {
     "id": 279,
     "motion": "THBT gambling of all forms (e.g. lotteries, horse racing, or casinos) should be illegal.",
     "tournament": "連盟杯",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 278
   },
   {
     "id": 280,
     "motion": "THBT governments should refuse to assist in rebuilding areas prone to natural disasters.",
     "tournament": "連盟杯",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 279
   },
   {
     "id": 281,
     "motion": "THW abolish death penalty.",
     "tournament": "連盟杯",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 280
   },
   {
     "id": 282,
     "motion": "THW provide welfare in the form of basic goods and services, rather than cash payments.",
     "tournament": "連盟杯",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 281
   },
   {
     "id": 283,
     "motion": "THBT governments should negotiate with terrorists when their citizens are taken hostages by terrorists groups.",
     "tournament": "連盟杯",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 282
   },
   {
     "id": 284,
     "motion": "THBT parents should have the right to access all accounts of their children's social networking sites.",
     "tournament": "連盟杯",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 283
   },
   {
     "id": 285,
     "motion": "THW apply the retirement age to politicians.",
     "tournament": "連盟杯",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 284
   },
   {
     "id": 286,
     "motion": "THBT the Tokyo Olympics venue should include the Tohoku/Fukushima area.",
     "tournament": "連盟杯",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 285
   },
   {
     "id": 287,
     "motion": "THW deny those who have made poor lifestyle choices and actively harmed themselves (fatty food, alcohol, smoking) the access to the national health insurance.",
     "tournament": "連盟杯",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 286
   },
   {
     "id": 288,
     "motion": "THBT research institutions that actively employ female scientists should be given more research funding by the government.",
     "tournament": "連盟杯",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 287
   },
   {
     "id": 289,
     "motion": "THBT Japan should not impose any sanctions on Russia regarding the Crimea issue.",
     "tournament": "連盟杯",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 288
   },
   {
     "id": 290,
     "motion": "THW allow gifted students to skip grades in schools.",
     "tournament": "連盟杯",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 289
   },
   {
     "id": 291,
     "motion": "THW ban experiments on animals.",
     "tournament": "連盟杯",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 290
   },
   {
     "id": 292,
     "motion": "THBT using the Internet in political election campaigns will do more harm than good.",
     "tournament": "連盟杯",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 291
   },
   {
     "id": 293,
     "motion": "THW use quota to increase the representation of women in the Japanese parliament.",
     "tournament": "連盟杯",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 292
   },
   {
     "id": 294,
     "motion": "THW penalize media companies that broadcast the use of physical abuse (such as beating or kicking someone) as a form of humor.",
     "tournament": "連盟杯",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 293
   },
   {
     "id": 295,
     "motion": "THBT the US federal government should ban the private use of firearms.",
     "tournament": "連盟杯",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 294
   },
   {
     "id": 296,
     "motion": "THBT students in elementary schools and junior schools should be required to repeat a grade if their class performance is poor.",
     "tournament": "連盟杯",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 295
   },
   {
     "id": 297,
     "motion": "THW make voting at elections compulsory.",
     "tournament": "連盟杯",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 296
   },
   {
     "id": 298,
     "motion": "THW ban fortune-telling businesses.",
     "tournament": "連盟杯",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 297
   },
   {
     "id": 299,
     "motion": "It is better for university admission test takers to have a boyfriend/girlfriend.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 298
   },
   {
     "id": 300,
     "motion": "People should prioritize what they want to do over job stability when choosing a career.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 299
   },
   {
     "id": 301,
     "motion": "Japan should give more votes to the young.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 300
   },
   {
     "id": 302,
     "motion": "Grade retention should be implemented in compulsory education.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 301
   },
   {
     "id": 303,
     "motion": "Romantic relationships with AI do more harm than good.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 302
   },
   {
     "id": 304,
     "motion": "Families should place their elderly family members in care facilities rather than live together at home.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 303
   },
   {
     "id": 305,
     "motion": "Investment in domestic education should be prioritized over support for studying abroad.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 304
   },
   {
     "id": 306,
     "motion": "Consumption tax on food should be eliminated.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 305
   },
   {
     "id": 307,
     "motion": "Students should be allowed to work on different materials during class.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 306
   },
   {
     "id": 308,
     "motion": "Children playing games does more harm than good to their development.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 307
   },
   {
     "id": 309,
     "motion": "We should introduce a female quota in the Diet.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 308
   },
   {
     "id": 310,
     "motion": "Domestic travel is better than traveling abroad for a school trip.",
     "tournament": "中学全国大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 309
   },
   {
     "id": 311,
     "motion": "It is better to confess your love through social media than face-to-face.",
     "tournament": "中学全国大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 310
   },
   {
     "id": 312,
     "motion": "Grade-skipping should be introduced in compulsory education.",
     "tournament": "中学全国大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 311
   },
   {
     "id": 313,
     "motion": "In the future, people should live with humanoid robots rather than with other humans.",
     "tournament": "中学全国大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 312
   },
   {
     "id": 314,
     "motion": "Tobacco should be banned.",
     "tournament": "世界交流大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 313
   },
   {
     "id": 315,
     "motion": "Ambulance services should be paid rather than free.",
     "tournament": "世界交流大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 314
   },
   {
     "id": 316,
     "motion": "It is better to have romantic relationships with humanoid robots than with humans.",
     "tournament": "世界交流大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 315
   },
   {
     "id": 317,
     "motion": "Organ donation should be mandatory.",
     "tournament": "世界交流大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 316
   },
   {
     "id": 318,
     "motion": "Tariffs do more benefits than harm.",
     "tournament": "世界交流大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 317
   },
   {
     "id": 319,
     "motion": "Accepting immigrants brings more benefits than harms.",
     "tournament": "世界交流大会",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 318
   },
   {
     "id": 320,
     "motion": "Universities should prioritize regional diversity over academic performance in admissions.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 319
   },
   {
     "id": 321,
     "motion": "Japan should abolish the mandatory retirement age.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 320
   },
   {
     "id": 322,
     "motion": "Japan should abolish tax exemptions for foreign tourists to address overtourism.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 321
   },
   {
     "id": 323,
     "motion": "AI decisions are better than politicians’ decisions.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 322
   },
   {
     "id": 324,
     "motion": "In group decision-making, one should follow the majority.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 323
   },
   {
     "id": 325,
     "motion": "In foreign policy decision-making and execution, the judgment of diplomats should be prioritized over that of heads of government.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 324
   },
   {
     "id": 326,
     "motion": "Japan should possess nuclear weapons.",
     "tournament": "冬 全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 325
   },
   {
     "id": 327,
     "motion": "Japan should make voting compulsory.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 326
   },
   {
     "id": 328,
     "motion": "Japan should abolish the consumption tax.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 327
   },
   {
     "id": 329,
     "motion": "Japanese First’ brings more benefits than harm.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 328
   },
   {
     "id": 330,
     "motion": "All countries should eliminate tariffs.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 329
   },
   {
     "id": 331,
     "motion": "Art education should be a required part of scientific training.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 330
   },
   {
     "id": 332,
     "motion": "Debate feedback is better provided by AI than by teachers.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 331
   },
   {
     "id": 333,
     "motion": "Palestine should be recognized as a state.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 332
   },
   {
     "id": 334,
     "motion": "Japan should construct new nuclear power plants",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 333
   },
   {
     "id": 335,
     "motion": "Japan should make voting compulsory.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 334
   },
   {
     "id": 336,
     "motion": "Swimming classes should be abolished.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 335
   },
   {
     "id": 337,
     "motion": "Japan should abolish the consumption tax.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 336
   },
   {
     "id": 338,
     "motion": "Free high school tuition will do more harm than good.",
     "tournament": "中学全国大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 337
   },
   {
     "id": 339,
     "motion": "Debate feedback is better provided by AI than teachers.",
     "tournament": "中学全国大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 338
   },
   {
     "id": 340,
     "motion": "To learn about the world, it is better to watch YouTube videos than TV news programs.",
     "tournament": "中学全国大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 339
   },
   {
     "id": 341,
     "motion": "School uniforms should be abolished.",
     "tournament": "中学全国大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 340
   },
   {
     "id": 342,
     "motion": "Homework should be abolished.",
     "tournament": "世界交流大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 341
   },
   {
     "id": 343,
     "motion": "Being fashionable brings more benefit than harm.",
     "tournament": "世界交流大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 342
   },
   {
     "id": 344,
     "motion": "Donald Trump's second presidency would do more harm than good to the world.",
     "tournament": "世界交流大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 343
   },
   {
     "id": 345,
     "motion": "Developing countries should prioritize investing in online education over in-person education.",
     "tournament": "世界交流大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 344
   },
   {
     "id": 346,
     "motion": "It is better for students to work after graduation of high school rather than to go to university.",
     "tournament": "世界交流大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 345
   },
   {
     "id": 347,
     "motion": "Countries with high carbon emissions should pay climate reparations to low emitting nations disproportionately affected by climate change.",
     "tournament": "世界交流大会",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 346
   },
   {
     "id": 348,
     "motion": "The Japanese government should prohibit the use of SNS under the age of 16.",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 347
   },
   {
     "id": 349,
     "motion": "In Japan's university entrance examinations, AO examinations should be increased rather than general entrance examinations.",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 348
   },
   {
     "id": 350,
     "motion": "The United Nations should completely ban the development and use of Lethal Autonomous Weapon Systems (LAWS).",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 349
   },
   {
     "id": 351,
     "motion": "Researchers should focus their research on national policy rather than their own interests.",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 350
   },
   {
     "id": 352,
     "motion": "Japan should prioritize solving domestic problems over international problems.",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 351
   },
   {
     "id": 353,
     "motion": "We are the ones who create Expo 2025 Osaka, Kansai, Japan.",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 352
   },
   {
     "id": 354,
     "motion": "SNS is more reliable than old media (newspapers, television, etc.).",
     "tournament": "冬 全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 353
   },
   {
     "id": 355,
     "motion": "School trips should be abolished.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 354
   },
   {
     "id": 356,
     "motion": "Animal experiment should be abolished.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 355
   },
   {
     "id": 357,
     "motion": "All political parties should be banned.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 356
   },
   {
     "id": 358,
     "motion": "All doctors should be required to work in rural areas for a couple of years.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 357
   },
   {
     "id": 359,
     "motion": "We should stop using English as the common language of science.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 358
   },
   {
     "id": 360,
     "motion": "Power harassment should be severely punished.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 359
   },
   {
     "id": 361,
     "motion": "Doping should be allowed in the Olympic Games.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 360
   },
   {
     "id": 362,
     "motion": "Decentralization of the population of Tokyo will do more good than harm.",
     "tournament": "夏合宿・全国大会（高校）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 361
   },
   {
     "id": 363,
     "motion": "Summer vacations should be shortened in junior high schools.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 362
   },
   {
     "id": 364,
     "motion": "People who don't have children will be happier, compared to those who do.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 363
   },
   {
     "id": 365,
     "motion": "We should promote reviving the dead through generative AI.",
     "tournament": "夏合宿・全国大会（中学）",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 364
   },
   {
     "id": 366,
     "motion": "Japan should accelerate its investment in small rockets.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 365
   },
   {
     "id": 367,
     "motion": "It is better to spend time on various experiences rather than studying for university entrance exams (traditional written exams).",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 366
   },
   {
     "id": 368,
     "motion": "For violent crimes, the names of offenders should be disclosed, regardless of age.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 367
   },
   {
     "id": 369,
     "motion": "Limited medical care in times of disaster should prioritize the young over he elderly.",
     "tournament": "中学全国大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 368
   },
   {
     "id": 370,
     "motion": "Living in rural areas is better than living in urban areas.",
     "tournament": "世界交流大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 369
   },
   {
     "id": 371,
     "motion": "Zoos should be banned.",
     "tournament": "世界交流大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 370
   },
   {
     "id": 372,
     "motion": "Disaster-affected marginal villages should move to other cities rather than rebuild.",
     "tournament": "世界交流大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 371
   },
   {
     "id": 373,
     "motion": "African countries should prioritize environmental protection over economic development.",
     "tournament": "世界交流大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 372
   },
   {
     "id": 374,
     "motion": "Politics is better done by AI than by humans.",
     "tournament": "世界交流大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 373
   },
   {
     "id": 375,
     "motion": "STEM education is more important than language education for high school students.",
     "tournament": "世界交流大会",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 374
   },
   {
     "id": 376,
     "motion": "Japan should make university tuition free.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 375
   },
   {
     "id": 377,
     "motion": "Being fashionable brings more benefit than harm.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 376
   },
   {
     "id": 378,
     "motion": "To change Japan, it is better to be a business person than a politician.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 377
   },
   {
     "id": 379,
     "motion": "The U.S. should stop supporting Israel.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 378
   },
   {
     "id": 380,
     "motion": "Priority should be put on speed when deliberating on policy/decision making.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 379
   },
   {
     "id": 381,
     "motion": "Going to university abroad is better than going to university in Japan.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 380
   },
   {
     "id": 382,
     "motion": "The upper limit of income should be 100 million yen and excess income should be redistributed.",
     "tournament": "冬 全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 381
   },
   {
     "id": 383,
     "motion": "After-school club activities in schools should be abolished.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 382
   },
   {
     "id": 384,
     "motion": "The number of AI-equipped surveillance cameras should be increased.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 383
   },
   {
     "id": 385,
     "motion": "Volunteer work in schools should be mandatory.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 384
   },
   {
     "id": 386,
     "motion": "Japan should privatize prizons.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 385
   },
   {
     "id": 387,
     "motion": "Patriotism should be emphasized in compulsory education.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 386
   },
   {
     "id": 388,
     "motion": "Scholarships should be granted based only on financial situation, not on academic performance.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 387
   },
   {
     "id": 389,
     "motion": "In elections, only those who pass aptitude tests should be eligible to vote.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 388
   },
   {
     "id": 390,
     "motion": "In university entrance examinations, the ratio of comprehensive type selections (AO examinations) should be increased.",
     "tournament": "夏合宿・全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 389
   },
   {
     "id": 391,
     "motion": "Japan should ban pet sales.",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 390
   },
   {
     "id": 392,
     "motion": "Spending weekends with friends is better than with family.",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 391
   },
   {
     "id": 393,
     "motion": "Japan should prioritize child raising support over defense spending.",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 392
   },
   {
     "id": 394,
     "motion": "Brain Machine Interface (BMI), which allows people to interact just by thinking by implanting electrodes in the brain, will do more good than harm.",
     "tournament": "中学全国大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 393
   },
   {
     "id": 395,
     "motion": "Having pets should be banned.",
     "tournament": "世界交流大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 394
   },
   {
     "id": 396,
     "motion": "High school students should have part-time jobs.",
     "tournament": "世界交流大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 395
   },
   {
     "id": 397,
     "motion": "Economic sanctions against Russia do more harm than good.",
     "tournament": "世界交流大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 396
   },
   {
     "id": 398,
     "motion": "Degrowth should be supported rather than SDGs.",
     "tournament": "世界交流大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 397
   },
   {
     "id": 399,
     "motion": "All universities should give students the option to graduate online only.",
     "tournament": "世界交流大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 398
   },
   {
     "id": 400,
     "motion": "Universities involved in STEM should select students based on diversity rather than academics.",
     "tournament": "世界交流大会",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 399
   },
   {
     "id": 401,
     "motion": "Being single is better than getting married in the modern world.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 400
   },
   {
     "id": 402,
     "motion": "Japan should increase defense spending.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 401
   },
   {
     "id": 403,
     "motion": "Online education should be introduced in junior high and high schools, and school districts should be abolished.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 402
   },
   {
     "id": 404,
     "motion": "Students should be instructed in debate by Al rather than by teachers.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 403
   },
   {
     "id": 405,
     "motion": "Consumer behavior (ownership and use of things) should be limited to achieve carbon neutrality.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 404
   },
   {
     "id": 406,
     "motion": "Entrepreneurship should be pursued rather than employment at a big company.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 405
   },
   {
     "id": 407,
     "motion": "Living in the U.S. will be better than living in Japan in the future.",
     "tournament": "全国大会(冬)",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 406
   },
   {
     "id": 408,
     "motion": "Ranking children in sport events at kindergartens and elementary schools should be abolished.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 407
   },
   {
     "id": 409,
     "motion": "As pets, robot dogs are better than real dogs.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 408
   },
   {
     "id": 410,
     "motion": "We should abolish the death penalty.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 409
   },
   {
     "id": 411,
     "motion": "STEAM education should be prioritized over English education.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 410
   },
   {
     "id": 412,
     "motion": "Footage of shooting incidents should not be reported.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 411
   },
   {
     "id": 413,
     "motion": "Public policies should be based on public opinion polls, rather than a few experts or bureaucrats.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 412
   },
   {
     "id": 414,
     "motion": "NATO should deploy its troops to Ukraine.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 413
   },
   {
     "id": 415,
     "motion": "Japan should promote the use of nuclear power plants.",
     "tournament": "夏合宿・全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 414
   },
   {
     "id": 416,
     "motion": "We should prohibit cosmetic surgery.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 415
   },
   {
     "id": 417,
     "motion": "High school students should study abroad during high school years.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 416
   },
   {
     "id": 418,
     "motion": "Space exploration spending should be increased.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 417
   },
   {
     "id": 419,
     "motion": "Economic sanctions against Russia does more good than harm to the world.",
     "tournament": "中学全国大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 418
   },
   {
     "id": 420,
     "motion": "Parents should have the right to access their children’s SNS.",
     "tournament": "世界交流大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 419
   },
   {
     "id": 421,
     "motion": "Homework should be abolished.",
     "tournament": "世界交流大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 420
   },
   {
     "id": 422,
     "motion": "The development of AI weapons for military purposes should be banned.",
     "tournament": "世界交流大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 421
   },
   {
     "id": 423,
     "motion": "Companies should not do business with countries where there are human rights violations.",
     "tournament": "世界交流大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 422
   },
   {
     "id": 424,
     "motion": "Developing countries should take the same responsibilities as developed countries on global warming.",
     "tournament": "世界交流大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 423
   },
   {
     "id": 425,
     "motion": "Space travel by the wealthy should be criticized.",
     "tournament": "世界交流大会",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 424
   },
   {
     "id": 426,
     "motion": "Plastic products should be taxed.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 425
   },
   {
     "id": 427,
     "motion": "Parents of children who bully other children should face criminal charges.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 426
   },
   {
     "id": 428,
     "motion": "Japan should impose a diplomatic boycott of the Beijing Olympics.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 427
   },
   {
     "id": 429,
     "motion": "COVID-19 vaccination should be mandatory.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 428
   },
   {
     "id": 430,
     "motion": "Wild fish catch should be prohibited and fish should be farmed.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 429
   },
   {
     "id": 431,
     "motion": "Debate competitions should be held online rather than face-to-face regardless of the COVID-19 situation.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 430
   },
   {
     "id": 432,
     "motion": "The U.S. military should not have withdrawn from Afghanistan.",
     "tournament": "冬 全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 431
   },
   {
     "id": 433,
     "motion": "Cosmetic surgery should be banned.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 432
   },
   {
     "id": 434,
     "motion": "It is better to be single for life than to have a family.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 433
   },
   {
     "id": 435,
     "motion": "China should abolish its restriction on the number of births.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 434
   },
   {
     "id": 436,
     "motion": "Vaccination against COVID-19 should become mandatory.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 435
   },
   {
     "id": 437,
     "motion": "Male Employees should be forced to take parental leave.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 436
   },
   {
     "id": 438,
     "motion": "School rule regarding appearances should be abolished.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 437
   },
   {
     "id": 439,
     "motion": "The Tokyo Olympics should have been cancelled.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 438
   },
   {
     "id": 440,
     "motion": "Teleworking makes people happy.",
     "tournament": "夏合宿・全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 439
   },
   {
     "id": 441,
     "motion": "Japan should abolish zoos.",
     "tournament": "中学全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 440
   },
   {
     "id": 442,
     "motion": "Hosting the Tokyo Olympics in the summer of 2021 will do more good than harm.",
     "tournament": "中学全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 441
   },
   {
     "id": 443,
     "motion": "Children should choose foster parents over biological parents who cannot provide adequate food, clothing and shelter.",
     "tournament": "中学全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 442
   },
   {
     "id": 444,
     "motion": "Online learning should be introduced in junior high schools, and students go to school only three days a week.",
     "tournament": "中学全国大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 443
   },
   {
     "id": 445,
     "motion": "High school students should have part-time jobs.",
     "tournament": "世界交流大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 444
   },
   {
     "id": 446,
     "motion": "The death penalty should be abolished.",
     "tournament": "世界交流大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 445
   },
   {
     "id": 447,
     "motion": "Government should force people to take a COVID-19 vaccine.",
     "tournament": "世界交流大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 446
   },
   {
     "id": 448,
     "motion": "The permanent ban of Donald Trump’s Twitter account should be removed.",
     "tournament": "世界交流大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 447
   },
   {
     "id": 449,
     "motion": "Combat sports should be banned.",
     "tournament": "世界交流大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 448
   },
   {
     "id": 450,
     "motion": "Development aid does more harm than good in developing countries.",
     "tournament": "世界交流大会",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 449
   },
   {
     "id": 451,
     "motion": "Wearing a mask should be mandatory.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 450
   },
   {
     "id": 452,
     "motion": "The media should not report on suicide.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 451
   },
   {
     "id": 453,
     "motion": "Infertility treatment should be for free.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 452
   },
   {
     "id": 454,
     "motion": "Class-size reduction in elementary schools does more good than harm.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 453
   },
   {
     "id": 455,
     "motion": "Tuition fees for university STEM departments should be free.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 454
   },
   {
     "id": 456,
     "motion": "Prevention of COVID-19 should be prioritized over boosting economy in developing countries.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 455
   },
   {
     "id": 457,
     "motion": "Japan should introduce a basic income.",
     "tournament": "冬全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 456
   },
   {
     "id": 458,
     "motion": "A grade should be decided based on learning outcomes.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 457
   },
   {
     "id": 459,
     "motion": "A fat tax should be introduced.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 458
   },
   {
     "id": 460,
     "motion": "Persons who spread a virus on purpose should be sentenced to death.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 459
   },
   {
     "id": 461,
     "motion": "Japan should accept more foreign refugees.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 460
   },
   {
     "id": 462,
     "motion": "Japan should legalize euthanasia.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 461
   },
   {
     "id": 463,
     "motion": "A pet tax should be introduced.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 462
   },
   {
     "id": 464,
     "motion": "Authoritarianism is better than democracy during the COVID-19 pandemic.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 463
   },
   {
     "id": 465,
     "motion": "A life imprisonment should be imposed on a person who lead others to commit suicide with slander.",
     "tournament": "夏合宿・全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 464
   },
   {
     "id": 466,
     "motion": "Bringing snacks and soft drink to junior high school should be allowed.",
     "tournament": "中学全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 465
   },
   {
     "id": 467,
     "motion": "Closing schools to combat the COVID-19 has brought more benefits than harm.",
     "tournament": "中学全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 466
   },
   {
     "id": 468,
     "motion": "Recreating the dead in VR does more benefits than harm.",
     "tournament": "中学全国大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 467
   },
   {
     "id": 469,
     "motion": "Parental leave should be made mandatory for both parents.",
     "tournament": "世界交流大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 468
   },
   {
     "id": 470,
     "motion": "A maximum number of terms for parliament members should be established.",
     "tournament": "世界交流大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 469
   },
   {
     "id": 471,
     "motion": "In primary and secondary school years, students should be grouped by competency and intelligence instead of age.",
     "tournament": "世界交流大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 470
   },
   {
     "id": 472,
     "motion": "The Olympics Games should be abolished.",
     "tournament": "世界交流大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 471
   },
   {
     "id": 473,
     "motion": "The United State should remove all sanctions against Iran.",
     "tournament": "世界交流大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 472
   },
   {
     "id": 474,
     "motion": "Government should oblige companies to allow their employees to telework.",
     "tournament": "世界交流大会",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 473
   },
   {
     "id": 475,
     "motion": "Club activity should have three days off a week.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 474
   },
   {
     "id": 476,
     "motion": "Children should be prohibited from posting on video hosting websites.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 475
   },
   {
     "id": 477,
     "motion": "The postponement of introducing private English tests into national university entrance examinations has brought more benefits than harm.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 476
   },
   {
     "id": 478,
     "motion": "Social media (e.g. twitter) causes only division of society.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 477
   },
   {
     "id": 479,
     "motion": "Disaster forecasts should be issued from a single source.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 478
   },
   {
     "id": 480,
     "motion": "Japan should pay the full cost of US military bases in Japan.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 479
   },
   {
     "id": 481,
     "motion": "Parents should be banned from corporal punishment of children for discipline.",
     "tournament": "全国大会（冬）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 480
   },
   {
     "id": 482,
     "motion": "All P.E. classes should be outsourced at elementary and junior high school.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 481
   },
   {
     "id": 483,
     "motion": "The number of classes taught by teachers should be reduced by half at high schools and universities, by introducing e-learning.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 482
   },
   {
     "id": 484,
     "motion": "Mandatory paternity leave should be introduced.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 483
   },
   {
     "id": 485,
     "motion": "NHK should be scrambled.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 484
   },
   {
     "id": 486,
     "motion": "Gender and age should be removed in school application forms.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 485
   },
   {
     "id": 487,
     "motion": "Companies should encourage employees to wear a skirt at work.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 486
   },
   {
     "id": 488,
     "motion": "People should have a microchip implant in their own bodies.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 487
   },
   {
     "id": 489,
     "motion": "Companies should introduce the four-day-workweek system.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 488
   },
   {
     "id": 490,
     "motion": "Anonymous writing on the Internet should be prohibited.",
     "tournament": "世界交流大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 489
   },
   {
     "id": 491,
     "motion": "As a form of welfare for the poor, providing basic goods and services(e.g. food stamp, job training and so on) is better than providing cash.",
     "tournament": "世界交流大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 490
   },
   {
     "id": 492,
     "motion": "In aging societies, the young should be given more votes.",
     "tournament": "世界交流大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 491
   },
   {
     "id": 493,
     "motion": "Exclusive schools for LGBT should be established.",
     "tournament": "世界交流大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 492
   },
   {
     "id": 494,
     "motion": "Private ownership of guns should be prohibited in United States.",
     "tournament": "世界交流大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 493
   },
   {
     "id": 495,
     "motion": "Parents/educators should encourage children to choose start-up rather than traditional path.",
     "tournament": "世界交流大会",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 494
   },
   {
     "id": 496,
     "motion": "Using private homes as hotels for school trips should be banned.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 495
   },
   {
     "id": 497,
     "motion": "Japan should raise the pension age to 70 years old.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 496
   },
   {
     "id": 498,
     "motion": "Affirmative action  should be taken for female students with science and engineering background.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 497
   },
   {
     "id": 499,
     "motion": "Accepting more foreign workers will give Japan benefit than harm.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 498
   },
   {
     "id": 500,
     "motion": "Sale of potatoes with no poison produced through genome editing technology should be prohibited.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 499
   },
   {
     "id": 501,
     "motion": "Centralization in urban areas bring more good than harm.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 500
   },
   {
     "id": 502,
     "motion": "US protectionism does more harm than good to the US.",
     "tournament": "全国大会（冬）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 501
   },
   {
     "id": 503,
     "motion": "Junior high school students should be allowed to bring smartphones to school.",
     "tournament": "中学生全国大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 502
   },
   {
     "id": 504,
     "motion": "High schools should introduce eSports as a regular course.",
     "tournament": "中学生全国大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 503
   },
   {
     "id": 505,
     "motion": "Production of plastic bags should be banned.",
     "tournament": "中学生全国大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 504
   },
   {
     "id": 506,
     "motion": "All schools should be coeducation",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 505
   },
   {
     "id": 507,
     "motion": "Corporal punishment should be allowed in schools.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 506
   },
   {
     "id": 508,
     "motion": "We should impose a tax on the usage of SNS.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 507
   },
   {
     "id": 509,
     "motion": "Japan should legalize active euthanasia.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 508
   },
   {
     "id": 510,
     "motion": "School lawyers should be set to all schools.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 509
   },
   {
     "id": 511,
     "motion": "Casinos in Japan will give us more benefit than harm.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 510
   },
   {
     "id": 512,
     "motion": "Overtime regulations will enrich Japan.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 511
   },
   {
     "id": 513,
     "motion": "We should ease the reception of foreign caregivers considerably.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 512
   },
   {
     "id": 514,
     "motion": "Plea bargaining will do more good than harm.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 513
   },
   {
     "id": 515,
     "motion": "Corporal punishment should be legalized.",
     "tournament": "世界交流大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 514
   },
   {
     "id": 516,
     "motion": "Stricter sanction on North Korea for its aggressive behavior does more harm than good.",
     "tournament": "世界交流大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 515
   },
   {
     "id": 517,
     "motion": "Preventive evacuation from meteorological disaster has to be obligation.",
     "tournament": "世界交流大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 516
   },
   {
     "id": 518,
     "motion": "Government should punish individuals who write Fake news.",
     "tournament": "世界交流大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 517
   },
   {
     "id": 519,
     "motion": "Government should subsidize prenatal diagnosis.",
     "tournament": "世界交流大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 518
   },
   {
     "id": 520,
     "motion": "Countries with aging populations should prioritize policies enhancing productivity over population increase.",
     "tournament": "世界交流大会",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 519
   },
   {
     "id": 521,
     "motion": "Universities in Tokyo’s 23 wards should limit the number of new students.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 520
   },
   {
     "id": 522,
     "motion": "Reporting real names of crime victims should be prohibited.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 521
   },
   {
     "id": 523,
     "motion": "Grade-skipping should be introduced in compulsory education.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 522
   },
   {
     "id": 524,
     "motion": "Government should restrict the time spent on online games.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 523
   },
   {
     "id": 525,
     "motion": "Promoting studying abroad for Japanese students will save Japan.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 524
   },
   {
     "id": 526,
     "motion": "Automatic driving cars does more harm than good.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 525
   },
   {
     "id": 527,
     "motion": "Development of AI weapons should be banned.",
     "tournament": "全国大会（冬）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 526
   },
   {
     "id": 528,
     "motion": "Corporal punishment should be admitted in schools.",
     "tournament": "中学生全国大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 527
   },
   {
     "id": 529,
     "motion": "Domestic travel is better than traveling abroad for a school trip.",
     "tournament": "中学生全国大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 528
   },
   {
     "id": 530,
     "motion": "Japan should accept more refugees.",
     "tournament": "中学生全国大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 529
   },
   {
     "id": 531,
     "motion": "Online shopping is better than going shopping.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 530
   },
   {
     "id": 532,
     "motion": "The assassination of dictators should be justified.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 531
   },
   {
     "id": 533,
     "motion": "Economic growth should be given priority over environmental protection.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 532
   },
   {
     "id": 534,
     "motion": "Having a boyfriend or girlfriend is a waste of time for high school students.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 533
   },
   {
     "id": 535,
     "motion": "We should accept more foreign workers.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 534
   },
   {
     "id": 536,
     "motion": "We should make it mandatory for elderly citizens to return their driver's license.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 535
   },
   {
     "id": 537,
     "motion": "The declining birth rate is not a bad thing.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 536
   },
   {
     "id": 538,
     "motion": "Polygamy should be legalized.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 537
   },
   {
     "id": 539,
     "motion": "Idols (pop stars) should be prohibited from having romantic relationships.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 538
   },
   {
     "id": 540,
     "motion": "Cosmetic surgery should be banned.",
     "tournament": "世界交流大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 539
   },
   {
     "id": 541,
     "motion": "We should build expensive disaster prevention facilities to prepare for a massive once-in-a-thousand-years disaster even if we end up destroying the environment in the process.",
     "tournament": "世界交流大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 540
   },
   {
     "id": 542,
     "motion": "President Trump brings more benefits than harm to the world.",
     "tournament": "世界交流大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 541
   },
   {
     "id": 543,
     "motion": "Euthanasia should be legalized.",
     "tournament": "世界交流大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 542
   },
   {
     "id": 544,
     "motion": "Countries around the world should actively promote immigration policies.",
     "tournament": "世界交流大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 543
   },
   {
     "id": 545,
     "motion": "Artificial intelligence is our enemy.",
     "tournament": "世界交流大会",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 544
   },
   {
     "id": 546,
     "motion": "Priority seats on trains should be abolished.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 545
   },
   {
     "id": 547,
     "motion": "Genetically modified organism brings us more benefits than harm.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 546
   },
   {
     "id": 548,
     "motion": "We should welcome the rent subsidies for female students of University of Tokyo.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 547
   },
   {
     "id": 549,
     "motion": "Japan should have nuclear weapons.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 548
   },
   {
     "id": 550,
     "motion": "Japan should raise its consumption tax rate.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 549
   },
   {
     "id": 551,
     "motion": "Media should broadcast Tsunami Warnings in a slightly exaggerated manner.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 550
   },
   {
     "id": 552,
     "motion": "Having casinos in Japan does more good than harm.",
     "tournament": "全国大会（冬）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 551
   },
   {
     "id": 553,
     "motion": "We should introduce compulsory voting.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 552
   },
   {
     "id": 554,
     "motion": "We should raise consumption tax rate.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 553
   },
   {
     "id": 555,
     "motion": "When it comes to high school years, living in rural areas is better than living in urban areas.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 554
   },
   {
     "id": 556,
     "motion": "Intimate relationships between teachers and students should be acceptable.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 555
   },
   {
     "id": 557,
     "motion": "Celebrities who got accused of drug scandals should not be allowed to be back on mass media.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 556
   },
   {
     "id": 558,
     "motion": "We should introduce female quota in the Diet.",
     "tournament": "全国大会・合宿（夏）",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 557
   },
   {
     "id": 559,
     "motion": "We should outsource coaching of club activities.",
     "tournament": "全国大会（冬）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 558
   },
   {
     "id": 560,
     "motion": "Reduced tax rate should be applied to newspapers.",
     "tournament": "全国大会（冬）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 559
   },
   {
     "id": 561,
     "motion": "Pictures of the ex-boyfriend/girlfriend should be thrown away.",
     "tournament": "全国大会（冬）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 560
   },
   {
     "id": 562,
     "motion": "Same-sex marriage should be legalized.",
     "tournament": "全国大会（冬）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 561
   },
   {
     "id": 563,
     "motion": "Genetically modified food brings more benefits than harm.",
     "tournament": "全国大会（冬）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 562
   },
   {
     "id": 564,
     "motion": "Court trials should be broadcast live.",
     "tournament": "全国大会（冬）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 563
   },
   {
     "id": 565,
     "motion": "High school students should have the right to vote.",
     "tournament": "全国大会（夏）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 564
   },
   {
     "id": 566,
     "motion": "Using a selfie stick in public space should be banned.",
     "tournament": "全国大会（夏）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 565
   },
   {
     "id": 567,
     "motion": "Marrying at older age is better than marrying young.",
     "tournament": "全国大会（夏）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 566
   },
   {
     "id": 568,
     "motion": "We should prohibit cosmetic surgery.",
     "tournament": "全国大会（夏）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 567
   },
   {
     "id": 569,
     "motion": "Homeroom teachers should be criminally charged for bullying.",
     "tournament": "全国大会（夏）",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 568
   },
   {
     "id": 570,
     "motion": "THBT Panama should replace the US dollar with its own independent currency",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 569
   },
   {
     "id": 571,
     "motion": "THBT courts should not defer to administrative agencies in statutory interpretation.",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 570
   },
   {
     "id": 572,
     "motion": "This House Opposes the prominence of celebrity conflict",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 571
   },
   {
     "id": 573,
     "motion": "THS European countries gradually withdrawing from NATO and establishing an independent military presence (NATO).",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 572
   },
   {
     "id": 574,
     "motion": "THS the Holy See recognizing the underground Catholic church in China, rather than the government-sanctioned church",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 573
   },
   {
     "id": 575,
     "motion": "This House believes that sports leagues should fund 'loyalty bonuses' for accomplished professional athletes who remain with their team for more than 5 years.",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 574
   },
   {
     "id": 576,
     "motion": "THBT the International Seabed Authority should immediately legalize deep sea mining for rare earth minerals",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 575
   },
   {
     "id": 577,
     "motion": "In countries experiencing democratic backsliding, THBT civil society groups should shift their advocacy from substantive policy goals (e.g. legalizing abortion or gay marriage) to critiquing violations of democratic norms (e.g. infringing on the independence of courts, removing constitutional safeguards)",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 576
   },
   {
     "id": 578,
     "motion": "This House Would allow employees to contractually agree with their employer to delay or forgo having children during their employment.",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 577
   },
   {
     "id": 579,
     "motion": "This House prefers public interest models to venture-backed models in the development of educational technology for primary and secondary education",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 578
   },
   {
     "id": 580,
     "motion": "This House opposes the creation of nation-states founded on the basis of a shared ethnic or religious identity as a response to group-based persecution or conflict.",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 579
   },
   {
     "id": 581,
     "motion": "This House supports the Second Wave of the Pink Tide.",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 580
   },
   {
     "id": 582,
     "motion": "TH prefers a world with a strong belief in seriti.",
     "tournament": "WSDC",
-    "year": "2025"
+    "year": "2025",
+    "_originalIndex": 581
   },
   {
     "id": 583,
     "motion": "This House Supports strict state secularism",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 582
   },
   {
     "id": 584,
     "motion": "This House Prefers A World where Truth and Reconciliation Commissions were established to deal with the aftermath of the Yugoslav Wars rather than the ICTY.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 583
   },
   {
     "id": 585,
     "motion": "This House Would ban sports betting.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 584
   },
   {
     "id": 586,
     "motion": "This House Believes That New Age wellness culture has done more harm than good.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 585
   },
   {
     "id": 587,
     "motion": "This House believes that major tourist destinations should significantly limit the number of tourists that can visit.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 586
   },
   {
     "id": 588,
     "motion": "This House would introduce a governmental basic income for all artists, rather than offering governmental fellowships and grants to certain artists upon application.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 587
   },
   {
     "id": 589,
     "motion": "This House supports France's exit from West Africa.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 588
   },
   {
     "id": 590,
     "motion": "This House opposes attempts by the feminist movement to redefine traditionally feminine",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 589
   },
   {
     "id": 591,
     "motion": "This House would put an upper age limit of 60 years old for individuals running for political office.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 590
   },
   {
     "id": 592,
     "motion": "This House regrets the narrative that money cannot buy happiness.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 591
   },
   {
     "id": 593,
     "motion": "This House, as Serbia, would develop closer ties with China at the expense of ties with the European Union.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 592
   },
   {
     "id": 594,
     "motion": "This House would allow violent offenders to opt into Pavlovian conditioning as a substitution for prison time.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 593
   },
   {
     "id": 595,
     "motion": "This House regrets the glorification of champions.",
     "tournament": "WSDC",
-    "year": "2024"
+    "year": "2024",
+    "_originalIndex": 594
   },
   {
     "id": 596,
     "motion": "This House believes that the World Bank Group should adopt a one-country-one-vote system",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 595
   },
   {
     "id": 597,
     "motion": "This House supports the use of the nine planetary boundaries framework",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 596
   },
   {
     "id": 598,
     "motion": "This House opposes internet gurus",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 597
   },
   {
     "id": 599,
     "motion": "This House believes that the feminist movement should promote the maximisation of individual development and empowerment over solidarity among women.",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 598
   },
   {
     "id": 600,
     "motion": "This House believes that African countries should recognise the sovereignty of Somaliland",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 599
   },
   {
     "id": 601,
     "motion": "This House regrets the professionalisation of sports.",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 600
   },
   {
     "id": 602,
     "motion": "This House would replace agricultural companies with farmers’ cooperatives",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 601
   },
   {
     "id": 603,
     "motion": "This House believes that developing countries should drop local languages in favor of a world language",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 602
   },
   {
     "id": 604,
     "motion": "This House regrets depictions of veganism as trendy",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 603
   },
   {
     "id": 605,
     "motion": "This House believes that it is against the interest of organized religion to emphasize strict requirements for personal religious commitments (e.g. not being allowed to work on Sabbath, not eating during Ramadan, restraining from premarital relationships, etc.)",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 604
   },
   {
     "id": 606,
     "motion": "This House believes that offensive art should not be commissioned for public spaces (Museums, Parks, Squares, etc.)",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 605
   },
   {
     "id": 607,
     "motion": "This House believes that the LGBTQ+ community should actively embrace the nuclear family ideal",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 606
   },
   {
     "id": 608,
     "motion": "This House Prefers a world ruled by a benevolent AI programmed to maximize utility by calculating the actions most guaranteed to reduce the greatest global suffering",
     "tournament": "WSDC",
-    "year": "2023"
+    "year": "2023",
+    "_originalIndex": 607
   },
   {
     "id": 609,
     "motion": "A workplace union is a union that only involves workers of one specific company. These unions tend to focus on directly negotiating with the management of that individual company. By contrast, an industrial union is a union with workers from an entire industry (e.g. service workers, educators, etc.). Industrial unions, more often, focus on trying to implement industry-wide standards for worker rights rather than negotiate with individual companies.)",
     "tournament": "WSDC This house prefers industrial unions to workplace unions. (info slide",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 608
   },
   {
     "id": 610,
     "motion": "This House would create a global carbon market.",
     "tournament": "WSDC",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 609
   },
   {
     "id": 611,
     "motion": "Free-to-play (F2P or FtP) video games are games that give players access to a sizeable portion or to the start of their gaming content without paying. However, players have to make in-game financial transactions to access competitive advantages (like power-ups, money, etc.), cosmetic changes (e.g.: a different type of character/look), or in some cases, to continue playing higher levels. This is distinct from games which require payment before using the game or service. It is also separate games which are entirely costless. Free-to-play games include, but are not limited to Fortnite, World of Tanks, Valorant, and League of Legends.)",
     "tournament": "WSDC This house would ban free-to-play games. (info slide",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 610
   },
   {
     "id": 612,
     "motion": "This House would implement fairness doctrines on broadcast news media with significant audience reach.",
     "tournament": "WSDC",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 611
   },
   {
     "id": 613,
     "motion": "active land redistribution, quotas, cash transfer programmes) over enshrining civil and political rights (e.g.: rights to protest, vote, free speech, form associations, etc.).",
     "tournament": "WSDC This House prefers a world in which postcolonial African states had prioritised achieving economic and land reparations (e.g.",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 612
   },
   {
     "id": 614,
     "motion": "This house would ban gated communities. (info slide: A gated community (or walled community) is a form of residential community or housing estate containing strictly controlled entrances and often characterised by a closed perimeter of walls and fences. Gated communities usually include various shared amenities.)",
     "tournament": "WSDC Time slot 2",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 613
   },
   {
     "id": 615,
     "motion": "This house believes that the LGBTQIA+ movement should centre reinterpreting religions in its public agenda.",
     "tournament": "WSDC Time slot 3",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 614
   },
   {
     "id": 616,
     "motion": "This house supports the rise of the use of cryptocurrencies (e.g. Bitcoin, Ethereum, USDT) in financial transactions.",
     "tournament": "WSDC Time slot 2",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 615
   },
   {
     "id": 617,
     "motion": "This house prefers a world in which success and failure are seen as a consequence of random factors, rather than personal actions.",
     "tournament": "WSDC Time slot 3",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 616
   },
   {
     "id": 618,
     "motion": "This house would overstate the impact of minority forces (Japanese American 442nd Battalion during WW2, Russia's Women's Battalion of Death during WW1, 4th Indian Infantry Division during WW2) in wars, even at the cost of historical accuracy.",
     "tournament": "WSDC Time slot 2",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 617
   },
   {
     "id": 619,
     "motion": "This house prefers a world in which juries/judges can use a \"not proven\" verdict in criminal courts, in addition to \"guilty\" and \"not guilty\" verdicts. (info slide: Criminal trials typically end in one of two verdicts - \"guilty\" or \"not guilty\". Under Scots law there exists a third verdict -\"not proven\". This is typically used to indicate the jury or judge believe the defendant could potentially be guilty, but there is not sufficient evidence to convict. In a \"not proven\" verdict, the prosecutor has the option to retry a case, while this is not possible in a \"not guilty\" decision.)",
     "tournament": "WSDC Time slot 3",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 618
   },
   {
     "id": 620,
     "motion": "This house prefers parenting models that adultify teenagers (i.e. giving them more responsibilities and autonomy, assuming higher capacity for independence) to those which emphasize their status and treatment as teenagers (i.e. refraining from giving them adult responsibilities, emphasizing they are legal minors).",
     "tournament": "WSDC Time slot 1",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 619
   },
   {
     "id": 621,
     "motion": "This house opposes academic activism. (info slide: \"Academic activism\" refers to a phenomenon where academics take an explicitly political standpoint in their work and outside it with the aim of bringing about social change. Activist academics openly associate with different social and political groups or movements. The scope of academic activism entails being involved in policy debates, advising politicians, writing opinion pieces, etc. It also entails activism taking place within academic work, i.e. when performing research or teaching at the university. Examples include Judith Butler (American philosopher and gender theorist, and active in the Occupy movement), Taimur Rahman (Professor at the Lahore University of Management Sciences, and Secretary-General of the Mazdoor Kisan Party - a communist political party), Jordan Peterson (Now Professor Emeritus at the University of Toronto, and conservative public intellectual).)",
     "tournament": "WSDC Time slot 2",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 620
   },
   {
     "id": 622,
     "motion": "The term “controlling interest” refers to a situation that arises when a shareholder (or a group acting in kind) holds the majority of a company's voting stock. Having a controlling interest gives the holding entity(s) significant influence over any corporate actions. Shareholders who have a controlling interest are often able to direct the course of a company and make key strategic and operational decisions.)",
     "tournament": "WSDC This house would not allow any individual shareholders to own a controlling interest in large, publicly traded social media companies.  (info slide",
-    "year": "2022"
+    "year": "2022",
+    "_originalIndex": 621
   },
   {
     "id": 623,
     "motion": "TH regrets the commercialisation of space.",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 622
   },
   {
     "id": 624,
     "motion": "THBT the International Olympic Committee should recognise an athlete’s right to protest",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 623
   },
   {
     "id": 625,
     "motion": "THW ban the production and consumption of meat",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 624
   },
   {
     "id": 626,
     "motion": "THBT the African Union should attempt to contain growing Gulf",
     "tournament": "WSDC R3 (Prepared)",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 625
   },
   {
     "id": 627,
     "motion": "THW significantly reduce income tax rates for women",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 626
   },
   {
     "id": 628,
     "motion": "THBT “cop shows” do more harm than good",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 627
   },
   {
     "id": 629,
     "motion": "TH prefers leaderless social justice movements.",
     "tournament": "WSDC R5 (Prepared)",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 628
   },
   {
     "id": 630,
     "motion": "THR the dominant belief that the customer’s needs and desires should always come first",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 629
   },
   {
     "id": 631,
     "motion": "THBT developing countries should prioritise import substitution industrialisation over export oriented industrialisation.",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 630
   },
   {
     "id": 632,
     "motion": "THBT Indigenous people charged with crimes should be tried and sentenced in accordance with the customs of their Indigenous justice system (i.e. state/federal/provincial courts)",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 631
   },
   {
     "id": 633,
     "motion": "electronic music, performance art) instead of those Indigenous artisans practicing more “traditional” disciplines (ex: beadwork, carvings)",
     "tournament": "WSDC THW prioritize government funding for Indigenous art & artisans working in contemporary artistic disciplines (ex",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 632
   },
   {
     "id": 634,
     "motion": "THS Rainbow Capitalism",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 633
   },
   {
     "id": 635,
     "motion": "THS a uniform standard for animal welfare, regardless of the animal’s perceived utility (e.g. how cute they are, how useful they are in service to humans, etc.)",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 634
   },
   {
     "id": 636,
     "motion": "THS periodic, fixed-date constitutional conventions in constitutional democracies",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 635
   },
   {
     "id": 637,
     "motion": "THW ban users from selling their data to companies in exchange for financial returns (i.e. receiving fixed monthly rates, dividends, etc., for the use of their data by companies)",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 636
   },
   {
     "id": 638,
     "motion": "THR the Westernization of the elites in post-colonial countries",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 637
   },
   {
     "id": 639,
     "motion": "TH objects to the giving of international military aid",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 638
   },
   {
     "id": 640,
     "motion": "TH supports the implementation of carbon credits for individuals",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 639
   },
   {
     "id": 641,
     "motion": "This House would nationalise",
     "tournament": "WSDC",
-    "year": "2021"
+    "year": "2021",
+    "_originalIndex": 640
   },
   {
     "id": 642,
     "motion": "TH opposes the narrative of sacrifice as a description of the work performed by essential workers during a crisis (for example, during pandemics, wars, natural disasters).",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 641
   },
   {
     "id": 643,
     "motion": "THBT large international institutions (e.g. UN & World Bank) should only accept female country delegates.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 642
   },
   {
     "id": 644,
     "motion": "THW allocate the majority of government sports funding to encourage grass roots participation (e.g. amateurs sports clubs, after school sports clubs, etc.) rather than invest in achieving success in prestigious competitions (e.g. intensive coaching academies).",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 643
   },
   {
     "id": 645,
     "motion": "TH prefers a world where each believer established their own connection to God, rather than establishing one through organized religion.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 644
   },
   {
     "id": 646,
     "motion": "THBT social movements should actively use anger to mobilize support for their cause.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 645
   },
   {
     "id": 647,
     "motion": "THW impose criminal liability on individuals who fail to assist a person in danger, when doing so would not place them at serious risk.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 646
   },
   {
     "id": 648,
     "motion": "THW not distribute emergency and humanitarian aid through non state groups linked to terrorism.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 647
   },
   {
     "id": 649,
     "motion": "THBT the west should withdraw military cooperation from India until they restore special privileges to Kashmiri residents in the J&K region.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 648
   },
   {
     "id": 650,
     "motion": "THBT states should reclaim a large proportion of all donations to charities and redistribute it across charities on the basis of their effectiveness.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 649
   },
   {
     "id": 651,
     "motion": "THW choose the job they are passionate about.",
     "tournament": "WSDC",
-    "year": "2020"
+    "year": "2020",
+    "_originalIndex": 650
   },
   {
     "id": 652,
     "motion": "THBT governments should actively prevent gentrification.",
     "tournament": "WSDC R1",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 651
   },
   {
     "id": 653,
     "motion": "This House believes that the US National Security Agency should notify software manufacturers of all zero-day vulnerabilities in order for them to patch the defect",
     "tournament": "WSDC R2",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 652
   },
   {
     "id": 654,
     "motion": "In art and popular culture, THBT creating new lead characters for minorities (eg Hancock, Black Panther) is better than recasting them in existing roles already played by other actors/communities (eg Ghostbusters, The Little Mermaid).",
     "tournament": "WSDC R3",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 653
   },
   {
     "id": 655,
     "motion": "This House would break up Amazon Inc.",
     "tournament": "WSDC R4",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 654
   },
   {
     "id": 656,
     "motion": "In post conflict societies, THW grant amnesty to perpetrators of crimes rather than seeking prosecutions.",
     "tournament": "WSDC R5",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 655
   },
   {
     "id": 657,
     "motion": "THW ban payday loans.",
     "tournament": "WSDC R6",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 656
   },
   {
     "id": 658,
     "motion": "THW reserve seats in parliament for candidates under 30.",
     "tournament": "WSDC R7",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 657
   },
   {
     "id": 659,
     "motion": "THW ban the practice of \"importing brides\".",
     "tournament": "WSDC R8",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 658
   },
   {
     "id": 660,
     "motion": "TH supports the right of indigenous peoples to have publicly funded schools with autonomy over curriculum, operations & educational philosophy.",
     "tournament": "WSDC PDO",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 659
   },
   {
     "id": 661,
     "motion": "TH prefers a world where adult children take in their elderly parents rather than support them to live separately.",
     "tournament": "WSDC OF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 660
   },
   {
     "id": 662,
     "motion": "TH supports china's attempts to become a global dominant power (eg. Establishing its own global financial / development institutions; increased FDI in Africa, South America, Asia; Increased military spending).",
     "tournament": "WSDC QF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 661
   },
   {
     "id": 663,
     "motion": "THBT charities and humanitarian aid organization should not use images of graphic suffering in their advertising campaigns.",
     "tournament": "WSDC SF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 662
   },
   {
     "id": 664,
     "motion": "TH regrets the glorification of soldiers as heroes.",
     "tournament": "WSDC GF",
-    "year": "2019"
+    "year": "2019",
+    "_originalIndex": 663
   },
   {
     "id": 665,
     "motion": "THW require professional sports teams to be owned by their local communities instead of individuals or corporations.",
     "tournament": "WSDC R1",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 664
   },
   {
     "id": 666,
     "motion": "TH opposes the development of lethal autonomous weapons.",
     "tournament": "WSDC R2",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 665
   },
   {
     "id": 667,
     "motion": "TH regrets the widespread belief that motherhood is a rewarding experience.",
     "tournament": "WSDC R3",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 666
   },
   {
     "id": 668,
     "motion": "THBT states should allow non-citizen migrant workers to vote in local and national elections.",
     "tournament": "WSDC R4",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 667
   },
   {
     "id": 669,
     "motion": "TH supports a school voucher system.",
     "tournament": "WSDC R5",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 668
   },
   {
     "id": 670,
     "motion": "THW not allow sellers and services providers to advertise their products beyond showing information and images that reveal technical product details.",
     "tournament": "WSDC R6",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 669
   },
   {
     "id": 671,
     "motion": "TH regrets the Bell and Road Initiative.",
     "tournament": "WSDC R7",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 670
   },
   {
     "id": 672,
     "motion": "\"Info Slide: Call-out culture is a term used to describe the social trend of expressing outrage and publicly shaming people or groups who have said or done things seen as offensive, often against minorities.  TH regrets the rise of call-out culture.\"",
     "tournament": "WSDC R8",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 671
   },
   {
     "id": 673,
     "motion": "THBT democratic states should not own or run media organizations.",
     "tournament": "WSDC PDO",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 672
   },
   {
     "id": 674,
     "motion": "TH prefers a world with no belief in the afterlife.",
     "tournament": "WSDC OF",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 673
   },
   {
     "id": 675,
     "motion": "This House believes that foreigners should not be allowed to own land in developing countries",
     "tournament": "WSDC QF",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 674
   },
   {
     "id": 676,
     "motion": "THBT rehabilitation should be the only consideration in criminal sentencing.",
     "tournament": "WSDC SF",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 675
   },
   {
     "id": 677,
     "motion": "THBT the West should end all arms sales and military corporation with Saudi Arabia.",
     "tournament": "WSDC GF",
-    "year": "2018"
+    "year": "2018",
+    "_originalIndex": 676
   },
   {
     "id": 678,
     "motion": "THW ban for-profit universities and colleges.",
     "tournament": "WSDC R1",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 677
   },
   {
     "id": 679,
     "motion": "THW impose restrictions the opening of stores operated by large retail chains in order to protect local businesses.",
     "tournament": "WSDC R2",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 678
   },
   {
     "id": 680,
     "motion": "THW deny tax-exempt status to religious institutions that refuse to appoint female leaders.",
     "tournament": "WSDC R3",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 679
   },
   {
     "id": 681,
     "motion": "THBT states should not erect natures or memorials which commemorate or glorify military companies or the service of soldiers in war.",
     "tournament": "WSDC R4",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 680
   },
   {
     "id": 682,
     "motion": "THW make labor union membership compulsory in large industries.",
     "tournament": "WSDC R5",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 681
   },
   {
     "id": 683,
     "motion": "THBT when working to preserve rare and endangered species, private entities are more effective than the state.",
     "tournament": "WSDC R6",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 682
   },
   {
     "id": 684,
     "motion": "THBT the NATO Enhanced Forward Presence in Eastern Europe does more harm than good.",
     "tournament": "WSDC R7",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 683
   },
   {
     "id": 685,
     "motion": "THBT states should be able to prioritize asylum seekers on the basis of cultural similarity with the existing population.",
     "tournament": "WSDC R8",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 684
   },
   {
     "id": 686,
     "motion": "THW legalize surrogate motherhood for profit.",
     "tournament": "WSDC PDO",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 685
   },
   {
     "id": 687,
     "motion": "THW support military retaliation against cyber attacks.",
     "tournament": "WSDC OF",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 686
   },
   {
     "id": 688,
     "motion": "TH would impose additional taxes on employers who use automation to replace human workers.",
     "tournament": "WSDC QF",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 687
   },
   {
     "id": 689,
     "motion": "This House prefers a benevolent dictatorship better than a weak democracy.",
     "tournament": "WSDC SF",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 688
   },
   {
     "id": 690,
     "motion": "THS restrictions of free speech to combat the rise of right wings populism.",
     "tournament": "WSDC GF",
-    "year": "2017"
+    "year": "2017",
+    "_originalIndex": 689
   },
   {
     "id": 691,
     "motion": "This house believes that, after meeting their basic needs, individuals have a moral responsibility to donate their wealth towards poverty alleviation.",
     "tournament": "WSDC R1",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 690
   },
   {
     "id": 692,
     "motion": "THBT major film and television awards shows should abolish awards categories separated by gender.",
     "tournament": "WSDC R2",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 691
   },
   {
     "id": 693,
     "motion": "THW require democratic states to hold a national referendum to ratify free trade agreements.",
     "tournament": "WSDC R3",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 692
   },
   {
     "id": 694,
     "motion": "THW televise criminal trials.",
     "tournament": "WSDC R4",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 693
   },
   {
     "id": 695,
     "motion": "THBT technology companies with significant market shares should not be eligible for patent protection.",
     "tournament": "WSDC R5",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 694
   },
   {
     "id": 696,
     "motion": "THBT it should be a criminal offence to make comments which could promote hatred against people of particular races, religions, disabilities, sexualities or gender identities.",
     "tournament": "WSDC R6",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 695
   },
   {
     "id": 697,
     "motion": "THBT Obama’s administration has done more harm than good.",
     "tournament": "WSDC R7",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 696
   },
   {
     "id": 698,
     "motion": "THW require individuals to pass a political general knowledge test in order to vote.",
     "tournament": "WSDC R8",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 697
   },
   {
     "id": 699,
     "motion": "THW abolish religious primary and secondary schools.",
     "tournament": "WSDC PDO",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 698
   },
   {
     "id": 700,
     "motion": "THBT large tech companies should refuse to provide data on their customers to governments, even if it involves refusing to comply with a law which compels them to do so.",
     "tournament": "WSDC OF",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 699
   },
   {
     "id": 701,
     "motion": "THBT governments should ban their citizens from joining overseas groups fighting against terrorism which are not official military forces.",
     "tournament": "WSDC QF",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 700
   },
   {
     "id": 702,
     "motion": "THBT versions of history taught by states through the education system should not be designed to promote national pride.",
     "tournament": "WSDC SF",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 701
   },
   {
     "id": 703,
     "motion": "THBT states should be allowed to pay other states to relocate and settle refugees.",
     "tournament": "WSDC GF",
-    "year": "2016"
+    "year": "2016",
+    "_originalIndex": 702
   },
   {
     "id": 704,
     "motion": "THW ban the use of zero-hour contracts.",
     "tournament": "WSDC R1",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 703
   },
   {
     "id": 705,
     "motion": "THW require defendants in criminal trials to be represented exclusively by public defenders.",
     "tournament": "WSDC R2",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 704
   },
   {
     "id": 706,
     "motion": "TH supports academic tracking in primary and secondary education.",
     "tournament": "WSDC R3",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 705
   },
   {
     "id": 707,
     "motion": "THW not consume art created by people who have committed deeply immoral acts.",
     "tournament": "WSDC R4",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 706
   },
   {
     "id": 708,
     "motion": "THBT cities with significant immigrant populations should actively break up ethnic enclaves.",
     "tournament": "WSDC R5",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 707
   },
   {
     "id": 709,
     "motion": "THW ban political opinion polls.",
     "tournament": "WSDC R6",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 708
   },
   {
     "id": 710,
     "motion": "TH supports a right to die.",
     "tournament": "WSDC R7",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 709
   },
   {
     "id": 711,
     "motion": "THW forgive Greece's debt.",
     "tournament": "WSDC R8",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 710
   },
   {
     "id": 712,
     "motion": "THW require members of the clergy to report all crimes to authorities including those made in confession.",
     "tournament": "WSDC OF",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 711
   },
   {
     "id": 713,
     "motion": "THBT the military struggle against ISIS should be conducted solely by Middle East nations.",
     "tournament": "WSDC QF",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 712
   },
   {
     "id": 714,
     "motion": "TH regrets the media focus on the personal lives of politicians.",
     "tournament": "WSDC SF",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 713
   },
   {
     "id": 715,
     "motion": "THBT governments should provide a guaranteed universal basic income.",
     "tournament": "WSDC SF",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 714
   },
   {
     "id": 716,
     "motion": "THBT, after meeting their basic needs, individuals have a moral responsibility to donate their wealth towards poverty alleviation.",
     "tournament": "WSDC GF",
-    "year": "2015"
+    "year": "2015",
+    "_originalIndex": 715
   },
   {
     "id": 717,
     "motion": "THW ban unpaid Internships.",
     "tournament": "WSDC R1",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 716
   },
   {
     "id": 718,
     "motion": "THBT only liberal democracies should host international sporting events.",
     "tournament": "WSDC R2",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 717
   },
   {
     "id": 719,
     "motion": "THW allow prisoners to volunteer for drug trials in exchange for a lighter sentence",
     "tournament": "WSDC R3",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 718
   },
   {
     "id": 720,
     "motion": "THBT post-revolution states should delegate trials of former rulers and high ranking officials to the ICC.",
     "tournament": "WSDC R4",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 719
   },
   {
     "id": 721,
     "motion": "THBT slum tourism does more than good.",
     "tournament": "WSDC R5",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 720
   },
   {
     "id": 722,
     "motion": "THW disallow unvaccinated children from attending public schools.",
     "tournament": "WSDC R6",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 721
   },
   {
     "id": 723,
     "motion": "THW lift tax exemptions from religious institutions that refuse to recognize marriage equality.",
     "tournament": "WSDC R7",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 722
   },
   {
     "id": 724,
     "motion": "THW remove all patents on Green technology.",
     "tournament": "WSDC R8",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 723
   },
   {
     "id": 725,
     "motion": "THW not prosecute defamation.",
     "tournament": "WSDC OF",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 724
   },
   {
     "id": 726,
     "motion": "THBT labour unions are becoming obsolete.",
     "tournament": "WSDC QF",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 725
   },
   {
     "id": 727,
     "motion": "THBT drone strikes are a legitimate tool of foreign policy.",
     "tournament": "WSDC SF",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 726
   },
   {
     "id": 728,
     "motion": "THBT an ASEAN political union is an impossible dream.",
     "tournament": "WSDC GF",
-    "year": "2014"
+    "year": "2014",
+    "_originalIndex": 727
   },
   {
     "id": 729,
     "motion": "THBT important decisions about children’s health should be made by medical professionals and not by their parents.",
     "tournament": "WSDC R1",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 728
   },
   {
     "id": 730,
     "motion": "THBT the media should be prevented by law from intruding the lives of public figures.",
     "tournament": "WSDC R2",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 729
   },
   {
     "id": 731,
     "motion": "TH supports greater US military presence in East Asia.",
     "tournament": "WSDC R3",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 730
   },
   {
     "id": 732,
     "motion": "THW allow prisoners to choose death over life sentence",
     "tournament": "WSDC R4",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 731
   },
   {
     "id": 733,
     "motion": "THW cease the exploitation of resources in the Arctic Region.",
     "tournament": "WSDC R5",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 732
   },
   {
     "id": 734,
     "motion": "THW require government schools to teach religious studies.",
     "tournament": "WSDC R6",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 733
   },
   {
     "id": 735,
     "motion": "TH supports sovereign debt default as a legitimate economic strategy for countries.",
     "tournament": "WSDC R7",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 734
   },
   {
     "id": 736,
     "motion": "THW require university students to work in their country of origin for a number of years after graduation.",
     "tournament": "WSDC R8",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 735
   },
   {
     "id": 737,
     "motion": "THW cut welfare support on compulsive gamblers.",
     "tournament": "WSDC OF",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 736
   },
   {
     "id": 738,
     "motion": "THBT social movements in democratic countries should drive social change through the courts rather than the legislature.",
     "tournament": "WSDC QF",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 737
   },
   {
     "id": 739,
     "motion": "THBT the government should pay house wives and house husbands for their work.",
     "tournament": "WSDC SF",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 738
   },
   {
     "id": 740,
     "motion": "THBT Turkey is better off outside the EU.",
     "tournament": "WSDC GF",
-    "year": "2013"
+    "year": "2013",
+    "_originalIndex": 739
   },
   {
     "id": 741,
     "motion": "THW ban alcohol.",
     "tournament": "WSDC R1",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 740
   },
   {
     "id": 742,
     "motion": "THBT newly democratised Arab nations should not allow religious parties to participate in elections.",
     "tournament": "WSDC R2",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 741
   },
   {
     "id": 743,
     "motion": "THW allow single parents to raise their children behind bars.",
     "tournament": "WSDC R3",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 742
   },
   {
     "id": 744,
     "motion": "THBT developing nations should place limits on internal rural-urban migration.",
     "tournament": "WSDC R4",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 743
   },
   {
     "id": 745,
     "motion": "THBT the police should use racial profiling to fight crime.",
     "tournament": "WSDC R5",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 744
   },
   {
     "id": 746,
     "motion": "THBT the feminist movement should seek a ban on pornography.",
     "tournament": "WSDC R6",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 745
   },
   {
     "id": 747,
     "motion": "THW make voting compulsory.",
     "tournament": "WSDC R7",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 746
   },
   {
     "id": 748,
     "motion": "THBT states should enshrine legally actionable socio-economic rights.",
     "tournament": "WSDC R8",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 747
   },
   {
     "id": 749,
     "motion": "THBT governments should create schools which teach in indigenous languages.",
     "tournament": "WSDC OF",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 748
   },
   {
     "id": 750,
     "motion": "THBT gay rights organisations should out gay public figures",
     "tournament": "WSDC QF",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 749
   },
   {
     "id": 751,
     "motion": "TH supports 100% inheritance tax.",
     "tournament": "WSDC SF",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 750
   },
   {
     "id": 752,
     "motion": "THBT South Africa's decision to use the Truth and Reconciliation Commission rather than prosecuting perpetrators of crimes committed under Apartheid.",
     "tournament": "WSDC GF",
-    "year": "2012"
+    "year": "2012",
+    "_originalIndex": 751
   },
   {
     "id": 753,
     "motion": "THW offer dictators immunity in return for leaving power.",
     "tournament": "WSDC R1",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 752
   },
   {
     "id": 754,
     "motion": "THW allow free distribution of music on the Internet.",
     "tournament": "WSDC R2",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 753
   },
   {
     "id": 755,
     "motion": "THBT Universal Primary Education is a misallocation of resources for the developing world.",
     "tournament": "WSDC R3",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 754
   },
   {
     "id": 756,
     "motion": "THW make voting in national elections mandatory.",
     "tournament": "WSDC R4",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 755
   },
   {
     "id": 757,
     "motion": "THW legalise the sale of human organs.",
     "tournament": "WSDC R5",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 756
   },
   {
     "id": 758,
     "motion": "THW stop sending humans into space.",
     "tournament": "WSDC R6",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 757
   },
   {
     "id": 759,
     "motion": "THBT women can only achieve equality under a secular system of government.",
     "tournament": "WSDC R7",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 758
   },
   {
     "id": 760,
     "motion": "THW penalise sporting teams for the poor behaviour of their fans.",
     "tournament": "WSDC R8",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 759
   },
   {
     "id": 761,
     "motion": "THW abandon nuclear energy.",
     "tournament": "WSDC OF",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 760
   },
   {
     "id": 762,
     "motion": "TH supports free immigration.",
     "tournament": "WSDC QF",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 761
   },
   {
     "id": 763,
     "motion": "THBT every region should have the right to independent statehood if a majority of its members wish.",
     "tournament": "WSDC SF",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 762
   },
   {
     "id": 764,
     "motion": "THBT autocracy is doomed in the age of Facebook.",
     "tournament": "WSDC GF",
-    "year": "2011"
+    "year": "2011",
+    "_originalIndex": 763
   },
   {
     "id": 765,
     "motion": "THBT we should support military intervention in Somalia.",
     "tournament": "WSDC R1",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 764
   },
   {
     "id": 766,
     "motion": "THBT we should make physical education compulsory in schools.",
     "tournament": "WSDC R2",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 765
   },
   {
     "id": 767,
     "motion": "THBT every country should have the right to possess nuclear weapons.",
     "tournament": "WSDC R3",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 766
   },
   {
     "id": 768,
     "motion": "THBT we should support quotas for women in high government positions.",
     "tournament": "WSDC R4",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 767
   },
   {
     "id": 769,
     "motion": "THBT doctors should report evidence of marital abuse to the police.",
     "tournament": "WSDC R5",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 768
   },
   {
     "id": 770,
     "motion": "THBT developing nations should have the right to give priority to development ahead of the environment.",
     "tournament": "WSDC R6",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 769
   },
   {
     "id": 771,
     "motion": "THBT terrorist suspects should have the right to a trial in civilian courts.",
     "tournament": "WSDC R7",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 770
   },
   {
     "id": 772,
     "motion": "THBT we should legalise performance-enhancing drugs in sport.",
     "tournament": "WSDC R8",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 771
   },
   {
     "id": 773,
     "motion": "THBT we should have no law restricting freedom of speech.",
     "tournament": "WSDC OF",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 772
   },
   {
     "id": 774,
     "motion": "THBT compensation should be paid for the injustices committed by past generations.",
     "tournament": "WSDC QF",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 773
   },
   {
     "id": 775,
     "motion": "THBT the United States should withdraw from the Middle East.",
     "tournament": "WSDC SF",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 774
   },
   {
     "id": 776,
     "motion": "THBT governments should never bail out big companies.",
     "tournament": "WSDC GF",
-    "year": "2010"
+    "year": "2010",
+    "_originalIndex": 775
   },
   {
     "id": 777,
     "motion": "THBT cultural treasures should be returned to their areas of origin.",
     "tournament": "WSDC R1",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 776
   },
   {
     "id": 778,
     "motion": "THW not eat meat.",
     "tournament": "WSDC R2",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 777
   },
   {
     "id": 779,
     "motion": "THW encourage the expanded use of civilian nuclear energy.",
     "tournament": "WSDC R3",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 778
   },
   {
     "id": 780,
     "motion": "THBT terrorism can never be justified.",
     "tournament": "WSDC R4",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 779
   },
   {
     "id": 781,
     "motion": "THW legalise current technologies for choosing human embryos on the basis of their genetic characteristics.",
     "tournament": "WSDC R5",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 780
   },
   {
     "id": 782,
     "motion": "THW ban smoking in public places.",
     "tournament": "WSDC R6",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 781
   },
   {
     "id": 783,
     "motion": "THBT public services are best run by private companies.",
     "tournament": "WSDC R7",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 782
   },
   {
     "id": 784,
     "motion": "THBT minor crimes should be pursued with the same vigour as serious crimes.",
     "tournament": "WSDC R8",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 783
   },
   {
     "id": 785,
     "motion": "THW require people to work in return for welfare payments.",
     "tournament": "WSDC OF",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 784
   },
   {
     "id": 786,
     "motion": "THW lower the voting age.",
     "tournament": "WSDC QF",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 785
   },
   {
     "id": 787,
     "motion": "THW cut off all development aid to non-democratic countries.",
     "tournament": "WSDC SF",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 786
   },
   {
     "id": 788,
     "motion": "THBT governments should grant amnesty to all illegal immigrants.",
     "tournament": "WSDC GF",
-    "year": "2009"
+    "year": "2009",
+    "_originalIndex": 787
   },
   {
     "id": 789,
     "motion": "TH supports military intervention to deliver emergency aid in humanitarian crises.",
     "tournament": "WSDC R1",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 788
   },
   {
     "id": 790,
     "motion": "THW ban strikes by those working in essential state services.",
     "tournament": "WSDC R2",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 789
   },
   {
     "id": 791,
     "motion": "THW ban the use of unethically obtained data in scientific research.",
     "tournament": "WSDC R3",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 790
   },
   {
     "id": 792,
     "motion": "THBT humanities courses should be part of every undergraduate programme.",
     "tournament": "WSDC R4",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 791
   },
   {
     "id": 793,
     "motion": "THW make the directors of multinational companies personally liable for environmental abuses committed by their companies in the developing world.",
     "tournament": "WSDC R5",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 792
   },
   {
     "id": 794,
     "motion": "THW cease the use of detention without trial in the war on terror.",
     "tournament": "WSDC R6",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 793
   },
   {
     "id": 795,
     "motion": "THBT governments have a duty to bail out failing financial institutions.",
     "tournament": "WSDC R7",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 794
   },
   {
     "id": 796,
     "motion": "THW ban government funding of the arts.",
     "tournament": "WSDC R8",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 795
   },
   {
     "id": 797,
     "motion": "THBT heads of government should be required to have a parliamentary majority to govern.",
     "tournament": "WSDC OF",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 796
   },
   {
     "id": 798,
     "motion": "TH regrets the hosting of the 2008 Beijing Olympics.",
     "tournament": "WSDC QF",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 797
   },
   {
     "id": 799,
     "motion": "THW drop all US sanctions on Cuba.",
     "tournament": "WSDC SF",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 798
   },
   {
     "id": 800,
     "motion": "THW expand the permanent membership of the UN Security Council.",
     "tournament": "WSDC GF",
-    "year": "2008"
+    "year": "2008",
+    "_originalIndex": 799
   },
   {
     "id": 801,
     "motion": "THW make the development of clean industry a condition for receiving non-emergency aid.",
     "tournament": "WSDC R1",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 800
   },
   {
     "id": 802,
     "motion": "THW ban the use of models who are below a healthy weight.",
     "tournament": "WSDC R2",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 801
   },
   {
     "id": 803,
     "motion": "THBT Holocaust denial should be a crime.",
     "tournament": "WSDC R3",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 802
   },
   {
     "id": 804,
     "motion": "THBT governments should not place limits in the areas which scientists may research.",
     "tournament": "WSDC R4",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 803
   },
   {
     "id": 805,
     "motion": "THBT the United States should withdraw from its military bases in Asia.",
     "tournament": "WSDC R5",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 804
   },
   {
     "id": 806,
     "motion": "THW legalise all drugs.",
     "tournament": "WSDC R6",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 805
   },
   {
     "id": 807,
     "motion": "THBT free trade harms the developing world.",
     "tournament": "WSDC R7",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 806
   },
   {
     "id": 808,
     "motion": "THW limit media reporting of terrorist atrocities.",
     "tournament": "WSDC R8",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 807
   },
   {
     "id": 809,
     "motion": "THW force organizations to place more women in senior positions.",
     "tournament": "WSDC OF",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 808
   },
   {
     "id": 810,
     "motion": "THW privatize public utilities companies.",
     "tournament": "WSDC QF",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 809
   },
   {
     "id": 811,
     "motion": "THW partition Iraq.",
     "tournament": "WSDC SF",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 810
   },
   {
     "id": 812,
     "motion": "THW abolish the Nuclear Non-Proliferation Treaty.",
     "tournament": "WSDC GF",
-    "year": "2007"
+    "year": "2007",
+    "_originalIndex": 811
   },
   {
     "id": 813,
     "motion": "THW place a worldwide ban on the use of civil nuclear energy.",
     "tournament": "WSDC R1",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 812
   },
   {
     "id": 814,
     "motion": "THBT full-time students should take part in compulsory charity work.",
     "tournament": "WSDC R2",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 813
   },
   {
     "id": 815,
     "motion": "THBT captured terrorists should be treated as prisoners of war.",
     "tournament": "WSDC R3",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 814
   },
   {
     "id": 816,
     "motion": "THW place a worldwide ban on tobacco advertising.",
     "tournament": "WSDC R4",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 815
   },
   {
     "id": 817,
     "motion": "TH supports the international trading of pollution quotas.",
     "tournament": "WSDC R5",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 816
   },
   {
     "id": 818,
     "motion": "TH0 ban abortion except in cases where the mother’s health is at risk.",
     "tournament": "WSDC R6",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 817
   },
   {
     "id": 819,
     "motion": "THBT Internet search engines should boycott China until it allows its citizens unrestricted access to the Web.",
     "tournament": "WSDC R7",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 818
   },
   {
     "id": 820,
     "motion": "THBT the War on Terror has been counter-productive.",
     "tournament": "WSDC R8",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 819
   },
   {
     "id": 821,
     "motion": "THBT governments should subsidise the traditional arts of minority cultures.",
     "tournament": "WSDC OF",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 820
   },
   {
     "id": 822,
     "motion": "THBT governments should subsidise the traditional arts of minority cultures.",
     "tournament": "WSDC QF",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 821
   },
   {
     "id": 823,
     "motion": "THBT first-time offenders who commit non-violent crimes should not be sent to jail.",
     "tournament": "WSDC SF",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 822
   },
   {
     "id": 824,
     "motion": "THBT democracy is the best system of government for every nation.",
     "tournament": "WSDC GF",
-    "year": "2006"
+    "year": "2006",
+    "_originalIndex": 823
   },
   {
     "id": 825,
     "motion": "THBT the costs of space exploration outweigh the benefits.",
     "tournament": "WSDC R1",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 824
   },
   {
     "id": 826,
     "motion": "THBT censorship does more harm than good.",
     "tournament": "WSDC R2",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 825
   },
   {
     "id": 827,
     "motion": "THBT political parties should receive state funding.",
     "tournament": "WSDC R3",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 826
   },
   {
     "id": 828,
     "motion": "THBT civil marriage should be open to homosexual couples.",
     "tournament": "WSDC R4",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 827
   },
   {
     "id": 829,
     "motion": "THW use affirmative action in response to historical injustice.",
     "tournament": "WSDC R5",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 828
   },
   {
     "id": 830,
     "motion": "THW not give development aid to non-democratic governments.",
     "tournament": "WSDC R6",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 829
   },
   {
     "id": 831,
     "motion": "THBT education policy should be the responsibility of local authorities.",
     "tournament": "WSDC R7",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 830
   },
   {
     "id": 832,
     "motion": "THW not give development aid to non-democratic governments.",
     "tournament": "WSDC R8",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 831
   },
   {
     "id": 833,
     "motion": "THBT national security should take precedence over individual rights.",
     "tournament": "WSDC OF",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 832
   },
   {
     "id": 834,
     "motion": "THBT the first priority of criminal justice should be rehabilitation, not retribution.",
     "tournament": "WSDC QF",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 833
   },
   {
     "id": 835,
     "motion": "TH believes in regional trading blocs rather than global free trade.",
     "tournament": "WSDC SF",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 834
   },
   {
     "id": 836,
     "motion": "THBT the permanent members of the United Nations Security Council should not have veto power.",
     "tournament": "WSDC GF",
-    "year": "2005"
+    "year": "2005",
+    "_originalIndex": 835
   },
   {
     "id": 837,
     "motion": "THBT Turkey should join the European Union.",
     "tournament": "WSDC R1",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 836
   },
   {
     "id": 838,
     "motion": "THBT fast food companies should pay people compensation for damaging their health.",
     "tournament": "WSDC R2",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 837
   },
   {
     "id": 839,
     "motion": "THW make use of genetically modified crops to feed the world.",
     "tournament": "WSDC R3",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 838
   },
   {
     "id": 840,
     "motion": "THW prosecute teenagers as adults for criminal offences.",
     "tournament": "WSDC R4",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 839
   },
   {
     "id": 841,
     "motion": "THBT trade unions impede progress.",
     "tournament": "WSDC R5",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 840
   },
   {
     "id": 842,
     "motion": "THBT governments should protect their native languages.",
     "tournament": "WSDC R6",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 841
   },
   {
     "id": 843,
     "motion": "THBT religion has no place in state schools.",
     "tournament": "WSDC R7",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 842
   },
   {
     "id": 844,
     "motion": "TH condemns the influence of the music industry on today’s youth.",
     "tournament": "WSDC R8",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 843
   },
   {
     "id": 845,
     "motion": "THBT the welfare state should be scrapped.",
     "tournament": "WSDC OF",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 844
   },
   {
     "id": 846,
     "motion": "THBT political parties have too much influence on democratic elections.",
     "tournament": "WSDC QF",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 845
   },
   {
     "id": 847,
     "motion": "THBT globalisation perpetuates social inequity.",
     "tournament": "WSDC SF",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 846
   },
   {
     "id": 848,
     "motion": "THBT the world is facing a clash of civilisations.",
     "tournament": "WSDC GF",
-    "year": "2004"
+    "year": "2004",
+    "_originalIndex": 847
   },
   {
     "id": 849,
     "motion": "THW advertise prescription medicines.",
     "tournament": "WSDC R1",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 848
   },
   {
     "id": 850,
     "motion": "THBT voting in national elections should be compulsory.",
     "tournament": "WSDC R2",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 849
   },
   {
     "id": 851,
     "motion": "THBT current intellectual property laws are a brake on progress.",
     "tournament": "WSDC R3",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 850
   },
   {
     "id": 852,
     "motion": "THBT sporting boycotts are a legitimate political tool.",
     "tournament": "WSDC R4",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 851
   },
   {
     "id": 853,
     "motion": "THBT cultural treasures belong at home.",
     "tournament": "WSDC R5",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 852
   },
   {
     "id": 854,
     "motion": "TH supports voluntary euthanasia.",
     "tournament": "WSDC R6",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 853
   },
   {
     "id": 855,
     "motion": "THBT the sovereignty of nation states is an outdated concept.",
     "tournament": "WSDC R7",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 854
   },
   {
     "id": 856,
     "motion": "TH supports quotas for women in national parliaments.",
     "tournament": "WSDC R8",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 855
   },
   {
     "id": 857,
     "motion": "THW pay development aid direct to governments.",
     "tournament": "WSDC OF",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 856
   },
   {
     "id": 858,
     "motion": "THW legalise prostitution.",
     "tournament": "WSDC QF",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 857
   },
   {
     "id": 859,
     "motion": "THBT political decisions should not be dictated by religious beliefs.",
     "tournament": "WSDC SF",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 858
   },
   {
     "id": 860,
     "motion": "THW end the war on drugs.",
     "tournament": "WSDC GF",
-    "year": "2003"
+    "year": "2003",
+    "_originalIndex": 859
   },
   {
     "id": 861,
     "motion": "THBT professionalism has ruined the Olympic Games.",
     "tournament": "WSDC R1",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 860
   },
   {
     "id": 862,
     "motion": "THBT politicians should only be allowed to serve in office for a limited period of time.",
     "tournament": "WSDC R2",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 861
   },
   {
     "id": 863,
     "motion": "THW maintain United States military bases in Asia.",
     "tournament": "WSDC R3",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 862
   },
   {
     "id": 864,
     "motion": "THBT low taxes are preferable to extensive government services.",
     "tournament": "WSDC R4",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 863
   },
   {
     "id": 865,
     "motion": "THBT free trade is the way forward.",
     "tournament": "WSDC R5",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 864
   },
   {
     "id": 866,
     "motion": "THBT gambling of all forms should be illegal.",
     "tournament": "WSDC R6",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 865
   },
   {
     "id": 867,
     "motion": "TH supports missile defence.",
     "tournament": "WSDC R7",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 866
   },
   {
     "id": 868,
     "motion": "THW make tobacco companies pay compensation to the individual.",
     "tournament": "WSDC R8",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 867
   },
   {
     "id": 869,
     "motion": "THW ban genetic screening.",
     "tournament": "WSDC OF",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 868
   },
   {
     "id": 870,
     "motion": "TH supports the international trading of pollution permits.",
     "tournament": "WSDC QF",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 869
   },
   {
     "id": 871,
     "motion": "THW compromise civil liberties in the interests of security.",
     "tournament": "WSDC SF",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 870
   },
   {
     "id": 872,
     "motion": "THBT the media has become too powerful.",
     "tournament": "WSDC GF",
-    "year": "2002"
+    "year": "2002",
+    "_originalIndex": 871
   },
   {
     "id": 873,
     "motion": "THBT affluent nations should accept more refugees.",
     "tournament": "WSDC R1",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 872
   },
   {
     "id": 874,
     "motion": "THW ban all handguns.",
     "tournament": "WSDC R2",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 873
   },
   {
     "id": 875,
     "motion": "THW waive patent rights for AIDS drugs for under-developed countries.",
     "tournament": "WSDC R3",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 874
   },
   {
     "id": 876,
     "motion": "TH supports the use of the death penalty.",
     "tournament": "WSDC R4",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 875
   },
   {
     "id": 877,
     "motion": "THBT gay couples should be allowed to adopt children.",
     "tournament": "WSDC R5",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 876
   },
   {
     "id": 878,
     "motion": "TH disapproves of cloning.",
     "tournament": "WSDC R6",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 877
   },
   {
     "id": 879,
     "motion": "THW cancel third world debt.",
     "tournament": "WSDC R7",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 878
   },
   {
     "id": 880,
     "motion": "THBT international sport is warfare without weapons.",
     "tournament": "WSDC R8",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 879
   },
   {
     "id": 881,
     "motion": "THW impose democracy.",
     "tournament": "WSDC OF",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 880
   },
   {
     "id": 882,
     "motion": "TH refuses to negotiate with terrorists.",
     "tournament": "WSDC QF",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 881
   },
   {
     "id": 883,
     "motion": "THW give parents the final say in medical treatment of their children.",
     "tournament": "WSDC SF",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 882
   },
   {
     "id": 884,
     "motion": "THBT compensation should be paid for the injustices committed by previous generations.",
     "tournament": "WSDC GF",
-    "year": "2001"
+    "year": "2001",
+    "_originalIndex": 883
   },
   {
     "motion": "THW impose huge fines on all companies that have leaked customers' information.",
     "tournament": "2026/10/22 部活内",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 884
   },
   {
     "motion": "THW impose stricter regulations on the use of chemicals to preserve fresh vegetables.",
     "tournament": "2026/08/25 部活内",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 885
   },
   {
     "motion": "THBT the feminist movement should advocate for male quotas in female-dominated fields.(nursing, teaching, etc)",
     "tournament": "",
-    "year": ""
+    "year": "",
+    "_originalIndex": 886
   },
   {
     "motion": "THW permit companies to dismiss their employees freely.",
     "tournament": "2026/08/28 部活内",
-    "year": "2026"
+    "year": "2026",
+    "_originalIndex": 887
   },
   {
     "motion": "THW permit individual privacy over national security.",
     "tournament": "2026/09/02 部活内",
+    "year": "2026",
+    "_originalIndex": 888
+  },
+  {
+    "motion": "THBT Japan should prioritize controlling inflation over economic growth.",
+    "tournament": "2026/09/04 部活内",
     "year": "2026"
   }
 ]
