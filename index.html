@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英語ディベート 割り当て＆論題管理ツール</title>
+    <title>チーム分け＆論題管理ツール</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -157,12 +157,12 @@
 <body>
 
 <div class="container">
-    <h1>英語ディベート 割り当て＆論題管理ツール</h1>
+    <h1>チーム分け＆論題管理ツール</h1>
 
     <!-- ホーム画面 -->
     <div class="card" id="homeView">
         <h2>メニュー</h2>
-        <p class="note">行いたい操作のボタンを押してください。</p>
+        <p class="note">行いたい操作を選んでください。</p>
         <div class="home-menu">
             <button onclick="switchView('assignView')">チーム分け ＆ 論題選択ツール</button>
             <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加ページ</button>
@@ -176,12 +176,12 @@
         
         <div class="grid-2">
             <div>
-                <label for="participants">参加者リスト (改行区切り)</label>
+                <label for="participants">メンバー(1人入力するごとに改行)</label>
                 <textarea id="participants" placeholder=""></textarea>
-                <div class="note">※定員を超えた余剰メンバーは自動的にジャッジに回ります</div>
+                <div class="note">※定員を超えた場合は自動的にジャッジに回ります</div>
             </div>
             <div>
-                <label for="judges">ジャッジリスト (改行区切り)</label>
+                <label for="judges">事前指定ジャッジ (1人入力するごとに改行)</label>
                 <textarea id="judges" placeholder=""></textarea>
             </div>
         </div>
@@ -212,7 +212,7 @@
 
         <!-- 割り当て結果表示エリア -->
         <div id="resultCard" class="hidden" style="margin-top: 24px;">
-            <h3 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">割り当て結果</h3>
+            <h3 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">結果</h3>
             <div id="resultContent"></div>
         </div>
     </div>
@@ -221,7 +221,7 @@
     <div class="card hidden" id="motionView">
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2>新規論題の追加（データベースへ保存）</h2>
-        <p class="note">GitHubトークン不要で、誰でも安全に `motions.json` に論題を追加できます。</p>
+        <p class="note"> 論題集データベースに論題を追加できます。</p>
         
         <label for="newMotion">論題 (Motion) <span style="color:red;">*</span></label>
         <input type="text" id="newMotion" placeholder="This house would...">
@@ -272,7 +272,7 @@
         const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value) || 2;
 
         if (!participantsText) {
-            alert('参加者リストを入力してください。');
+            alert('メンバーを入力してください。');
             return;
         }
 
@@ -299,7 +299,7 @@
             const extraCount = participants.length - totalCapacity;
             const extraParticipants = participants.splice(totalCapacity);
             judges = judges.concat(extraParticipants);
-            overflowNotice = `<p style="color: #d97706; font-weight: bold; font-size: 0.9rem;">⚠️ 参加者が定員（${totalCapacity}人）より ${extraCount} 人多いため、あふれたメンバーを自動的にジャッジに割り振りました。</p>`;
+            overflowNotice = `<p style="color: #d97706; font-weight: bold; font-size: 0.9rem;">⚠️ メンバーが定員（${totalCapacity}人）より ${extraCount} 人多いため、あふれたメンバーを自動的にジャッジに割り振りました。</p>`;
         }
 
         let teams = [];
@@ -335,7 +335,7 @@
                     sampleMotions = shuffledMotions.slice(0, 3);
                 }
 
-                let optionsHtml = `<option value="">-- 3つの候補から選択または下の検索欄を活用 --</option>`;
+                let optionsHtml = `<option value="">-- 3つの候補から選択できます。下の検索窓でキーワード検索もできます。 --</option>`;
                 sampleMotions.forEach(m => {
                     optionsHtml += `<option value="${m.motion}">[候補] ${m.motion} (${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</option>`;
                 });
@@ -349,10 +349,10 @@
                         📜 <strong>Assigned Motion:</strong> <span class="badge" id="selected-badge-${i}">未選択</span>
                         
                         <div class="motion-selection-area">
-                            <label style="font-size: 0.85rem; margin-bottom: 4px;">🔍 キーワード検索で論題を探す</label>
+                            <label style="font-size: 0.85rem; margin-bottom: 4px;"> キーワード検索で論題を探す</label>
                             <input type="text" id="search-input-${i}" placeholder="キーワードを入力して検索..." oninput="filterMotions(${i})" style="margin-bottom: 6px; padding: 6px; font-size: 0.9rem;">
 
-                            <label style="font-size: 0.85rem; margin-bottom: 4px;">📌 割り当て論題を選ぶ（ランダム3選 ＋ 検索結果）</label>
+                            <label style="font-size: 0.85rem; margin-bottom: 4px;">論題を選ぶ</label>
                             <select id="motion-select-${i}" onchange="selectMotion(${i})" style="margin-bottom: 0; padding: 6px; font-size: 0.9rem;">
                                 ${optionsHtml}
                             </select>
@@ -364,7 +364,7 @@
 
         // 余ったジャッジがいる場合の表示
         if (judges.length > 0) {
-            html += `<div style="margin-top: 20px;"><strong>👨‍⚖️ その他の待機ジャッジ:</strong> ${judges.join(', ')}</div>`;
+            html += `<div style="margin-top: 20px;"><strong>待機ジャッジ:</strong> ${judges.join(', ')}</div>`;
         }
 
         document.getElementById('resultContent').innerHTML = html;
@@ -413,7 +413,7 @@
         const statusEl = document.getElementById('submitStatus');
 
         if (!motion) {
-            alert('論題テキストを入力してください。');
+            alert('論題を入力してください。');
             return;
         }
 
@@ -431,7 +431,7 @@
 
             if (res.ok) {
                 statusEl.style.color = '#16a34a';
-                statusEl.innerText = '✨ 論題が正常に追加されました！';
+                statusEl.innerText = '論題が正常に追加されました！';
                 document.getElementById('newMotion').value = '';
                 document.getElementById('newTournament').value = '';
                 document.getElementById('newYear').value = '';
