@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>チーム分け＆論題管理ツール</title>
     <style>
         :root {
@@ -18,8 +18,9 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
         }
         .container {
             max-width: 900px;
@@ -28,18 +29,18 @@
         h1 {
             text-align: center;
             color: var(--primary-color);
-            margin-bottom: 30px;
-            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
         }
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            margin-bottom: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
         h2 {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             margin-top: 0;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 8px;
@@ -48,11 +49,17 @@
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
         }
         @media (max-width: 768px) {
             .grid-2 {
                 grid-template-columns: 1fr;
+            }
+            body {
+                padding: 10px;
+            }
+            .card {
+                padding: 16px;
             }
         }
         label {
@@ -63,12 +70,13 @@
         }
         textarea, input, select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px; /* スマホでの自動ズーム防止 */
             box-sizing: border-box;
             margin-bottom: 12px;
+            background-color: #fff;
         }
         textarea {
             resize: vertical;
@@ -78,13 +86,14 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 14px 20px;
             font-size: 1rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
             transition: background-color 0.2s;
+            min-height: 48px; /* タップしやすく改善 */
         }
         button:hover {
             background-color: var(--primary-hover);
@@ -110,8 +119,9 @@
             color: #475569;
             margin-bottom: 20px;
             width: auto;
-            padding: 8px 16px;
+            padding: 10px 16px;
             font-size: 0.9rem;
+            min-height: auto;
         }
         .back-btn:hover {
             background-color: #cbd5e1;
@@ -120,7 +130,7 @@
             background: #f1f5f9;
             border-left: 4px solid var(--primary-color);
             padding: 16px;
-            border-radius: 4px;
+            border-radius: 8px;
             margin-top: 16px;
         }
         .note {
@@ -132,10 +142,11 @@
         .badge {
             display: inline-block;
             background: #e2e8f0;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             margin-right: 4px;
+            word-break: break-all;
         }
         #submitStatus {
             margin-top: 10px;
@@ -146,27 +157,35 @@
             display: none;
         }
         .motion-selection-area {
-            margin-top: 10px;
+            margin-top: 12px;
             background: #ffffff;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
         }
         .motion-candidate-item {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            padding: 8px 12px;
+            padding: 10px;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 0.9rem;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 6px;
+        }
+        @media (min-width: 500px) {
+            .motion-candidate-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
         }
         .motion-candidate-item button {
             width: auto;
-            padding: 4px 10px;
-            font-size: 0.8rem;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            min-height: auto;
         }
     </style>
 </head>
@@ -197,7 +216,7 @@
                 <div class="note">※定員を超えた場合は自動的にジャッジに回ります</div>
             </div>
             <div>
-                <label for="judges">ジャッジ(1人入力するごとに改行してください)</label>
+                <label for="judges">ジャッジ (1人入力するごとに改行してください)</label>
                 <textarea id="judges" placeholder=""></textarea>
             </div>
         </div>
@@ -220,7 +239,7 @@
             </div>
             <div>
                 <label for="membersPerTeam">1チームあたりの人数</label>
-                <input type="number" id="membersPerTeam" value="2" min="1">
+                <input type="number" id="membersPerTeam" value="3" min="1">
             </div>
         </div>
 
@@ -262,6 +281,12 @@
     let motionsCache = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
+        // ローカルストレージから前回入力したデータを復元
+        const savedParticipants = localStorage.getItem('debate_participants');
+        const savedJudges = localStorage.getItem('debate_judges');
+        if (savedParticipants) document.getElementById('participants').value = savedParticipants;
+        if (savedJudges) document.getElementById('judges').value = savedJudges;
+
         try {
             const res = await fetch('motions.json');
             if (res.ok) {
@@ -285,12 +310,16 @@
         const participantsText = document.getElementById('participants').value.trim();
         const judgesText = document.getElementById('judges').value.trim();
         const targetPairs = parseInt(document.getElementById('targetPairs').value) || 1;
-        const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value) || 2;
+        const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value) || 3;
 
         if (!participantsText) {
             alert('参加者リストを入力してください。');
             return;
         }
+
+        // 入力内容をデバイスに保存
+        localStorage.setItem('debate_participants', participantsText);
+        localStorage.setItem('debate_judges', judgesText);
 
         let participants = participantsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
         let judges = judgesText ? judgesText.split('\n').map(s => s.trim()).filter(s => s.length > 0) : [];
@@ -339,29 +368,6 @@
                 const opp = teams[i * 2 + 1];
                 const assignedJudge = judges.length > 0 ? judges.shift() : 'ジャッジ不足（追加してください）';
 
-                // 自動でランダムな3件の論題を抽出
-                let sampleMotions = [];
-                if (motionsCache.length > 0) {
-                    let shuffledMotions = [...motionsCache];
-                    shuffle(shuffledMotions);
-                    sampleMotions = shuffledMotions.slice(0, 3);
-                }
-
-                let candidatesHtml = '';
-                if (sampleMotions.length > 0) {
-                    sampleMotions.forEach((m) => {
-                        const safeMotionText = m.motion.replace(/'/g, "\\'");
-                        candidatesHtml += `
-                            <div class="motion-candidate-item">
-                                <span>${m.motion} <span style="font-size:0.8rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
-                                <button class="btn-secondary" onclick="selectThisMotion(${i}, '${safeMotionText}')">選択する</button>
-                            </div>
-                        `;
-                    });
-                } else {
-                    candidatesHtml = `<p style="font-size:0.85rem; color:#64748b;">登録されている論題がありません。「新規論題追加ページ」から追加してください。</p>`;
-                }
-
                 html += `
                     <div class="result-box" id="match-box-${i}">
                         <strong>Match ${i + 1} (第 ${i + 1} 組)</strong><br>
@@ -371,13 +377,16 @@
                          <strong>Motion:</strong> <span class="badge" id="selected-badge-${i}">未選択</span>
                         
                         <div class="motion-selection-area">
-                            <label style="font-size: 0.85rem; margin-bottom: 6px;">自動抽出された論題3件（ここから選択可能）</label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label style="font-size: 0.85rem; margin-bottom: 0;">自動抽出された論題3件</label>
+                                <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; width: auto; min-height: auto;" onclick="redrawMotions(${i})">🔄 シャッフル</button>
+                            </div>
                             <div id="candidates-container-${i}">
-                                ${candidatesHtml}
+                                <!-- ここに動的に3件挿入されます -->
                             </div>
 
-                            <label style="font-size: 0.85rem; margin-top: 10px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
-                            <input type="text" id="search-input-${i}" placeholder="キーワードを入力して検索..." oninput="filterMotions(${i})" style="margin-bottom: 6px; padding: 6px; font-size: 0.9rem;">
+                            <label style="font-size: 0.85rem; margin-top: 12px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
+                            <input type="text" id="search-input-${i}" placeholder="キーワードを入力して検索..." oninput="filterMotions(${i})" style="margin-bottom: 6px; padding: 10px; font-size: 16px;">
                             
                             <div id="search-results-${i}"></div>
                         </div>
@@ -392,6 +401,44 @@
 
         document.getElementById('resultContent').innerHTML = html;
         document.getElementById('resultCard').classList.remove('hidden');
+
+        // 各試合の初期ランダム3件を描画
+        for (let i = 0; i < matchCount; i++) {
+            redrawMotions(i);
+        }
+    }
+
+    // 指定したMatchの論題3件を再抽選（シャッフル）する関数
+    function redrawMotions(matchIndex) {
+        const container = document.getElementById(`candidates-container-${matchIndex}`);
+        if (!container) return;
+
+        let sampleMotions = [];
+        if (motionsCache.length > 0) {
+            let shuffledMotions = [...motionsCache];
+            for (let i = shuffledMotions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledMotions[i], shuffledMotions[j]] = [shuffledMotions[j], shuffledMotions[i]];
+            }
+            sampleMotions = shuffledMotions.slice(0, 3);
+        }
+
+        let candidatesHtml = '';
+        if (sampleMotions.length > 0) {
+            sampleMotions.forEach((m) => {
+                const safeMotionText = m.motion.replace(/'/g, "\\'");
+                candidatesHtml += `
+                    <div class="motion-candidate-item">
+                        <span>${m.motion} <span style="font-size:0.8rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
+                        <button class="btn-secondary" onclick="selectThisMotion(${matchIndex}, '${safeMotionText}')">選択する</button>
+                    </div>
+                `;
+            });
+        } else {
+            candidatesHtml = `<p style="font-size:0.85rem; color:#64748b;">登録されている論題がありません。「新規論題追加ページ」から追加してください。</p>`;
+        }
+
+        container.innerHTML = candidatesHtml;
     }
 
     // 論題を直接選択して決定する関数
@@ -428,9 +475,9 @@
         filtered.forEach(m => {
             const safeText = m.motion.replace(/'/g, "\\'");
             resHtml += `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; gap: 8px;">
                     <span>${m.motion} (${m.tournament || '-'}, ${m.year || '-'})</span>
-                    <button class="btn-secondary" style="padding: 2px 6px; font-size: 0.75rem; width: auto;" onclick="selectThisMotion(${matchIndex}, '${safeText}')">選択</button>
+                    <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; width: auto; min-height: auto;" onclick="selectThisMotion(${matchIndex}, '${safeText}')">選択</button>
                 </div>
             `;
         });
