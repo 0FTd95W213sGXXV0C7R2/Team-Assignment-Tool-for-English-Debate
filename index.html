@@ -66,7 +66,7 @@
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         textarea, input, select {
             width: 100%;
@@ -93,7 +93,7 @@
             cursor: pointer;
             width: 100%;
             transition: background-color 0.2s;
-            min-height: 48px; /* タップしやすく改善 */
+            min-height: 48px;
         }
         button:hover {
             background-color: var(--primary-hover);
@@ -103,6 +103,12 @@
         }
         .btn-secondary:hover {
             background-color: #475569;
+        }
+        .btn-success {
+            background-color: #16a34a;
+        }
+        .btn-success:hover {
+            background-color: #15803d;
         }
         .home-menu {
             display: flex;
@@ -141,12 +147,14 @@
         }
         .badge {
             display: inline-block;
-            background: #e2e8f0;
-            padding: 4px 10px;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.85rem;
-            margin-right: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
             word-break: break-all;
+            margin-top: 4px;
         }
         #submitStatus {
             margin-top: 10px;
@@ -157,24 +165,24 @@
             display: none;
         }
         .motion-selection-area {
-            margin-top: 12px;
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 8px;
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 10px;
             border: 1px solid var(--border-color);
+            margin-bottom: 20px;
         }
         .motion-candidate-item {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
-        @media (min-width: 500px) {
+        @media (min-width: 600px) {
             .motion-candidate-item {
                 flex-direction: row;
                 justify-content: space-between;
@@ -183,9 +191,38 @@
         }
         .motion-candidate-item button {
             width: auto;
-            padding: 6px 12px;
-            font-size: 0.85rem;
+            padding: 8px 16px;
+            font-size: 0.9rem;
             min-height: auto;
+            white-space: nowrap;
+        }
+        .search-results-box {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 8px;
+            background: #ffffff;
+            margin-top: 8px;
+        }
+        .search-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            gap: 10px;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .preview-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
         }
     </style>
 </head>
@@ -209,6 +246,32 @@
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2>チーム分け ＆ 論題選択ツール</h2>
         
+        <!-- 【事前選択】論題選択セクション -->
+        <div class="motion-selection-area">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の選択</h3>
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="redrawPreMotions()">🔄 シャッフル</button>
+            </div>
+            
+            <p class="note" style="margin-bottom: 10px;">事前に以下の候補または検索から論題を1つ選択してください。</p>
+            
+            <!-- ランダム抽出3件エリア -->
+            <div id="pre-candidates-container"></div>
+
+            <!-- 検索エリア -->
+            <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
+            <input type="text" id="pre-search-input" placeholder="キーワードを入力して検索..." oninput="filterPreMotions()" style="margin-bottom: 4px; padding: 12px; font-size: 16px;">
+            <div id="pre-search-results"></div>
+
+            <!-- 現在選択されている論題 -->
+            <div style="margin-top: 14px; background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <strong>選択中の論題:</strong><br>
+                <span class="badge" id="selected-pre-motion">未選択（ランダム抽出または検索から選択してください）</span>
+            </div>
+        </div>
+
+        <h3 style="font-size: 1.05rem; color: var(--primary-color); margin-top: 24px; margin-bottom: 12px;">2. メンバー・チーム設定</h3>
+
         <div class="grid-2">
             <div>
                 <label for="participants">メンバー (1人入力するごとに改行してください)</label>
@@ -243,7 +306,7 @@
             </div>
         </div>
 
-        <button onclick="generateAssignments()">チームを割り振る</button>
+        <button onclick="generateAssignments()" style="margin-top: 12px;">チームを割り振る</button>
 
         <!-- 割り当て結果表示エリア -->
         <div id="resultCard" class="hidden" style="margin-top: 24px;">
@@ -255,30 +318,52 @@
     <!-- 2. 新規論題追加セクション -->
     <div class="card hidden" id="motionView">
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
-        <h2>新規論題の追加（データベースへ保存）</h2>
-        <p class="note">論題集データベースに論題を追加できます。部活内での論題を登録する際には、大会名の欄に「西暦/月/日(曜日) 部活内」のように登録して、年度のところにその時点での年度を書いてください。(例:2026/01/01(木)部活内)</p>
+        <h2>新規論題の追加</h2>
         
-        <label for="newMotion">論題 (Motion) <span style="color:red;">*</span></label>
-        <input type="text" id="newMotion" placeholder="This house would...">
+        <!-- 入力フォーム -->
+        <div id="motionFormArea">
+            <p class="note">論題集データベースに新しい論題を追加します。</p>
+            
+            <label for="newMotion">論題 (Motion) <span style="color:red;">*</span></label>
+            <input type="text" id="newMotion" placeholder="This house would...">
 
-        <div class="grid-2">
-            <div>
-                <label for="newTournament">大会名 (Tournament)</label>
-                <input type="text" id="newTournament" placeholder="例: Asian Spring 2026">
+            <div class="grid-2">
+                <div>
+                    <label for="newTournament">大会名 (Tournament)</label>
+                    <input type="text" id="newTournament" placeholder="例: Asian Spring 2026">
+                </div>
+                <div>
+                    <label for="newYear">年度 (Year)</label>
+                    <input type="text" id="newYear" placeholder="例: 2026">
+                </div>
             </div>
-            <div>
-                <label for="newYear">年度 (Year)</label>
-                <input type="text" id="newYear" placeholder="例: 2026">
+
+            <button class="btn-secondary" onclick="showPreview()">入力内容を確認する</button>
+        </div>
+
+        <!-- 確認画面エリア（デフォルト非表示） -->
+        <div id="motionPreviewArea" class="hidden">
+            <p class="note" style="color: #2563eb; font-weight: bold;">以下の内容でデータベースに追加します。よろしいですか？</p>
+            
+            <div class="preview-box">
+                <p><strong>論題:</strong> <span id="prevMotion"></span></p>
+                <p><strong>大会名:</strong> <span id="prevTournament"></span></p>
+                <p><strong>年度:</strong> <span id="prevYear"></span></p>
+            </div>
+
+            <div class="grid-2">
+                <button class="btn-secondary" onclick="hidePreview()">← 修正する</button>
+                <button class="btn-success" onclick="addNewMotion()">この内容で追加する</button>
             </div>
         </div>
 
-        <button class="btn-secondary" onclick="addNewMotion()">論題をデータベースに追加する</button>
         <div id="submitStatus"></div>
     </div>
 </div>
 
 <script>
     let motionsCache = [];
+    let selectedMotionText = "未選択";
 
     window.addEventListener('DOMContentLoaded', async () => {
         // ローカルストレージから前回入力したデータを復元
@@ -291,6 +376,7 @@
             const res = await fetch('motions.json');
             if (res.ok) {
                 motionsCache = await res.json();
+                redrawPreMotions();
             }
         } catch (e) {
             console.error('論題集データベースの読み込みに失敗しました', e);
@@ -302,10 +388,96 @@
         document.getElementById('assignView').classList.add('hidden');
         document.getElementById('motionView').classList.add('hidden');
 
+        if (viewId === 'assignView') {
+            redrawPreMotions();
+        }
+
+        if (viewId === 'motionView') {
+            hidePreview();
+            document.getElementById('submitStatus').innerText = '';
+        }
+
         document.getElementById(viewId).classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // 事前抽出の3件を表示する関数
+    function redrawPreMotions() {
+        const container = document.getElementById('pre-candidates-container');
+        if (!container) return;
+
+        let sampleMotions = [];
+        if (motionsCache.length > 0) {
+            let shuffled = [...motionsCache];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            sampleMotions = shuffled.slice(0, 3);
+        }
+
+        let html = '';
+        if (sampleMotions.length > 0) {
+            sampleMotions.forEach((m) => {
+                const safeMotionText = m.motion.replace(/'/g, "\\'");
+                html += `
+                    <div class="motion-candidate-item">
+                        <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
+                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">選択する</button>
+                    </div>
+                `;
+            });
+        } else {
+            html = `<p style="font-size:0.9rem; color:#64748b;">登録されている論題がありません。「新規論題追加ページ」から追加してください。</p>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+    // 検索による論題絞り込み
+    function filterPreMotions() {
+        const keyword = document.getElementById('pre-search-input').value.toLowerCase();
+        const resultsContainer = document.getElementById('pre-search-results');
+
+        if (!keyword) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        const filtered = motionsCache.filter(m => {
+            const text = (m.motion || '').toLowerCase();
+            const tournament = (m.tournament || '').toLowerCase();
+            const year = (m.year || '').toLowerCase();
+            return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
+        });
+
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">一致する論題が見つかりませんでした。</p>`;
+            return;
+        }
+
+        let resHtml = `<div class="search-results-box">`;
+        filtered.forEach(m => {
+            const safeText = m.motion.replace(/'/g, "\\'");
+            resHtml += `
+                <div class="search-result-item">
+                    <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '-'}, ${m.year || '-'})</span></span>
+                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">選択</button>
+                </div>
+            `;
+        });
+        resHtml += `</div>`;
+        resultsContainer.innerHTML = resHtml;
+    }
+
+    // 論題を選択して保持する関数
+    function selectPreMotion(motionText) {
+        selectedMotionText = motionText;
+        const badgeEl = document.getElementById('selected-pre-motion');
+        badgeEl.innerText = motionText;
+    }
+
+    // チーム割り振り実行
     function generateAssignments() {
         const participantsText = document.getElementById('participants').value.trim();
         const judgesText = document.getElementById('judges').value.trim();
@@ -317,7 +489,6 @@
             return;
         }
 
-        // 入力内容をデバイスに保存
         localStorage.setItem('debate_participants', participantsText);
         localStorage.setItem('debate_judges', judgesText);
 
@@ -369,26 +540,13 @@
                 const assignedJudge = judges.length > 0 ? judges.shift() : 'ジャッジ不足（追加してください）';
 
                 html += `
-                    <div class="result-box" id="match-box-${i}">
+                    <div class="result-box">
                         <strong>Match ${i + 1} (第 ${i + 1} 組)</strong><br>
-                         <strong>Government:</strong> ${gov.members.join(', ')}<br>
-                         <strong>Opposition:</strong> ${opp.members.join(', ')}<br>
-                         <strong>Judge:</strong> <span style="color: #2563eb; font-weight: bold;">${assignedJudge}</span><br>
-                         <strong>Motion:</strong> <span class="badge" id="selected-badge-${i}">未選択</span>
-                        
-                        <div class="motion-selection-area">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                <label style="font-size: 0.85rem; margin-bottom: 0;">自動抽出された論題3件</label>
-                                <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; width: auto; min-height: auto;" onclick="redrawMotions(${i})">🔄 シャッフル</button>
-                            </div>
-                            <div id="candidates-container-${i}">
-                                <!-- ここに動的に3件挿入されます -->
-                            </div>
-
-                            <label style="font-size: 0.85rem; margin-top: 12px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
-                            <input type="text" id="search-input-${i}" placeholder="キーワードを入力して検索..." oninput="filterMotions(${i})" style="margin-bottom: 6px; padding: 10px; font-size: 16px;">
-                            
-                            <div id="search-results-${i}"></div>
+                        <strong>Government:</strong> ${gov.members.join(', ')}<br>
+                        <strong>Opposition:</strong> ${opp.members.join(', ')}<br>
+                        <strong>Judge:</strong> <span style="color: #2563eb; font-weight: bold;">${assignedJudge}</span><br>
+                        <div style="margin-top: 6px;">
+                            <strong>Motion:</strong> <span class="badge">${selectedMotionText}</span>
                         </div>
                     </div>
                 `;
@@ -401,100 +559,39 @@
 
         document.getElementById('resultContent').innerHTML = html;
         document.getElementById('resultCard').classList.remove('hidden');
-
-        // 各試合の初期ランダム3件を描画
-        for (let i = 0; i < matchCount; i++) {
-            redrawMotions(i);
-        }
     }
 
-    // 指定したMatchの論題3件を再抽選（シャッフル）する関数
-    function redrawMotions(matchIndex) {
-        const container = document.getElementById(`candidates-container-${matchIndex}`);
-        if (!container) return;
-
-        let sampleMotions = [];
-        if (motionsCache.length > 0) {
-            let shuffledMotions = [...motionsCache];
-            for (let i = shuffledMotions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledMotions[i], shuffledMotions[j]] = [shuffledMotions[j], shuffledMotions[i]];
-            }
-            sampleMotions = shuffledMotions.slice(0, 3);
-        }
-
-        let candidatesHtml = '';
-        if (sampleMotions.length > 0) {
-            sampleMotions.forEach((m) => {
-                const safeMotionText = m.motion.replace(/'/g, "\\'");
-                candidatesHtml += `
-                    <div class="motion-candidate-item">
-                        <span>${m.motion} <span style="font-size:0.8rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" onclick="selectThisMotion(${matchIndex}, '${safeMotionText}')">選択する</button>
-                    </div>
-                `;
-            });
-        } else {
-            candidatesHtml = `<p style="font-size:0.85rem; color:#64748b;">登録されている論題がありません。「新規論題追加ページ」から追加してください。</p>`;
-        }
-
-        container.innerHTML = candidatesHtml;
-    }
-
-    // 論題を直接選択して決定する関数
-    function selectThisMotion(matchIndex, motionText) {
-        const badgeEl = document.getElementById(`selected-badge-${matchIndex}`);
-        badgeEl.style.backgroundColor = '#2563eb';
-        badgeEl.style.color = '#ffffff';
-        badgeEl.innerText = motionText;
-    }
-
-    // キーワード検索による絞り込みとリスト表示
-    function filterMotions(matchIndex) {
-        const keyword = document.getElementById(`search-input-${matchIndex}`).value.toLowerCase();
-        const resultsContainer = document.getElementById(`search-results-${matchIndex}`);
-
-        if (!keyword) {
-            resultsContainer.innerHTML = '';
-            return;
-        }
-
-        const filtered = motionsCache.filter(m => {
-            const text = (m.motion || '').toLowerCase();
-            const tournament = (m.tournament || '').toLowerCase();
-            const year = (m.year || '').toLowerCase();
-            return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
-        });
-
-        if (filtered.length === 0) {
-            resultsContainer.innerHTML = `<p style="font-size: 0.85rem; color: #dc2626;">一致する論題が見つかりませんでした。</p>`;
-            return;
-        }
-
-        let resHtml = `<div style="max-height: 150px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; background: #f8fafc;">`;
-        filtered.forEach(m => {
-            const safeText = m.motion.replace(/'/g, "\\'");
-            resHtml += `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; gap: 8px;">
-                    <span>${m.motion} (${m.tournament || '-'}, ${m.year || '-'})</span>
-                    <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; width: auto; min-height: auto;" onclick="selectThisMotion(${matchIndex}, '${safeText}')">選択</button>
-                </div>
-            `;
-        });
-        resHtml += `</div>`;
-        resultsContainer.innerHTML = resHtml;
-    }
-
-    async function addNewMotion() {
+    // 確認画面を表示する関数
+    function showPreview() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
-        const statusEl = document.getElementById('submitStatus');
 
         if (!motion) {
             alert('論題を入力してください。');
             return;
         }
+
+        document.getElementById('prevMotion').innerText = motion;
+        document.getElementById('prevTournament').innerText = tournament || '（未入力）';
+        document.getElementById('prevYear').innerText = year || '（未入力）';
+
+        document.getElementById('motionFormArea').classList.add('hidden');
+        document.getElementById('motionPreviewArea').classList.remove('hidden');
+    }
+
+    // 確認画面から入力画面に戻る関数
+    function hidePreview() {
+        document.getElementById('motionPreviewArea').classList.add('hidden');
+        document.getElementById('motionFormArea').classList.remove('hidden');
+    }
+
+    // 実際にデータベース（GitHub）に追加する関数
+    async function addNewMotion() {
+        const motion = document.getElementById('newMotion').value.trim();
+        const tournament = document.getElementById('newTournament').value.trim();
+        const year = document.getElementById('newYear').value.trim();
+        const statusEl = document.getElementById('submitStatus');
 
         statusEl.style.color = '#2563eb';
         statusEl.innerText = '追加中...';
@@ -511,12 +608,17 @@
             if (res.ok) {
                 statusEl.style.color = '#16a34a';
                 statusEl.innerText = '論題が正常に追加されました！';
+                
                 document.getElementById('newMotion').value = '';
                 document.getElementById('newTournament').value = '';
                 document.getElementById('newYear').value = '';
+                hidePreview();
 
                 const updateRes = await fetch('motions.json');
-                if (updateRes.ok) motionsCache = await updateRes.json();
+                if (updateRes.ok) {
+                    motionsCache = await updateRes.json();
+                    redrawPreMotions();
+                }
             } else {
                 throw new Error(data.error || '追加に失敗しました。');
             }
