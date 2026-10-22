@@ -110,6 +110,12 @@
         .btn-success:hover {
             background-color: #15803d;
         }
+        .btn-danger {
+            background-color: #dc2626;
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
         .home-menu {
             display: flex;
             flex-direction: column;
@@ -224,6 +230,42 @@
             border-radius: 8px;
             margin-bottom: 16px;
         }
+        .management-list {
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            background: #f8fafc;
+            margin-top: 12px;
+        }
+        .management-item {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        @media (min-width: 600px) {
+            .management-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        .management-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .management-actions button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            min-height: auto;
+        }
     </style>
 </head>
 <body>
@@ -237,7 +279,7 @@
         <p class="note">行いたい操作を選択してください。</p>
         <div class="home-menu">
             <button onclick="switchView('assignView')">チーム分け ＆ 論題選択ツール</button>
-            <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加ページ</button>
+            <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加・管理ページ</button>
         </div>
     </div>
 
@@ -309,15 +351,17 @@
         </div>
     </div>
 
-    <!-- 2. 新規論題追加セクション -->
+    <!-- 2. 新規論題追加・管理セクション -->
     <div class="card hidden" id="motionView">
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
-        <h2>新規論題の追加</h2>
+        <h2 id="formTitle">新規論題の追加</h2>
         
         <!-- 入力フォーム -->
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加します。部活内での論題を登録する場合は、大会名の欄に、「2026/01/01 部活内」、年度の欄に「2026」などと入力してください</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
             
+            <input type="hidden" id="editIndex" value="-1">
+
             <label for="newMotion">論題 (Motion) <span style="color:red;">*</span></label>
             <input type="text" id="newMotion" placeholder="This house would...">
 
@@ -332,12 +376,17 @@
                 </div>
             </div>
 
-            <button class="btn-secondary" onclick="showPreview()">入力内容を確認する</button>
+            <div id="formButtons">
+                <button class="btn-secondary" onclick="showPreview()">入力内容を確認する</button>
+            </div>
+            <div id="editCancelContainer" class="hidden" style="margin-top: 10px;">
+                <button class="btn-secondary" onclick="cancelEdit()">編集をキャンセル</button>
+            </div>
         </div>
 
         <!-- 確認画面エリア（デフォルト非表示） -->
         <div id="motionPreviewArea" class="hidden">
-            <p class="note" style="color: #2563eb; font-weight: bold;">以下の内容でデータベースに追加します。よろしいですか？</p>
+            <p class="note" style="color: #2563eb; font-weight: bold;" id="previewTitle">以下の内容でデータベースに追加します。よろしいですか？</p>
             
             <div class="preview-box">
                 <p><strong>論題:</strong> <span id="prevMotion"></span></p>
@@ -347,11 +396,20 @@
 
             <div class="grid-2">
                 <button class="btn-secondary" onclick="hidePreview()">← 修正する</button>
-                <button class="btn-success" onclick="addNewMotion()">この内容で追加する</button>
+                <button class="btn-success" onclick="addNewMotion()">この内容で決定する</button>
             </div>
         </div>
 
         <div id="submitStatus"></div>
+
+        <!-- 登録済み論題の一覧・管理エリア -->
+        <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
+            <p class="note">登録されている論題の修正や削除が行えます。</p>
+            <div id="managementListContainer" class="management-list">
+                <p style="font-size: 0.9rem; color: #64748b;">読み込み中...</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -360,22 +418,26 @@
     let selectedMotionText = "未選択";
 
     window.addEventListener('DOMContentLoaded', async () => {
-        // ローカルストレージから前回入力したデータを復元
         const savedParticipants = localStorage.getItem('debate_participants');
         const savedJudges = localStorage.getItem('debate_judges');
         if (savedParticipants) document.getElementById('participants').value = savedParticipants;
         if (savedJudges) document.getElementById('judges').value = savedJudges;
 
+        await fetchMotions();
+    });
+
+    async function fetchMotions() {
         try {
             const res = await fetch('motions.json');
             if (res.ok) {
                 motionsCache = await res.json();
                 redrawPreMotions();
+                renderManagementList();
             }
         } catch (e) {
             console.error('論題集データベースの読み込みに失敗しました', e);
         }
-    });
+    }
 
     function switchView(viewId) {
         document.getElementById('homeView').classList.add('hidden');
@@ -387,15 +449,14 @@
         }
 
         if (viewId === 'motionView') {
-            hidePreview();
-            document.getElementById('submitStatus').innerText = '';
+            cancelEdit();
+            renderManagementList();
         }
 
         document.getElementById(viewId).classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 事前抽出の3件を表示する関数
     function redrawPreMotions() {
         const container = document.getElementById('pre-candidates-container');
         if (!container) return;
@@ -417,18 +478,17 @@
                 html += `
                     <div class="motion-candidate-item">
                         <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" id="btn-select-${safeMotionText}" onclick="selectPreMotion('${safeMotionText}', this)">選択する</button>
+                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}', this)">選択する</button>
                     </div>
                 `;
             });
         } else {
-            html = `<p style="font-size:0.9rem; color:#64748b;">登録されている論題がありません。「新規論題追加ページ」から追加してください。</p>`;
+            html = `<p style="font-size:0.9rem; color:#64748b;">登録されている論題がありません。「新規論題追加・管理ページ」から追加してください。</p>`;
         }
 
         container.innerHTML = html;
     }
 
-    // 検索による論題絞り込み
     function filterPreMotions() {
         const keyword = document.getElementById('pre-search-input').value.toLowerCase();
         const resultsContainer = document.getElementById('pre-search-results');
@@ -464,24 +524,18 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 論題を選択して保持する関数（選択時にボタンの表示を更新）
     function selectPreMotion(motionText, btnElement) {
         selectedMotionText = motionText;
-
-        // 全ての選択ボタンの見た目をリセット
         document.querySelectorAll('.motion-candidate-item button, .search-result-item button').forEach(b => {
             b.innerText = "選択する";
             b.style.backgroundColor = "";
         });
-
-        // 押されたボタンを選択済みの表示に変更
         if (btnElement) {
             btnElement.innerText = "選択中 ✓";
             btnElement.style.backgroundColor = "#16a34a";
         }
     }
 
-    // チーム割り振り実行
     function generateAssignments() {
         const participantsText = document.getElementById('participants').value.trim();
         const judgesText = document.getElementById('judges').value.trim();
@@ -565,11 +619,70 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 確認画面を表示する関数
+    // 登録済み一覧の表示
+    function renderManagementList() {
+        const container = document.getElementById('managementListContainer');
+        if (!container) return;
+
+        if (motionsCache.length === 0) {
+            container.innerHTML = `<p style="font-size: 0.9rem; color: #64748b;">登録されている論題はありません。</p>`;
+            return;
+        }
+
+        let html = '';
+        motionsCache.forEach((m, index) => {
+            const safeMotion = (m.motion || '').replace(/'/g, "\\'");
+            const safeTourney = (m.tournament || '').replace(/'/g, "\\'");
+            const safeYear = (m.year || '').replace(/'/g, "\\'");
+
+            html += `
+                <div class="management-item">
+                    <div>
+                        <strong>${m.motion}</strong><br>
+                        <span style="font-size:0.85rem; color:#64748b;">大会: ${m.tournament || '-'} / 年度: ${m.year || '-'}</span>
+                    </div>
+                    <div class="management-actions">
+                        <button class="btn-secondary" onclick="startEdit(${index}, '${safeMotion}', '${safeTourney}', '${safeYear}')">編集</button>
+                        <button class="btn-danger" onclick="deleteMotion(${index})">削除</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // 編集モードを開始
+    function startEdit(index, motion, tournament, year) {
+        document.getElementById('editIndex').value = index;
+        document.getElementById('newMotion').value = motion;
+        document.getElementById('newTournament').value = tournament === '-' ? '' : tournament;
+        document.getElementById('newYear').value = year === '-' ? '' : year;
+
+        document.getElementById('formTitle').innerText = '論題の編集';
+        document.getElementById('editCancelContainer').classList.remove('hidden');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 編集をキャンセル
+    function cancelEdit() {
+        document.getElementById('editIndex').value = -1;
+        document.getElementById('newMotion').value = '';
+        document.getElementById('newTournament').value = '';
+        document.getElementById('newYear').value = '';
+
+        document.getElementById('formTitle').innerText = '新規論題の追加';
+        document.getElementById('editCancelContainer').classList.add('hidden');
+        hidePreview();
+        document.getElementById('submitStatus').innerText = '';
+    }
+
+    // 確認画面を表示
     function showPreview() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
+        const editIndex = parseInt(document.getElementById('editIndex').value);
 
         if (!motion) {
             alert('論題を入力してください。');
@@ -580,51 +693,93 @@
         document.getElementById('prevTournament').innerText = tournament || '（未入力）';
         document.getElementById('prevYear').innerText = year || '（未入力）';
 
+        const previewTitle = document.getElementById('previewTitle');
+        if (editIndex >= 0) {
+            previewTitle.innerText = '以下の内容で論題を更新します。よろしいですか？';
+        } else {
+            previewTitle.innerText = '以下の内容でデータベースに追加します。よろしいですか？';
+        }
+
         document.getElementById('motionFormArea').classList.add('hidden');
         document.getElementById('motionPreviewArea').classList.remove('hidden');
     }
 
-    // 確認画面から入力画面に戻る関数
     function hidePreview() {
         document.getElementById('motionPreviewArea').classList.add('hidden');
         document.getElementById('motionFormArea').classList.remove('hidden');
     }
 
-    // 実際にデータベース（GitHub）に追加する関数
+    // 追加または更新を実行（今回はシンプルに「全データを再送信して上書き」する形になります）
     async function addNewMotion() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
+        const editIndex = parseInt(document.getElementById('editIndex').value);
         const statusEl = document.getElementById('submitStatus');
 
         statusEl.style.color = '#2563eb';
-        statusEl.innerText = '追加中...';
+        statusEl.innerText = editIndex >= 0 ? '更新中...' : '追加中...';
+
+        let updatedList = [...motionsCache];
+        if (editIndex >= 0) {
+            updatedList[editIndex] = { motion, tournament, year };
+        } else {
+            updatedList.push({ motion, tournament, year });
+        }
 
         try {
+            // 全データをサーバーに送り直してmotions.jsonを更新する仕組み
             const res = await fetch('/api/add-motion', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ motion, tournament, year })
+                body: JSON.stringify({ action: 'overwrite', motions: updatedList })
             });
 
             const data = await res.json();
 
             if (res.ok) {
                 statusEl.style.color = '#16a34a';
-                statusEl.innerText = '論題が正常に追加されました！';
+                statusEl.innerText = editIndex >= 0 ? '論題が正常に更新されました！' : '論題が正常に追加されました！';
                 
-                document.getElementById('newMotion').value = '';
-                document.getElementById('newTournament').value = '';
-                document.getElementById('newYear').value = '';
-                hidePreview();
-
-                const updateRes = await fetch('motions.json');
-                if (updateRes.ok) {
-                    motionsCache = await updateRes.json();
-                    redrawPreMotions();
-                }
+                cancelEdit();
+                await fetchMotions();
             } else {
-                throw new Error(data.error || '追加に失敗しました。');
+                throw new Error(data.error || '処理に失敗しました。');
+            }
+        } catch (err) {
+            statusEl.style.color = '#dc2626';
+            statusEl.innerText = `エラー: ${err.message}`;
+        }
+    }
+
+    // 削除を実行
+    async function deleteMotion(index) {
+        if (!confirm(`「${motionsCache[index].motion}」を削除してもよろしいですか？`)) {
+            return;
+        }
+
+        let updatedList = [...motionsCache];
+        updatedList.splice(index, 1);
+
+        const statusEl = document.getElementById('submitStatus');
+        statusEl.style.color = '#2563eb';
+        statusEl.innerText = '削除中...';
+
+        try {
+            const res = await fetch('/api/add-motion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'overwrite', motions: updatedList })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                statusEl.style.color = '#16a34a';
+                statusEl.innerText = '論題を削除しました。';
+                await fetchMotions();
+            } else {
+                throw new Error(data.error || '削除に失敗しました。');
             }
         } catch (err) {
             statusEl.style.color = '#dc2626';
