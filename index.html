@@ -268,7 +268,7 @@
                 motionsCache = await res.json();
             }
         } catch (e) {
-            console.error(論題集データベースの読み込みに失敗しました', e);
+            console.error('論題集データベースの読み込みに失敗しました', e);
         }
     });
 
@@ -349,8 +349,7 @@
 
                 let candidatesHtml = '';
                 if (sampleMotions.length > 0) {
-                    sampleMotions.forEach((m, mIdx) => {
-                        // エスケープ処理の代わりに安全に渡すため文字コード等を考慮
+                    sampleMotions.forEach((m) => {
                         const safeMotionText = m.motion.replace(/'/g, "\\'");
                         candidatesHtml += `
                             <div class="motion-candidate-item">
@@ -431,7 +430,7 @@
             resHtml += `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
                     <span>${m.motion} (${m.tournament || '-'}, ${m.year || '-'})</span>
-                    <button class="btn-secondary" style="padding: 2px 6px; font-size: 0.75rem; width: auto;" onclick="selectThisMotion(${i || matchIndex}, '${safeText}')">選択</button>
+                    <button class="btn-secondary" style="padding: 2px 6px; font-size: 0.75rem; width: auto;" onclick="selectThisMotion(${matchIndex}, '${safeText}')">選択</button>
                 </div>
             `;
         });
