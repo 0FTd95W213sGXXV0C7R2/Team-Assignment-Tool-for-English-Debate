@@ -38,14 +38,12 @@ export default async function handler(req, res) {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        // クリーンアップ関数（6ヶ月より古い履歴を除外）
         const filterHistory = (historyArr) => {
             if (!Array.isArray(historyArr)) return [];
             return historyArr.filter(dateStr => new Date(dateStr) >= sixMonthsAgo);
         };
 
         if (action === 'recordUsage' && Array.isArray(selectedMotions)) {
-            // 使用履歴の記録
             currentContent = currentContent.map(m => {
                 const cleanHistory = filterHistory(m.history);
                 if (selectedMotions.includes(m.motion)) {
@@ -55,14 +53,12 @@ export default async function handler(req, res) {
             });
             commitMessage = `Record motion usage: ${selectedMotions.length} motions selected`;
         } else if (action === 'overwrite' && Array.isArray(motions)) {
-            // 全体上書き（編集・削除・追加）
             currentContent = motions.map(m => ({
                 ...m,
                 history: filterHistory(m.history)
             }));
             commitMessage = 'Update motions database via web tool';
         } else {
-            // 単体追加
             if (!motion) {
                 return res.status(400).json({ error: 'Motion is required' });
             }
