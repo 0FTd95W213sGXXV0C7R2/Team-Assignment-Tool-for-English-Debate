@@ -152,6 +152,22 @@
             border-radius: 6px;
             border: 1px solid var(--border-color);
         }
+        .motion-candidate-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .motion-candidate-item button {
+            width: auto;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -162,7 +178,7 @@
     <!-- ホーム画面 -->
     <div class="card" id="homeView">
         <h2>メニュー</h2>
-        <p class="note">行いたい操作のボタンを押してください。</p>
+        <p class="note">行いたい操作を選択してください。</p>
         <div class="home-menu">
             <button onclick="switchView('assignView')">チーム分け ＆ 論題選択ツール</button>
             <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加ページ</button>
@@ -176,12 +192,12 @@
         
         <div class="grid-2">
             <div>
-                <label for="participants">参加者リスト (1人入力するごとに改行してください)</label>
+                <label for="participants">メンバー (1人入力するごとに改行してください)</label>
                 <textarea id="participants" placeholder=""></textarea>
                 <div class="note">※定員を超えた場合は自動的にジャッジに回ります</div>
             </div>
             <div>
-                <label for="judges">ジャッジ (1人入力するごとに改行してください/任意入力)</label>
+                <label for="judges">ジャッジ(1人入力するごとに改行してください)</label>
                 <textarea id="judges" placeholder=""></textarea>
             </div>
         </div>
@@ -252,7 +268,7 @@
                 motionsCache = await res.json();
             }
         } catch (e) {
-            console.error('motions.jsonの読み込みに失敗しました', e);
+            console.error(論題集データベースの読み込みに失敗しました', e);
         }
     });
 
@@ -323,7 +339,7 @@
                 const opp = teams[i * 2 + 1];
                 const assignedJudge = judges.length > 0 ? judges.shift() : 'ジャッジ不足（追加してください）';
 
-                // 割り当て時に自動でランダムな3つの論題を抽出
+                // 自動でランダムな3件の論題を抽出
                 let sampleMotions = [];
                 if (motionsCache.length > 0) {
                     let shuffledMotions = [...motionsCache];
@@ -331,10 +347,21 @@
                     sampleMotions = shuffledMotions.slice(0, 3);
                 }
 
-                let optionsHtml = `<option value="">-- 自動的に論題が選ばれます。下の検索窓をで論題をキーワード検索できます。 --</option>`;
-                sampleMotions.forEach(m => {
-                    optionsHtml += `<option value="${m.motion}">[ランダム候補] ${m.motion} (${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</option>`;
-                });
+                let candidatesHtml = '';
+                if (sampleMotions.length > 0) {
+                    sampleMotions.forEach((m, mIdx) => {
+                        // エスケープ処理の代わりに安全に渡すため文字コード等を考慮
+                        const safeMotionText = m.motion.replace(/'/g, "\\'");
+                        candidatesHtml += `
+                            <div class="motion-candidate-item">
+                                <span>${m.motion} <span style="font-size:0.8rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
+                                <button class="btn-secondary" onclick="selectThisMotion(${i}, '${safeMotionText}')">選択する</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    candidatesHtml = `<p style="font-size:0.85rem; color:#64748b;">登録されている論題がありません。「新規論題追加ページ」から追加してください。</p>`;
+                }
 
                 html += `
                     <div class="result-box" id="match-box-${i}">
@@ -345,13 +372,15 @@
                          <strong>Motion:</strong> <span class="badge" id="selected-badge-${i}">未選択</span>
                         
                         <div class="motion-selection-area">
-                            <label style="font-size: 0.85rem; margin-bottom: 4px;">論題</label>
-                            <select id="motion-select-${i}" onchange="selectMotion(${i})" style="margin-bottom: 8px; padding: 6px; font-size: 0.9rem;">
-                                ${optionsHtml}
-                            </select>
+                            <label style="font-size: 0.85rem; margin-bottom: 6px;">自動抽出された論題3件（ここから選択可能）</label>
+                            <div id="candidates-container-${i}">
+                                ${candidatesHtml}
+                            </div>
 
-                            <label style="font-size: 0.85rem; margin-bottom: 4px;">キーワード検索（見つからない場合はこちら）</label>
-                            <input type="text" id="search-input-${i}" placeholder="キーワードを入力して全体から検索..." oninput="filterMotions(${i})" style="margin-bottom: 0; padding: 6px; font-size: 0.9rem;">
+                            <label style="font-size: 0.85rem; margin-top: 10px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
+                            <input type="text" id="search-input-${i}" placeholder="キーワードを入力して検索..." oninput="filterMotions(${i})" style="margin-bottom: 6px; padding: 6px; font-size: 0.9rem;">
+                            
+                            <div id="search-results-${i}"></div>
                         </div>
                     </div>
                 `;
@@ -366,12 +395,21 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
+    // 論題を直接選択して決定する関数
+    function selectThisMotion(matchIndex, motionText) {
+        const badgeEl = document.getElementById(`selected-badge-${matchIndex}`);
+        badgeEl.style.backgroundColor = '#2563eb';
+        badgeEl.style.color = '#ffffff';
+        badgeEl.innerText = motionText;
+    }
+
+    // キーワード検索による絞り込みとリスト表示
     function filterMotions(matchIndex) {
         const keyword = document.getElementById(`search-input-${matchIndex}`).value.toLowerCase();
-        const selectEl = document.getElementById(`motion-select-${matchIndex}`);
+        const resultsContainer = document.getElementById(`search-results-${matchIndex}`);
 
         if (!keyword) {
-            // 検索キーワードが空の場合は元のランダム3選に戻すなどの処理も可能ですが、ここではシンプルに全件または検索結果を表示
+            resultsContainer.innerHTML = '';
             return;
         }
 
@@ -382,28 +420,23 @@
             return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
         });
 
-        let optionsHtml = `<option value="">-- 検索結果 (${filtered.length}件) から選択 --</option>`;
-        filtered.forEach(m => {
-            optionsHtml += `<option value="${m.motion}">[検索結果] ${m.motion} (${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</option>`;
-        });
-
-        selectEl.innerHTML = optionsHtml;
-    }
-
-    function selectMotion(matchIndex) {
-        const selectEl = document.getElementById(`motion-select-${matchIndex}`);
-        const badgeEl = document.getElementById(`selected-badge-${matchIndex}`);
-        const selectedValue = selectEl.value;
-
-        if (selectedValue) {
-            badgeEl.style.backgroundColor = '#2563eb';
-            badgeEl.style.color = '#ffffff';
-            badgeEl.innerText = selectedValue;
-        } else {
-            badgeEl.style.backgroundColor = '#e2e8f0';
-            badgeEl.style.color = '#1e293b';
-            badgeEl.innerText = '未選択';
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = `<p style="font-size: 0.85rem; color: #dc2626;">一致する論題が見つかりませんでした。</p>`;
+            return;
         }
+
+        let resHtml = `<div style="max-height: 150px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; background: #f8fafc;">`;
+        filtered.forEach(m => {
+            const safeText = m.motion.replace(/'/g, "\\'");
+            resHtml += `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
+                    <span>${m.motion} (${m.tournament || '-'}, ${m.year || '-'})</span>
+                    <button class="btn-secondary" style="padding: 2px 6px; font-size: 0.75rem; width: auto;" onclick="selectThisMotion(${i || matchIndex}, '${safeText}')">選択</button>
+                </div>
+            `;
+        });
+        resHtml += `</div>`;
+        resultsContainer.innerHTML = resHtml;
     }
 
     async function addNewMotion() {
