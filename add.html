@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ディベート論題 追加フォーム</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        h2 { margin-top: 0; color: #1a73e8; }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        .config-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e4e8;
+        }
+        #message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </p style="font-size: 12px; color: #666;">
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📝 論題追加フォーム</h2>
+    <p style="font-size: 13px; color: #666;">新しい論題を入力すると、自動でGitHubのデータ（motions.json）に追加されます。</p>
+
+    <!-- 初期設定（GitHub接続情報） -->
+    <div class="config-box">
+        <h4 style="margin:0 0 10px 0; font-size:14px; color:#444;">⚙️ 初期設定（管理者用）</h4>
+        <div class="form-group" style="margin-bottom:10px;">
+            <label>GitHub ユーザー名</label>
+            <input type="text" id="ghUser" placeholder="例: yamada-taro">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+            <label>リポジトリ名</label>
+            <input type="text" id="ghRepo" placeholder="例: debate-tool">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+            <label>アクセストークン (PAT)</label>
+            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+    </div>
+
+    <!-- 論題入力フォーム -->
+    <div class="form-group">
+        <label>論題 (Motion)</label>
+        <input type="text" id="motionText" placeholder="This house would...">
+    </div>
+
+    <div class="form-group">
+        <label>大会名 (Tournament)</label>
+        <input type="text" id="tournamentText" placeholder="例: WSDC, HEnDA, 新緑杯">
+    </div>
+
+    <div class="form-group">
+        <label>年度 (Year)</label>
+        <input type="number" id="yearNumber" value="2026">
+    </div>
+
+    <button onclick="addMotion()">論題を追加する</button>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    // ブラウザに設定を記憶させる（次回から入力不要に）
+    window.onload = function() {
+        if(localStorage.getItem('ghUser')) document.getElementById('ghUser').value = localStorage.getItem('ghUser');
+        if(localStorage.getItem('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('ghRepo');
+        if(localStorage.getItem('ghToken')) document.getElementById('ghToken').value = localStorage.getItem('ghToken');
+    };
+
+    async function addMotion() {
+        const user = document.getElementById('ghUser').value.trim();
+        const repo = document.getElementById('ghRepo').value.trim();
+        const token = document.getElementById('ghToken').value.trim();
+        
+        const motion = document.getElementById('motionText').value.trim();
+        const tournament = document.getElementById('tournamentText').value.trim();
+        const year = parseInt(document.getElementById('yearNumber').value);
+
+        const msgDiv = document.getElementById('message');
+
+        if (!user || !repo || !token || !motion || !tournament || !year) {
+            showMsg('すべての項目を正しく入力してください。', 'error');
+            return;
+        }
+
+        // 設定をブラウザに保存
+        localStorage.setItem('ghUser', user);
+        localStorage.setItem('ghRepo', repo);
+        localStorage.setItem('ghToken', token);
+
+        showMsg('データを送信中...', 'success');
+
+        const path = 'motions.json';
+        const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+
+        try {
+            // 1. 現在の motions.json の内容と sha を取得
+            const getRes = await fetch(url, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+
+            if (!getRes.ok) throw new Error('GitHubからのデータ取得に失敗しました。ユーザー名やリポジトリ名、トークンを確認してください。');
+            
+            const fileData = await getRes.json();
+            const contentDecoded = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+
+            // 2. 新しいデータを追加
+            const newId = contentDecoded.length > 0 ? Math.max(...contentDecoded.map(item => item.id)) + 1 : 1;
+            contentDecoded.push({
+                id: newId,
+                motion: motion,
+                tournament: tournament,
+                year: year
+            });
+
+            // 3. GitHubへ再アップロード（コミット）
+            const newContentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(contentDecoded, null, 2))));
+
+            const putRes = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: `Add new motion via form: ${motion}`,
+                    content: newContentEncoded,
+                    sha: fileData.sha
+                })
+            });
+
+            if (!putRes.ok) throw new Error('GitHubへの保存に失敗しました。');
+
+            showMsg('✨ 論題が正常に追加されました！', 'success');
+            document.getElementById('motionText').value = ''; // 論題欄だけクリア
+
+        } catch (error) {
+            showMsg('エラー: ' + error.message, 'error');
+        }
+    }
+
+    function showMsg(text, type) {
+        const msgDiv = document.getElementById('message');
+        msgDiv.style.display = 'block';
+        msgDiv.className = type;
+        msgDiv.innerText = text;
+    }
+</script>
+
+</body>
+</html>
