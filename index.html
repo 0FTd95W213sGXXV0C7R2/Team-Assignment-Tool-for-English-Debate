@@ -327,7 +327,7 @@
         <div class="motion-selection-area">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の記録 (最大4候補)</h3>
-                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="redrawPreMotions()">シャッフル</button>
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="redrawPreMotions()">🔄 シャッフル</button>
             </div>
             
             <p class="note" style="margin-bottom: 10px;">
@@ -544,7 +544,6 @@
             const sixMonthsAgo = new Date();
             sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-            // 6ヶ月以内に使用されていない論題と、使用されている論題に分ける
             let freshList = [];
             let recentList = [];
 
@@ -554,14 +553,13 @@
                 } else {
                     const lastUsed = new Date(m.history[m.history.length - 1]);
                     if (lastUsed < sixMonthsAgo) {
-                        freshList.push(m); // 6ヶ月以上前なら新鮮扱いに含める
+                        freshList.push(m);
                     } else {
-                        recentList.push(m); // 直近6ヶ月以内に使用済み
+                        recentList.push(m);
                     }
                 }
             });
 
-            // それぞれをシャッフル
             const shuffleArray = (arr) => {
                 let a = [...arr];
                 for (let i = a.length - 1; i > 0; i--) {
@@ -574,7 +572,6 @@
             freshList = shuffleArray(freshList);
             recentList = shuffleArray(recentList);
 
-            // まず未使用/6ヶ月以上前のものから最大4件選び、足りなければ直近のものから補う
             let combined = [...freshList, ...recentList];
             sampleMotions = combined.slice(0, 4);
         }
@@ -636,7 +633,6 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 論題を記録して即時DBへ使用履歴送信
     async function selectPreMotion(motionText) {
         selectedMotionText = motionText;
         document.getElementById('selectedMotionDisplay').innerText = motionText;
@@ -648,7 +644,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'recordUsage', selectedMotions: [motionText] })
             });
-            // キャッシュ側もローカルで即時更新しておく
             const target = motionsCache.find(m => m.motion === motionText);
             if (target) {
                 if (!Array.isArray(target.history)) target.history = [];
@@ -748,7 +743,6 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 履歴（回数・日時）をフォーマットする関数
     function formatHistory(historyArr) {
         if (!Array.isArray(historyArr) || historyArr.length === 0) {
             return '<span style="color:#64748b;">実施履歴なし</span>';
@@ -777,7 +771,6 @@
         return `実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
     }
 
-    // 登録済み一覧の表示（回数・日時表示、スペース区切り・単語境界対応、ヒット件数表示）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const rawKeyword = document.getElementById('manage-search-input').value.trim();
@@ -896,7 +889,9 @@
         if (editIndex >= 0) {
             updatedList[editIndex] = { ...updatedList[editIndex], motion, tournament, year };
         } else {
-            updatedList.push({ motion, tournament, year, history: [] });
+            // 大会名に「部活内」が含まれる場合は、新規登録時から自動的に1回分の実施履歴を付与する
+            const initialHistory = (tournament.includes('部活内') || tournament.includes('部活')) ? [new Date().toISOString()] : [];
+            updatedList.push({ motion, tournament, year, history: initialHistory });
         }
 
         try {
@@ -942,7 +937,7 @@
             const data = await res.json();
 
             if (res.ok) {
-                setStatus('論題を削除しました。', 'success');
+                setStatus(論題を削除しました。', 'success');
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
