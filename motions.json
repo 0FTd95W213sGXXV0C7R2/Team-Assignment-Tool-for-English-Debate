@@ -7081,7 +7081,9 @@
     "tournament": "2026/10/22 部活内",
     "year": "2026",
     "_originalIndex": 884,
-    "history": ["2026-10-22T00:00:00.000Z"]
+    "history": [
+      "2026-10-22T00:00:00.000Z"
+    ]
   },
   {
     "id": 886,
@@ -7089,15 +7091,17 @@
     "tournament": "2026/08/25 部活内",
     "year": "2026",
     "_originalIndex": 885,
-    "history": ["2026-08-25T00:00:00.000Z"]
+    "history": [
+      "2026-08-25T00:00:00.000Z"
+    ]
   },
   {
     "id": 887,
     "motion": "THBT the feminist movement should advocate for male quotas in female-dominated fields.(nursing, teaching, etc)",
-    "tournament": "-",
-    "year": "-",
+    "tournament": "部活内",
+    "year": "2026",
     "_originalIndex": 886,
-    "history": ["-"]
+    "history": []
   },
   {
     "id": 888,
@@ -7105,7 +7109,9 @@
     "tournament": "2026/08/28 部活内",
     "year": "2026",
     "_originalIndex": 887,
-    "history": ["2026-08-28T00:00:00.000Z"]
+    "history": [
+      "2026-08-28T00:00:00.000Z"
+    ]
   },
   {
     "id": 889,
@@ -7113,7 +7119,9 @@
     "tournament": "2026/09/02 部活内",
     "year": "2026",
     "_originalIndex": 888,
-    "history": ["2026-09-02T00:00:00.000Z"]
+    "history": [
+      "2026-09-02T00:00:00.000Z"
+    ]
   },
   {
     "id": 890,
@@ -7121,7 +7129,9 @@
     "tournament": "2026/09/04 部活内",
     "year": "2026",
     "_originalIndex": 889,
-    "history": ["2026-09-04T00:00:00.000Z"]
+    "history": [
+      "2026-09-04T00:00:00.000Z"
+    ]
   },
   {
     "id": 891,
@@ -7129,7 +7139,9 @@
     "tournament": "2026/09/08 部活内",
     "year": "2026",
     "_originalIndex": 890,
-    "history": ["2026-09-08T00:00:00.000Z"]
+    "history": [
+      "2026-09-08T00:00:00.000Z"
+    ]
   },
   {
     "id": 892,
@@ -7137,7 +7149,9 @@
     "tournament": "2026/09/01 部活内",
     "year": "2026",
     "_originalIndex": 891,
-    "history": ["2026-09-01T00:00:00.000Z"]
+    "history": [
+      "2026-09-01T00:00:00.000Z"
+    ]
   },
   {
     "id": 893,
@@ -7145,7 +7159,9 @@
     "tournament": "2026/09/18 部活内",
     "year": "2026",
     "_originalIndex": 892,
-    "history": ["2026-09-18T00:00:00.000Z"]
+    "history": [
+      "2026-09-18T00:00:00.000Z"
+    ]
   },
   {
     "id": 894,
@@ -7153,7 +7169,9 @@
     "tournament": "2026/09/17 部活内",
     "year": "2026",
     "_originalIndex": 893,
-    "history": ["2026-09-17T00:00:00.000Z"]
+    "history": [
+      "2026-09-17T00:00:00.000Z"
+    ]
   },
   {
     "id": 895,
@@ -7161,6 +7179,8 @@
     "tournament": "2026/10/23 部活内",
     "year": "2026",
     "_originalIndex": 894,
-    "history": ["2026-10-23T00:00:00.000Z"]
+    "history": [
+      "2026-10-23T00:00:00.000Z"
+    ]
   }
 ]
