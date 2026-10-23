@@ -526,39 +526,43 @@
         if (!rawT || rawT === '-') return '-';
         let t = rawT.trim();
 
-        // 1. 部活内 (日付ごとなどのものをまとめる)
+        // 1. 部活内
         if (t.includes('部活内') || t.includes('部活')) {
             return '部活内';
         }
-        // 2. HEnDA全国大会
+        // 2. SOLA CUP (SOLA Cup と SOLA CUP を統一)
+        if (t.toLowerCase().includes('sola cup')) {
+            return 'SOLA CUP';
+        }
+        // 3. HEnDA全国大会
         if (t.includes('HEnDA')) {
             return 'HEnDA全国大会';
         }
-        // 3. HPDU推奨
+        // 4. HPDU推奨
         if (t.includes('HPDU推奨')) {
             return 'HPDU推奨';
         }
-        // 4. JWSDC、中学生全国大会、中学全国大会、夏合宿・全国大会（中学）を同じくくる
+        // 5. JWSDC、中学生全国大会、中学全国大会、夏合宿・全国大会（中学）
         if (t.includes('JWSDC') || t.includes('中学生全国大会') || t.includes('中学全国大会') || t.includes('夏合宿・全国大会（中学）')) {
             return 'JWSDC';
         }
-        // 5. WSDC、世界交流大会をWSDCとする
+        // 6. WSDC、世界交流大会
         if (t.includes('WSDC') || t.includes('世界交流大会')) {
             return 'WSDC';
         }
-        // 6. 連盟杯 → HPDU連盟杯
+        // 7. 連盟杯 → HPDU連盟杯
         if (t.includes('連盟杯')) {
             return 'HPDU連盟杯';
         }
-        // 7. 新緑杯や新芽杯 → HPDU新緑杯・新芽杯
+        // 8. 新緑杯や新芽杯 → HPDU新緑杯・新芽杯
         if (t.includes('新緑杯') || t.includes('新芽杯')) {
             return 'HPDU新緑杯・新芽杯';
         }
-        // 8. 夏合宿（夏合宿・全国大会（中学）以外）
+        // 9. 夏合宿（夏合宿・全国大会（中学）以外）
         if (t.includes('合宿')) {
             return '夏合宿';
         }
-        // 9. PDA全国大会 (全国大会(冬)、全国大会（夏）、冬 全国大会、冬 全国大会（高校）、冬全国大会など)
+        // 10. PDA全国大会
         if (t.includes('全国大会') || t.includes('冬全国大会') || t.includes('冬 全国大会')) {
             return 'PDA全国大会';
         }
@@ -946,7 +950,7 @@
         return `実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
     }
 
-    // 管理ページの論題リスト表示（正規化大会名でフィルタリング）
+    // 管理ページの論題リスト表示（「登録名」表記に変更）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const rawKeyword = document.getElementById('manage-search-input').value.trim();
@@ -1000,7 +1004,7 @@
                 <div class="management-item">
                     <div>
                         <strong>${m.motion}</strong><br>
-                        <span style="font-size:0.85rem; color:#64748b;">大会: ${normTourney} (原義: ${m.tournament || '-'}) / 年度: ${m.year || '-'}</span><br>
+                        <span style="font-size:0.85rem; color:#64748b;">大会: ${normTourney} (登録名: ${m.tournament || '-'}) / 年度: ${m.year || '-'}</span><br>
                         <span style="font-size:0.8rem; color:#0284c7;">${historyInfo}</span>
                     </div>
                     <div class="management-actions">
@@ -1051,12 +1055,12 @@
 
         // 同一論題の重複チェック
         const duplicate = motionsCache.find((m, idx) => {
-            if (editIndex >= 0 && idx === editIndex) return false; // 編集中の自分自身は除外
+            if (editIndex >= 0 && idx === editIndex) return false;
             return m.motion.trim().toLowerCase() === motion.toLowerCase();
         });
 
         if (duplicate) {
-            setFormWarning(`すでに同一の論題があります。\n【論題】${duplicate.motion}\n【大会】${duplicate.tournament} (${duplicate.year})`);
+            setFormWarning(`すでに同一のものがあります。\n【論題】${duplicate.motion}\n【大会】${duplicate.tournament} (${duplicate.year})`);
             return;
         } else {
             clearFormWarning();
