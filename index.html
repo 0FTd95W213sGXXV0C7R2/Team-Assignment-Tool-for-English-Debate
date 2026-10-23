@@ -649,6 +649,9 @@
         let tournaments = new Set();
         let years = new Set();
 
+        // 常に「その他の大会」を選択肢として追加する
+        tournaments.add('その他の大会');
+
         motionsCache.forEach(m => {
             const normT = getNormalizedTournament(m.tournament);
             if (normT) tournaments.add(normT);
@@ -656,7 +659,11 @@
         });
 
         let tourneyHtml = '<option value="">すべての大会名</option>';
-        Array.from(tournaments).sort().forEach(t => {
+        Array.from(tournaments).sort((a, b) => {
+            if (a === 'その他の大会') return 1;
+            if (b === 'その他の大会') return -1;
+            return a.localeCompare(b, 'ja');
+        }).forEach(t => {
             tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
         });
         tourneySelect.innerHTML = tourneyHtml;
@@ -680,6 +687,9 @@
         let tournaments = new Set();
         let years = new Set();
 
+        // 常に「その他の大会」を選択肢として追加する
+        tournaments.add('その他の大会');
+
         motionsCache.forEach(m => {
             const normT = getNormalizedTournament(m.tournament);
             if (normT) tournaments.add(normT);
@@ -687,7 +697,11 @@
         });
 
         let tourneyHtml = '<option value="">すべての大会名</option>';
-        Array.from(tournaments).sort().forEach(t => {
+        Array.from(tournaments).sort((a, b) => {
+            if (a === 'その他の大会') return 1;
+            if (b === 'その他の大会') return -1;
+            return a.localeCompare(b, 'ja');
+        }).forEach(t => {
             tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
         });
         tourneySelect.innerHTML = tourneyHtml;
