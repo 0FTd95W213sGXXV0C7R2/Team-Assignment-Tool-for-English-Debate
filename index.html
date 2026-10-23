@@ -313,7 +313,7 @@
         <h2>メニュー</h2>
         <p class="note">行いたい操作を選択してください。</p>
         <div class="home-menu">
-            <button onclick="switchView('assignView')">チーム分け ＆ 論題選択ツール</button>
+            <button onclick="switchView('assignView')">チーム分け ＆ 論題記録ツール</button>
             <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加・管理ページ</button>
         </div>
     </div>
@@ -321,16 +321,18 @@
     <!-- 1. チーム分け＆論題選択セクション -->
     <div class="card hidden" id="assignView">
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
-        <h2>チーム分け ＆ 論題選択ツール</h2>
+        <h2>チーム分け ＆ 論題記録ツール</h2>
         
-        <!-- 【事前選択】論題選択セクション（最大4個表示） -->
+        <!-- 【事前記録】論題記録セクション（最大4個表示） -->
         <div class="motion-selection-area">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の選択 (最大4候補)</h3>
+                <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の記録 (最大4候補)</h3>
                 <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="redrawPreMotions()">🔄 シャッフル</button>
             </div>
             
-            <p class="note" style="margin-bottom: 10px;">事前に以下の候補または検索から論題を1つ選択してください。</p>
+            <p class="note" style="margin-bottom: 10px;">
+                登録ボタンを押すと、論題集データベースにその論題を採用したことが記録され、論題シャッフル時に被りを防ぐため一定期間(6ヶ月)その論題が出づ라くなります。また、部活内でやったものも同様です。
+            </p>
             
             <!-- ランダム抽出4件エリア -->
             <div id="pre-candidates-container"></div>
@@ -340,13 +342,13 @@
             <input type="text" id="pre-search-input" placeholder="キーワードを入力して検索..." oninput="filterPreMotions()" style="margin-bottom: 4px; padding: 12px; font-size: 16px;">
             <div id="pre-search-results"></div>
 
-            <!-- 選択中の論題状態表示エリア -->
+            <!-- 記録中の論題状態表示エリア -->
             <div id="selectedMotionArea" class="selected-box hidden">
                 <div>
-                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">選択中 ✓ (DB記録済み)</span><br>
+                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">記録中 ✓ (DB保存済み)</span><br>
                     <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
                 </div>
-                <button class="btn-danger" onclick="clearSelectedMotion()">選択を取り消す</button>
+                <button class="btn-danger" onclick="clearSelectedMotion()">記録を取り消す</button>
             </div>
         </div>
 
@@ -445,8 +447,8 @@
         <div id="submitStatus" class="hidden"></div>
 
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
-            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
-            <p class="note">登録されている論題の検索（スペース区切り・単語境界対応）、修正、削除が行えます。</p>
+            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（実施履歴・編集・削除）</h3>
+            <p class="note">登録されている論題の検索（スペース区切り・単語境界対応）、実施回数・日時の確認、修正、削除が行えます。</p>
             
             <!-- 検索欄 -->
             <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み (例: AI, spring 2026)..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
@@ -531,19 +533,50 @@
         return text.toLowerCase().includes(keyword.toLowerCase());
     }
 
-    // シャッフルして最大4件表示する関数
+    // シャッフル機能（6ヶ月以内に使用された論題が出づらくなるように優先度を調整）
     function redrawPreMotions() {
         const container = document.getElementById('pre-candidates-container');
         if (!container) return;
 
         let sampleMotions = [];
         if (motionsCache.length > 0) {
-            let shuffled = [...motionsCache];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            sampleMotions = shuffled.slice(0, 4);
+            const now = new Date();
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+            // 6ヶ月以内に使用されていない論題と、使用されている論題に分ける
+            let freshList = [];
+            let recentList = [];
+
+            motionsCache.forEach(m => {
+                if (!Array.isArray(m.history) || m.history.length === 0) {
+                    freshList.push(m);
+                } else {
+                    const lastUsed = new Date(m.history[m.history.length - 1]);
+                    if (lastUsed < sixMonthsAgo) {
+                        freshList.push(m); // 6ヶ月以上前なら新鮮扱いに含める
+                    } else {
+                        recentList.push(m); // 直近6ヶ月以内に使用済み
+                    }
+                }
+            });
+
+            // それぞれをシャッフル
+            const shuffleArray = (arr) => {
+                let a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            };
+
+            freshList = shuffleArray(freshList);
+            recentList = shuffleArray(recentList);
+
+            // まず未使用/6ヶ月以上前のものから最大4件選び、足りなければ直近のものから補う
+            let combined = [...freshList, ...recentList];
+            sampleMotions = combined.slice(0, 4);
         }
 
         let html = '';
@@ -553,7 +586,7 @@
                 html += `
                     <div class="motion-candidate-item">
                         <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">選択する</button>
+                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">記録する</button>
                     </div>
                 `;
             });
@@ -595,7 +628,7 @@
             resHtml += `
                 <div class="search-result-item">
                     <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '-'}, ${m.year || '-'})</span></span>
-                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">選択</button>
+                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">記録</button>
                 </div>
             `;
         });
@@ -603,7 +636,7 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 論題を選択して即時記録＆DBへ使用履歴送信
+    // 論題を記録して即時DBへ使用履歴送信
     async function selectPreMotion(motionText) {
         selectedMotionText = motionText;
         document.getElementById('selectedMotionDisplay').innerText = motionText;
@@ -615,6 +648,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'recordUsage', selectedMotions: [motionText] })
             });
+            // キャッシュ側もローカルで即時更新しておく
+            const target = motionsCache.find(m => m.motion === motionText);
+            if (target) {
+                if (!Array.isArray(target.history)) target.history = [];
+                target.history.push(new Date().toISOString());
+            }
         } catch (e) {
             console.error('使用履歴の記録に失敗しました', e);
         }
@@ -709,7 +748,36 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 登録済み一覧の表示（スペース区切りAND検索 ＆ 単語境界対応 ＆ ヒット件数表示）
+    // 履歴（回数・日時）をフォーマットする関数
+    function formatHistory(historyArr) {
+        if (!Array.isArray(historyArr) || historyArr.length === 0) {
+            return '<span style="color:#64748b;">実施履歴なし</span>';
+        }
+
+        const count = historyArr.length;
+        const lastDateStr = historyArr[historyArr.length - 1];
+        const lastDate = new Date(lastDateStr);
+        const now = new Date();
+        const diffTime = now - lastDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        let timeStr = "";
+        if (diffDays <= 0) {
+            timeStr = "今日";
+        } else if (diffDays <= 10) {
+            timeStr = `${diffDays}日前`;
+        } else if (diffDays < 30) {
+            const weeks = Math.floor(diffDays / 7);
+            timeStr = `${weeks > 0 ? weeks : 1}週間前`;
+        } else {
+            const months = Math.floor(diffDays / 30);
+            timeStr = `${months > 0 ? months : 1}ヶ月前`;
+        }
+
+        return `実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
+    }
+
+    // 登録済み一覧の表示（回数・日時表示、スペース区切り・単語境界対応、ヒット件数表示）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const rawKeyword = document.getElementById('manage-search-input').value.trim();
@@ -743,12 +811,14 @@
             const safeMotion = (m.motion || '').replace(/'/g, "\\'");
             const safeTourney = (m.tournament || '').replace(/'/g, "\\'");
             const safeYear = (m.year || '').replace(/'/g, "\\'");
+            const historyInfo = formatHistory(m.history);
 
             html += `
                 <div class="management-item">
                     <div>
                         <strong>${m.motion}</strong><br>
-                        <span style="font-size:0.85rem; color:#64748b;">大会: ${m.tournament || '-'} / 年度: ${m.year || '-'}</span>
+                        <span style="font-size:0.85rem; color:#64748b;">大会: ${m.tournament || '-'} / 年度: ${m.year || '-'}</span><br>
+                        <span style="font-size:0.8rem; color:#0284c7;">${historyInfo}</span>
                     </div>
                     <div class="management-actions">
                         <button class="btn-secondary" onclick="startEdit(${originalIndex}, '${safeMotion}', '${safeTourney}', '${safeYear}')">編集</button>
@@ -872,7 +942,7 @@
             const data = await res.json();
 
             if (res.ok) {
-                setStatus('🗑️ 論題を削除しました。', 'success');
+                setStatus('論題を削除しました。', 'success');
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
