@@ -889,7 +889,6 @@
         if (editIndex >= 0) {
             updatedList[editIndex] = { ...updatedList[editIndex], motion, tournament, year };
         } else {
-            // 大会名に「部活内」が含まれる場合は、新規登録時から自動的に1回分の実施履歴を付与する
             const initialHistory = (tournament.includes('部活内') || tournament.includes('部活')) ? [new Date().toISOString()] : [];
             updatedList.push({ motion, tournament, year, history: initialHistory });
         }
@@ -937,7 +936,7 @@
             const data = await res.json();
 
             if (res.ok) {
-                setStatus(論題を削除しました。', 'success');
+                setStatus('論題を削除しました。', 'success');
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
