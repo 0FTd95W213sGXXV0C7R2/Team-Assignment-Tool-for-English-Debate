@@ -162,7 +162,7 @@
             word-break: break-all;
             margin-top: 4px;
         }
-        #submitStatus {
+        #submitStatus, #formWarningStatus {
             margin-top: 16px;
             padding: 14px;
             border-radius: 8px;
@@ -323,7 +323,7 @@
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2>チーム分け ＆ 論題記録ツール</h2>
         
-        <!-- 【事前記録】論題記録セクション（最大4個表示） -->
+        <!-- 【事前記録】論題記録セクション（最大4個表示 & 絞り込み対応） -->
         <div class="motion-selection-area">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 使用する論題の記録 (最大4候補)</h3>
@@ -331,15 +331,32 @@
             </div>
             
             <p class="note" style="margin-bottom: 10px;">
-                登録ボタンを押すと、論題集データベースにその論題を採用したことが記録され、論題シャッフル時に被りを防ぐため一定期間(6ヶ月)その論題が出づらくなります。また、部活内でやったものも同様です。
+                登録ボタンを押すと、論題集データベースにその論題を採用したことが記録され、一定期間(6ヶ月)その論題が出づらくなります。
             </p>
             
             <!-- ランダム抽出4件エリア -->
             <div id="pre-candidates-container"></div>
 
-            <!-- 検索エリア -->
-            <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">キーワード検索（データベース全体から探す）</label>
-            <input type="text" id="pre-search-input" placeholder="キーワードを入力して検索..." oninput="filterPreMotions()" style="margin-bottom: 4px; padding: 12px; font-size: 16px;">
+            <!-- 検索 & 絞り込みエリア -->
+            <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">データベースから論題を検索・絞り込み</label>
+            <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
+            
+            <div class="grid-2" style="margin-bottom: 8px;">
+                <select id="pre-filter-tournament" onchange="filterPreMotions()">
+                    <option value="">すべての大会名</option>
+                </select>
+                <select id="pre-filter-year" onchange="filterPreMotions()">
+                    <option value="">すべての年度</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <select id="pre-filter-status" onchange="filterPreMotions()">
+                    <option value="all">すべての実施状況</option>
+                    <option value="done">過去にやった論題のみ</option>
+                    <option value="not_done">まだやっていない論題のみ</option>
+                </select>
+            </div>
+
             <div id="pre-search-results"></div>
 
             <!-- 記録中の論題状態表示エリア -->
@@ -403,7 +420,7 @@
         <h2 id="formTitle">新規論題の追加</h2>
         
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、検索欄で類似論題がないことを確認したあと、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -413,7 +430,7 @@
             <div class="grid-2">
                 <div>
                     <label for="newTournament">大会名 (Tournament)</label>
-                    <input type="text" id="newTournament" placeholder="例: Asian Spring 2026">
+                    <input type="text" id="newTournament" placeholder="例: WSDC">
                 </div>
                 <div>
                     <label for="newYear">年度 (Year)</label>
@@ -444,6 +461,7 @@
             </div>
         </div>
 
+        <div id="formWarningStatus" class="hidden"></div>
         <div id="submitStatus" class="hidden"></div>
 
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
@@ -451,7 +469,7 @@
             <p class="note">登録されている論題の検索や、大会名・年度・実施状況での絞り込みが行えます。</p>
             
             <!-- 検索窓 & 各種絞り込みフィルター -->
-            <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み (例: AI, spring)..." oninput="renderManagementList()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
+            <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
             
             <div class="grid-2" style="margin-bottom: 8px;">
                 <select id="filter-tournament" onchange="renderManagementList()">
@@ -503,13 +521,60 @@
         }
     }
 
+    // 大会名の正規化・グループ化ルール関数
+    function getNormalizedTournament(rawT) {
+        if (!rawT || rawT === '-') return '-';
+        let t = rawT.trim();
+
+        // 1. 部活内 (日付ごとなどのものをまとめる)
+        if (t.includes('部活内') || t.includes('部活')) {
+            return '部活内';
+        }
+        // 2. HEnDA全国大会
+        if (t.includes('HEnDA')) {
+            return 'HEnDA全国大会';
+        }
+        // 3. HPDU推奨
+        if (t.includes('HPDU推奨')) {
+            return 'HPDU推奨';
+        }
+        // 4. JWSDC、中学生全国大会、中学全国大会、夏合宿・全国大会（中学）を同じくくる
+        if (t.includes('JWSDC') || t.includes('中学生全国大会') || t.includes('中学全国大会') || t.includes('夏合宿・全国大会（中学）')) {
+            return 'JWSDC';
+        }
+        // 5. WSDC、世界交流大会をWSDCとする
+        if (t.includes('WSDC') || t.includes('世界交流大会')) {
+            return 'WSDC';
+        }
+        // 6. 連盟杯 → HPDU連盟杯
+        if (t.includes('連盟杯')) {
+            return 'HPDU連盟杯';
+        }
+        // 7. 新緑杯や新芽杯 → HPDU新緑杯・新芽杯
+        if (t.includes('新緑杯') || t.includes('新芽杯')) {
+            return 'HPDU新緑杯・新芽杯';
+        }
+        // 8. 夏合宿（夏合宿・全国大会（中学）以外）
+        if (t.includes('合宿')) {
+            return '夏合宿';
+        }
+        // 9. PDA全国大会 (全国大会(冬)、全国大会（夏）、冬 全国大会、冬 全国大会（高校）、冬全国大会など)
+        if (t.includes('全国大会') || t.includes('冬全国大会') || t.includes('冬 全国大会')) {
+            return 'PDA全国大会';
+        }
+
+        return t;
+    }
+
     function switchView(viewId) {
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('assignView').classList.add('hidden');
         document.getElementById('motionView').classList.add('hidden');
 
         if (viewId === 'assignView') {
+            updatePreFilterOptions();
             redrawPreMotions();
+            filterPreMotions();
         }
 
         if (viewId === 'motionView') {
@@ -519,6 +584,7 @@
             document.getElementById('filter-year').value = '';
             document.getElementById('filter-status').value = 'all';
             clearStatus();
+            clearFormWarning();
             updateFilterOptions();
             renderManagementList();
         }
@@ -544,6 +610,19 @@
         statusEl.className = 'hidden';
     }
 
+    function setFormWarning(text) {
+        const el = document.getElementById('formWarningStatus');
+        el.innerText = text;
+        el.className = 'status-error';
+        el.classList.remove('hidden');
+    }
+
+    function clearFormWarning() {
+        const el = document.getElementById('formWarningStatus');
+        el.innerText = '';
+        el.className = 'hidden';
+    }
+
     function matchesKeyword(text, keyword) {
         if (!keyword) return true;
         if (/^[a-z0-9]+$/i.test(keyword)) {
@@ -553,7 +632,7 @@
         return text.toLowerCase().includes(keyword.toLowerCase());
     }
 
-    // 大会名と年度のセレクトボックスの選択肢を動的に生成する
+    // フィルタ用のセレクトボックス選択肢更新（管理ページ用）
     function updateFilterOptions() {
         const tourneySelect = document.getElementById('filter-tournament');
         const yearSelect = document.getElementById('filter-year');
@@ -566,7 +645,39 @@
         let years = new Set();
 
         motionsCache.forEach(m => {
-            if (m.tournament && m.tournament !== '-') tournaments.add(m.tournament);
+            const normT = getNormalizedTournament(m.tournament);
+            if (normT && normT !== '-') tournaments.add(normT);
+            if (m.year && m.year !== '-') years.add(m.year);
+        });
+
+        let tourneyHtml = '<option value="">すべての大会名</option>';
+        Array.from(tournaments).sort().forEach(t => {
+            tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
+        });
+        tourneySelect.innerHTML = tourneyHtml;
+
+        let yearHtml = '<option value="">すべての年度</option>';
+        Array.from(years).sort().reverse().forEach(y => {
+            yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
+        });
+        yearSelect.innerHTML = yearHtml;
+    }
+
+    // フィルタ用のセレクトボックス選択肢更新（チーム分けページ用）
+    function updatePreFilterOptions() {
+        const tourneySelect = document.getElementById('pre-filter-tournament');
+        const yearSelect = document.getElementById('pre-filter-year');
+        if (!tourneySelect || !yearSelect) return;
+
+        const currentTourney = tourneySelect.value;
+        const currentYear = yearSelect.value;
+
+        let tournaments = new Set();
+        let years = new Set();
+
+        motionsCache.forEach(m => {
+            const normT = getNormalizedTournament(m.tournament);
+            if (normT && normT !== '-') tournaments.add(normT);
             if (m.year && m.year !== '-') years.add(m.year);
         });
 
@@ -629,38 +740,52 @@
         if (sampleMotions.length > 0) {
             sampleMotions.forEach((m) => {
                 const safeMotionText = m.motion.replace(/'/g, "\\'");
+                const normTourney = getNormalizedTournament(m.tournament);
                 html += `
                     <div class="motion-candidate-item">
-                        <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '大会名なし'}, ${m.year || '年度なし'})</span></span>
+                        <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${normTourney}, ${m.year || '年度なし'})</span></span>
                         <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">記録する</button>
                     </div>
                 `;
             });
         } else {
-            html = `<p style="font-size:0.9rem; color:#64748b;">登録されている論題がありません。「新規論題追加・管理ページ」から追加してください。</p>`;
+            html = `<p style="font-size:0.9rem; color:#64748b;">登録されている論題がありません。</p>`;
         }
 
         container.innerHTML = html;
     }
 
+    // チーム分けページの論題検索・絞り込み処理
     function filterPreMotions() {
         const rawKeyword = document.getElementById('pre-search-input').value.trim();
+        const selectedTourney = document.getElementById('pre-filter-tournament').value;
+        const selectedYear = document.getElementById('pre-filter-year').value;
+        const selectedStatus = document.getElementById('pre-filter-status').value;
         const resultsContainer = document.getElementById('pre-search-results');
 
-        if (!rawKeyword) {
+        if (!rawKeyword && !selectedTourney && !selectedYear && selectedStatus === 'all') {
             resultsContainer.innerHTML = '';
             return;
         }
 
-        const keywords = rawKeyword.split(/\s+/);
+        const keywords = rawKeyword ? rawKeyword.split(/\s+/) : [];
 
         const filtered = motionsCache.filter(m => {
             const text = m.motion || '';
-            const tournament = m.tournament || '';
+            const normTourney = getNormalizedTournament(m.tournament);
             const year = m.year || '';
-            const targetString = `${text} ${tournament} ${year}`;
+            const targetString = `${text} ${normTourney} ${year}`;
 
-            return keywords.every(kw => matchesKeyword(targetString, kw));
+            const matchKeyword = keywords.every(kw => matchesKeyword(targetString, kw));
+            const matchTourney = !selectedTourney || normTourney === selectedTourney;
+            const matchYear = !selectedYear || year === selectedYear;
+
+            const hasDone = Array.isArray(m.history) && m.history.length > 0 && m.history[0] !== "-";
+            let matchStatus = true;
+            if (selectedStatus === 'done') matchStatus = hasDone;
+            else if (selectedStatus === 'not_done') matchStatus = !hasDone;
+
+            return matchKeyword && matchTourney && matchYear && matchStatus;
         });
 
         if (filtered.length === 0) {
@@ -671,9 +796,10 @@
         let resHtml = `<p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px; padding-left: 2px;">${filtered.length}件ヒットしました</p><div class="search-results-box">`;
         filtered.forEach(m => {
             const safeText = m.motion.replace(/'/g, "\\'");
+            const normTourney = getNormalizedTournament(m.tournament);
             resHtml += `
                 <div class="search-result-item">
-                    <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${m.tournament || '-'}, ${m.year || '-'})</span></span>
+                    <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${normTourney}, ${m.year || '-'})</span></span>
                     <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">記録</button>
                 </div>
             `;
@@ -820,7 +946,7 @@
         return `実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
     }
 
-    // 検索窓と各フィルター条件に従って論題リストを絞り込んで表示
+    // 管理ページの論題リスト表示（正規化大会名でフィルタリング）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const rawKeyword = document.getElementById('manage-search-input').value.trim();
@@ -839,28 +965,19 @@
 
         const filtered = motionsCache.filter((m, originalIndex) => {
             const text = m.motion || '';
-            const tournament = m.tournament || '';
+            const normTourney = getNormalizedTournament(m.tournament);
             const year = m.year || '';
-            const targetString = `${text} ${tournament} ${year}`;
+            const targetString = `${text} ${normTourney} ${year}`;
             m._originalIndex = originalIndex;
 
-            // 1. キーワード一致判定
             const matchKeyword = keywords.every(kw => matchesKeyword(targetString, kw));
-
-            // 2. 大会名一致判定
-            const matchTourney = !selectedTourney || tournament === selectedTourney;
-
-            // 3. 年度一致判定
+            const matchTourney = !selectedTourney || normTourney === selectedTourney;
             const matchYear = !selectedYear || year === selectedYear;
 
-            // 4. 過去にやったかどうか（実施状況）判定
             const hasDone = Array.isArray(m.history) && m.history.length > 0 && m.history[0] !== "-";
             let matchStatus = true;
-            if (selectedStatus === 'done') {
-                matchStatus = hasDone;
-            } else if (selectedStatus === 'not_done') {
-                matchStatus = !hasDone;
-            }
+            if (selectedStatus === 'done') matchStatus = hasDone;
+            else if (selectedStatus === 'not_done') matchStatus = !hasDone;
 
             return matchKeyword && matchTourney && matchYear && matchStatus;
         });
@@ -876,13 +993,14 @@
             const safeMotion = (m.motion || '').replace(/'/g, "\\'");
             const safeTourney = (m.tournament || '').replace(/'/g, "\\'");
             const safeYear = (m.year || '').replace(/'/g, "\\'");
+            const normTourney = getNormalizedTournament(m.tournament);
             const historyInfo = formatHistory(m.history);
 
             html += `
                 <div class="management-item">
                     <div>
                         <strong>${m.motion}</strong><br>
-                        <span style="font-size:0.85rem; color:#64748b;">大会: ${m.tournament || '-'} / 年度: ${m.year || '-'}</span><br>
+                        <span style="font-size:0.85rem; color:#64748b;">大会: ${normTourney} (原義: ${m.tournament || '-'}) / 年度: ${m.year || '-'}</span><br>
                         <span style="font-size:0.8rem; color:#0284c7;">${historyInfo}</span>
                     </div>
                     <div class="management-actions">
@@ -904,6 +1022,7 @@
         document.getElementById('formTitle').innerText = '論題の編集';
         document.getElementById('editCancelContainer').classList.remove('hidden');
         clearStatus();
+        clearFormWarning();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -915,6 +1034,7 @@
 
         document.getElementById('formTitle').innerText = '新規論題の追加';
         document.getElementById('editCancelContainer').classList.add('hidden');
+        clearFormWarning();
         hidePreview();
     }
 
@@ -927,6 +1047,19 @@
         if (!motion) {
             alert('論題を入力してください。');
             return;
+        }
+
+        // 同一論題の重複チェック
+        const duplicate = motionsCache.find((m, idx) => {
+            if (editIndex >= 0 && idx === editIndex) return false; // 編集中の自分自身は除外
+            return m.motion.trim().toLowerCase() === motion.toLowerCase();
+        });
+
+        if (duplicate) {
+            setFormWarning(`すでに同一の論題があります。\n【論題】${duplicate.motion}\n【大会】${duplicate.tournament} (${duplicate.year})`);
+            return;
+        } else {
+            clearFormWarning();
         }
 
         document.getElementById('prevMotion').innerText = motion;
