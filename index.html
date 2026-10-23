@@ -523,7 +523,7 @@
 
     // 大会名の正規化・グループ化ルール関数
     function getNormalizedTournament(rawT) {
-        if (!rawT || rawT === '-') return '-';
+        if (!rawT || rawT === '-') return 'その他の大会';
         let t = rawT.trim();
 
         // 1. 部活内
@@ -651,7 +651,7 @@
 
         motionsCache.forEach(m => {
             const normT = getNormalizedTournament(m.tournament);
-            if (normT && normT !== '-') tournaments.add(normT);
+            if (normT) tournaments.add(normT);
             if (m.year && m.year !== '-') years.add(m.year);
         });
 
@@ -682,7 +682,7 @@
 
         motionsCache.forEach(m => {
             const normT = getNormalizedTournament(m.tournament);
-            if (normT && normT !== '-') tournaments.add(normT);
+            if (normT) tournaments.add(normT);
             if (m.year && m.year !== '-') years.add(m.year);
         });
 
