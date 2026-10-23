@@ -343,7 +343,7 @@
             <!-- 選択中の論題状態表示エリア -->
             <div id="selectedMotionArea" class="selected-box hidden">
                 <div>
-                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">選択中 ✓ (DB記録予定)</span><br>
+                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">選択中 ✓ (DB記録済み)</span><br>
                     <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
                 </div>
                 <button class="btn-danger" onclick="clearSelectedMotion()">選択を取り消す</button>
@@ -401,7 +401,7 @@
         <h2 id="formTitle">新規論題の追加</h2>
         
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -446,9 +446,10 @@
 
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
             <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
-            <p class="note">登録されている論題の検索、修正、削除が行えます。</p>
+            <p class="note">登録されている論題の検索（スペース区切りで複数ワード対応）、修正、削除が行えます。</p>
             
-            <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
+            <!-- スペース区切り複数キーワード対応の管理用検索欄 -->
+            <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み (例: spring 2026)..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
 
             <div id="managementListContainer" class="management-list">
                 <p style="font-size: 0.9rem; color: #64748b;">読み込み中...</p>
@@ -532,7 +533,7 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            sampleMotions = shuffled.slice(0, 4); // 最大4個に変更
+            sampleMotions = shuffled.slice(0, 4);
         }
 
         let html = '';
@@ -588,13 +589,12 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 論題を選択して即時記録＆DB（GitHub）へ使用履歴として送信する関数
+    // 論題を選択して即時記録＆DBへ使用履歴送信
     async function selectPreMotion(motionText) {
         selectedMotionText = motionText;
         document.getElementById('selectedMotionDisplay').innerText = motionText;
         document.getElementById('selectedMotionArea').classList.remove('hidden');
 
-        // バックグラウンドでデータベースに選択された履歴を記録
         try {
             await fetch('/api/add-motion', {
                 method: 'POST',
@@ -695,9 +695,10 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
+    // 登録済み一覧の表示（スペース区切りの複数キーワードAND検索対応）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
-        const keyword = document.getElementById('manage-search-input').value.toLowerCase();
+        const rawKeyword = document.getElementById('manage-search-input').value.toLowerCase().trim();
         if (!container) return;
 
         if (motionsCache.length === 0) {
@@ -705,12 +706,17 @@
             return;
         }
 
+        const keywords = rawKeyword ? rawKeyword.split(/\s+/) : [];
+
         const filtered = motionsCache.filter((m, originalIndex) => {
             const text = (m.motion || '').toLowerCase();
             const tournament = (m.tournament || '').toLowerCase();
             const year = (m.year || '').toLowerCase();
+            
+            const targetString = `${text} ${tournament} ${year}`;
             m._originalIndex = originalIndex;
-            return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
+
+            return keywords.every(kw => targetString.includes(kw));
         });
 
         if (filtered.length === 0) {
@@ -853,7 +859,7 @@
             const data = await res.json();
 
             if (res.ok) {
-                setStatus('🗑️ 論題を削除しました。', 'success');
+                setStatus('論題を削除しました。', 'success');
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
