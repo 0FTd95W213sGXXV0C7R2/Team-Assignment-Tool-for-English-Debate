@@ -362,7 +362,7 @@
             <!-- 記録中の論題状態表示エリア -->
             <div id="selectedMotionArea" class="selected-box hidden">
                 <div>
-                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">記録中 ✓ (DB保存済み)</span><br>
+                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">記録中 ✓ (論題集に保存済み)</span><br>
                     <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
                 </div>
                 <button class="btn-danger" onclick="clearSelectedMotion()">記録を取り消す</button>
@@ -373,12 +373,12 @@
 
         <div class="grid-2">
             <div>
-                <label for="participants">メンバー (1人入力するごとに改行してください)</label>
+                <label for="participants">メンバー (1人入力するごとに改行)</label>
                 <textarea id="participants" placeholder=""></textarea>
                 <div class="note">※定員を超えた場合は自動的にジャッジに回ります</div>
             </div>
             <div>
-                <label for="judges">事前ジャッジ (1人入力するごとに改行してください/任意入力)</label>
+                <label for="judges">事前ジャッジ (1人入力するごとに改行/任意入力)</label>
                 <textarea id="judges" placeholder=""></textarea>
             </div>
         </div>
