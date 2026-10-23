@@ -401,7 +401,7 @@
         <h2 id="formTitle">新規論題の追加</h2>
         
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。部活内でやった論題を登録したいときは、検索欄で類似論題がないことを確認したあと、大会名の欄に「2026/01/01 部活内」、年度の欄に「2026」のように入力してください。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -446,10 +446,10 @@
 
         <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
             <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（編集・削除）</h3>
-            <p class="note">登録されている論題の検索（スペース区切りで複数ワード対応）、修正、削除が行えます。</p>
+            <p class="note">登録されている論題の検索（スペース区切り・単語境界対応）、修正、削除が行えます。</p>
             
-            <!-- スペース区切り複数キーワード対応の管理用検索欄 -->
-            <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み (例: spring 2026)..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
+            <!-- 検索欄 -->
+            <input type="text" id="manage-search-input" placeholder="登録済み論題をキーワードで絞り込み (例: AI, spring 2026)..." oninput="renderManagementList()" style="margin-bottom: 10px; padding: 12px; font-size: 16px;">
 
             <div id="managementListContainer" class="management-list">
                 <p style="font-size: 0.9rem; color: #64748b;">読み込み中...</p>
@@ -521,6 +521,18 @@
         statusEl.className = 'hidden';
     }
 
+    // 単語境界を考慮したスマートなキーワード一致判定ヘルパー
+    function matchesKeyword(text, keyword) {
+        if (!keyword) return true;
+        // 英数字のみのキーワード（例: AI, USなど）は単語単位(\b)でマッチさせることで誤爆を防ぐ
+        if (/^[a-z0-9]+$/i.test(keyword)) {
+            const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+            return regex.test(text);
+        }
+        // 日本語やスペース混じりの場合は通常の部分一致
+        return text.toLowerCase().includes(keyword.toLowerCase());
+    }
+
     // シャッフルして最大4件表示する関数
     function redrawPreMotions() {
         const container = document.getElementById('pre-candidates-container');
@@ -555,19 +567,23 @@
     }
 
     function filterPreMotions() {
-        const keyword = document.getElementById('pre-search-input').value.toLowerCase();
+        const rawKeyword = document.getElementById('pre-search-input').value.trim();
         const resultsContainer = document.getElementById('pre-search-results');
 
-        if (!keyword) {
+        if (!rawKeyword) {
             resultsContainer.innerHTML = '';
             return;
         }
 
+        const keywords = rawKeyword.split(/\s+/);
+
         const filtered = motionsCache.filter(m => {
-            const text = (m.motion || '').toLowerCase();
-            const tournament = (m.tournament || '').toLowerCase();
-            const year = (m.year || '').toLowerCase();
-            return text.includes(keyword) || tournament.includes(keyword) || year.includes(keyword);
+            const text = m.motion || '';
+            const tournament = m.tournament || '';
+            const year = m.year || '';
+            const targetString = `${text} ${tournament} ${year}`;
+
+            return keywords.every(kw => matchesKeyword(targetString, kw));
         });
 
         if (filtered.length === 0) {
@@ -695,10 +711,10 @@
         document.getElementById('resultCard').classList.remove('hidden');
     }
 
-    // 登録済み一覧の表示（スペース区切りの複数キーワードAND検索対応）
+    // 登録済み一覧の表示（スペース区切りAND検索 ＆ 単語境界対応）
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
-        const rawKeyword = document.getElementById('manage-search-input').value.toLowerCase().trim();
+        const rawKeyword = document.getElementById('manage-search-input').value.trim();
         if (!container) return;
 
         if (motionsCache.length === 0) {
@@ -709,14 +725,13 @@
         const keywords = rawKeyword ? rawKeyword.split(/\s+/) : [];
 
         const filtered = motionsCache.filter((m, originalIndex) => {
-            const text = (m.motion || '').toLowerCase();
-            const tournament = (m.tournament || '').toLowerCase();
-            const year = (m.year || '').toLowerCase();
-            
+            const text = m.motion || '';
+            const tournament = m.tournament || '';
+            const year = m.year || '';
             const targetString = `${text} ${tournament} ${year}`;
             m._originalIndex = originalIndex;
 
-            return keywords.every(kw => targetString.includes(kw));
+            return keywords.every(kw => matchesKeyword(targetString, kw));
         });
 
         if (filtered.length === 0) {
