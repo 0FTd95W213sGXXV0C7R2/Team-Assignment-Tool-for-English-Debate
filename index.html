@@ -38,7 +38,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
-            position: relative; /* 固定ボタンの基準位置調整用 */
+            position: relative;
         }
         h2 {
             font-size: 1.2rem;
@@ -127,11 +127,11 @@
             font-size: 1.1rem;
             padding: 18px;
         }
-        /* メニューに戻るボタンを右上に常時固定 */
+        /* メニューに戻るボタンを左上に常時固定 */
         .back-btn {
             position: fixed;
             top: 16px;
-            right: 16px;
+            left: 16px;
             z-index: 999;
             background-color: #e2e8f0;
             color: #475569;
@@ -1132,7 +1132,7 @@
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">一致する論題が見つかりませんでした。</p>`;
+            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">条件に一致する論題が見つかりませんでした。</p>`;
             return;
         }
 
