@@ -25,6 +25,7 @@
         .container {
             max-width: 900px;
             margin: 0 auto;
+            padding-top: 28px; /* ← 最上部でボタンとタイトルが被らないように上部に余白を確保 */
         }
         h1 {
             text-align: center;
@@ -61,6 +62,9 @@
             }
             .card {
                 padding: 16px;
+            }
+            .container {
+                padding-top: 36px; /* スマホでボタンとタイトルが近くなるため少し広めに調整 */
             }
         }
         label {
@@ -1132,7 +1136,7 @@
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">条件に一致する論題が見つかりませんでした。</p>`;
+            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">一致する論題が見つかりませんでした。</p>`;
             return;
         }
 
