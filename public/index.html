@@ -647,7 +647,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
       return;
     }
     const teams = [];
-    for (let i = 0; i < teamCount; i++) teams.push(participants.splice(0, size));
+    for (let i = 0; i < completePairs * 2; i++) teams.push(participants.splice(0, size));
     for (let i = 0; i < completePairs; i++) {
       const match = node('div', undefined, 'match');
       match.append(node('strong', `Match ${i + 1}`));
