@@ -551,6 +551,7 @@
     let selectedMotionText = "未選択";
     let pendingRecordMotionText = ""; // 誤操作防止用の一時保存
     let customTournaments = []; // 動的に追加された大会名選択肢
+    let statusTimer = null; // メッセージ消去用のタイマー
 
     window.addEventListener('DOMContentLoaded', async () => {
         const savedParticipants = localStorage.getItem('debate_participants');
@@ -670,7 +671,12 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function setStatus(text, type) {
+    function setStatus(text, type, autoDismiss = false) {
+        if (statusTimer) {
+            clearTimeout(statusTimer);
+            statusTimer = null;
+        }
+
         const statusEl = document.getElementById('submitStatus');
         statusEl.className = '';
         statusEl.innerText = text;
@@ -679,9 +685,20 @@
         else if (type === 'loading') statusEl.classList.add('status-loading');
         
         statusEl.classList.remove('hidden');
+
+        // 成功時などは指定により3秒後に消去する
+        if (autoDismiss) {
+            statusTimer = setTimeout(() => {
+                clearStatus();
+            }, 3000);
+        }
     }
 
     function clearStatus() {
+        if (statusTimer) {
+            clearTimeout(statusTimer);
+            statusTimer = null;
+        }
         const statusEl = document.getElementById('submitStatus');
         statusEl.innerText = '';
         statusEl.className = 'hidden';
@@ -1231,7 +1248,7 @@
 
             if (res.ok) {
                 const msg = editIndex >= 0 ? '✅ 論題が正常に更新されました！' : '✅ 論題は正常に追加されました！';
-                setStatus(msg, 'success');
+                setStatus(msg, 'success', true); // 第3引数trueで3秒後に自動消去
                 
                 cancelEdit();
                 await fetchMotions();
@@ -1263,7 +1280,7 @@
             const data = await res.json();
 
             if (res.ok) {
-                setStatus('論題を削除しました。', 'success');
+                setStatus('論題を削除しました。', 'success', true); // 第3引数trueで3秒後に自動消去
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
