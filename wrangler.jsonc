@@ -12,6 +12,11 @@
   "vars": {
     "SUPABASE_URL": "https://wsordbjnkvsmlqbaylrc.supabase.co"
   },
+  "previews": {
+    "vars": {
+      "SUPABASE_URL": "https://wsordbjnkvsmlqbaylrc.supabase.co"
+    }
+  },
   "r2_buckets": [
     {
       "binding": "BACKUPS",
