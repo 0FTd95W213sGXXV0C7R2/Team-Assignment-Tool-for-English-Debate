@@ -1068,14 +1068,19 @@
             return;
         }
 
-        // 同一論題の重複チェック
+        // 論題・大会名(登録名)・年度がすべて完全に一致する場合のみ重複判定
         const duplicate = motionsCache.find((m, idx) => {
             if (editIndex >= 0 && idx === editIndex) return false;
-            return m.motion.trim().toLowerCase() === motion.toLowerCase();
+            
+            const isMotionMatch = (m.motion || '').trim().toLowerCase() === motion.toLowerCase();
+            const isTournamentMatch = (m.tournament || '').trim().toLowerCase() === tournament.toLowerCase();
+            const isYearMatch = (m.year || '').trim().toLowerCase() === year.toLowerCase();
+
+            return isMotionMatch && isTournamentMatch && isYearMatch;
         });
 
         if (duplicate) {
-            setFormWarning(`すでに同一のものがあります。\n【論題】${duplicate.motion}\n【大会】${duplicate.tournament} (${duplicate.year})`);
+            setFormWarning(`すでに同一の論題データが存在します。\n【論題】${duplicate.motion}\n【大会名(登録名)】${duplicate.tournament || '未入力'}\n【年度】${duplicate.year || '未入力'}`);
             return;
         } else {
             clearFormWarning();
