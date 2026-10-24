@@ -25,13 +25,13 @@
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding-top: 55px; /* ← 固定ボタンとタイトルが被らないように上部に十分な余白を確保 */
+            padding-top: 45px; /* タイトルと固定ボタンが被らないように上部余白を確保 */
         }
         h1 {
             text-align: center;
             color: var(--primary-color);
             margin-bottom: 20px;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
         }
         .card {
             background: var(--card-bg);
@@ -63,7 +63,7 @@
                 padding: 16px;
             }
             .container {
-                padding-top: 55px; /* スマホでも被らないよう上部余白を確保 */
+                padding-top: 45px;
             }
         }
         label {
@@ -131,18 +131,20 @@
             padding: 18px;
         }
 
-        /* メニューに戻るボタンを左上に常時固定（タイトルと被らないようz-indexと余白を設定） */
+        /* メニューに戻るボタン（文字サイズと余白を小さくし、左上に固定） */
         .back-btn {
             position: fixed;
-            top: 12px;
-            left: 12px;
+            top: 10px;
+            left: 10px;
             z-index: 1000;
             background-color: #e2e8f0;
             color: #475569;
             width: auto;
-            padding: 8px 14px;
-            font-size: 0.85rem;
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
             min-height: auto;
+            border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .back-btn:hover {
@@ -346,8 +348,8 @@
 </head>
 <body>
 
-<!-- メニューに戻るボタン（左上に常時固定） -->
-<button id="navBackBtn" class="back-btn hidden" onclick="switchView('homeView')">← メニューに戻る</button>
+<!-- メニューに戻るボタン（左上に常時固定・コンパクト化） -->
+<button id="navBackBtn" class="back-btn hidden" onclick="switchView('homeView')">メニューに戻る</button>
 
 <div class="container">
     <h1>チーム分け＆論題管理ツール</h1>
@@ -845,7 +847,7 @@
         let tourneyHtml = '<option value="">すべての大会名</option>';
         Array.from(tournaments).sort((a, b) => {
             if (a === 'その他の大会') return 1;
-            if (b === 'その他の大会') return -1;
+            if (b === 'Other') return -1;
             return a.localeCompare(b, 'ja');
         }).forEach(t => {
             tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
