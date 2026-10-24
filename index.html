@@ -128,7 +128,7 @@
             padding: 18px;
         }
 
-        /* 検索窓とクリアボタン（×）用のスタイル */
+        /* 検索窓とクリアボタン（×）用のスタイル（ひらがな一文字分のサイズに調整） */
         .search-input-wrapper {
             position: relative;
             display: flex;
@@ -147,9 +147,9 @@
             color: #334155;
             border: none;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 20px;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -157,7 +157,6 @@
             cursor: pointer;
             padding: 0;
             min-height: auto !important;
-            width: auto;
         }
         .search-clear-btn:hover {
             background: #94a3b8;
@@ -660,7 +659,8 @@
 
     async function fetchMotions() {
         try {
-            const res = await fetch('motions.json');
+            // キャッシュ対策としてタイムスタンプを付与
+            const res = await fetch('motions.json?t=' + Date.now());
             if (res.ok) {
                 motionsCache = await res.json();
                 updateFilterOptions();
@@ -1229,7 +1229,6 @@
 
         // 既存の履歴があればチェックボックスと日付を反映
         const target = motionsCache[index];
-        const validHistory = getValidHistory(target.history || []);
         const isDoneCheckbox = document.getElementById('newIsDone');
         const doneDateInput = document.getElementById('newDoneDate');
 
@@ -1340,7 +1339,7 @@
 
         setStatus(editIndex >= 0 ? '更新中...' : '追加中...', 'loading');
 
-        // 実施履歴の作成
+        // 実施履歴の作成（日付が未入力の場合は 2024-01-01 にフォールバック）
         let historyArr = [];
         if (isDone) {
             const dateStr = rawDate ? rawDate : '2024-01-01';
@@ -1375,8 +1374,13 @@
                 const msg = editIndex >= 0 ? '✅ 論題が正常に更新されました！' : '✅ 論題は正常に追加されました！';
                 setStatus(msg, 'success', true);
                 
+                // 連続登録時にキャッシュズレが起きないよう即時反映
+                motionsCache = updatedList;
+                updateFilterOptions();
+                redrawPreMotions();
+                renderManagementList();
+
                 cancelEdit();
-                await fetchMotions();
             } else {
                 throw new Error(data.error || '処理に失敗しました。');
             }
@@ -1406,7 +1410,10 @@
 
             if (res.ok) {
                 setStatus('論題を削除しました。', 'success', true);
-                await fetchMotions();
+                motionsCache = updatedList;
+                updateFilterOptions();
+                redrawPreMotions();
+                renderManagementList();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
             }
