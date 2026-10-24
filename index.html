@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>チーム分け＆論題管理システム</title>
+    <!-- Supabase SDK の読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -128,7 +130,7 @@
             padding: 18px;
         }
 
-        /* 検索窓とクリアボタン（×）用のスタイル */
+        /* 検索窓とクリアボタン（×）用のスタイル（ひらがな一文字サイズ） */
         .search-input-wrapper {
             position: relative;
             display: flex;
@@ -419,7 +421,7 @@
             </div>
             
             <p class="note" style="margin-bottom: 10px;">
-                登録ボタンを押すと、確認画面を経て論題集データベースにその論題を採用したことが記録されます。
+                登録ボタンを押すと、確認画面を経てSupabaseデータベースにその論題の採用が記録されます。
             </p>
             
             <!-- ランダム抽出4件エリア -->
@@ -430,11 +432,6 @@
             <div class="search-input-wrapper">
                 <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()">
                 <button type="button" class="search-clear-btn" onclick="clearSearch('pre-search-input', filterPreMotions)" title="クリア">×</button>
-            </div>
-            
-            <!-- 検索窓直下の注意書き -->
-            <div class="search-subnote">
-                ※追加した論題が表示されない場合、このページを再更新することで表示される場合があります。表示されない場合、再度入力してください。
             </div>
 
             <div class="grid-2" style="margin-bottom: 8px;">
@@ -465,7 +462,7 @@
             <!-- 記録中の論題状態表示エリア -->
             <div id="selectedMotionArea" class="selected-box hidden">
                 <div>
-                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">記録中 ✓ (論題集に保存済み)</span><br>
+                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">記録中 ✓ (Supabase保存済み)</span><br>
                     <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
                 </div>
                 <button class="btn-danger" onclick="clearSelectedMotion()">記録を取り消す</button>
@@ -522,7 +519,7 @@
         <h2 id="formTitle">新規論題の追加</h2>
         
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。大会名は、必ず登録済み論題一覧に準拠してください。</p>
+            <p class="note">Supabaseデータベースに新しい論題を追加、または既存の論題を編集します。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -546,7 +543,7 @@
                     <input type="checkbox" id="newIsDone" onchange="toggleDoneDateInput()" style="width: auto; margin-bottom: 0; transform: scale(1.1);"> 過去に実施したことがある論題
                 </label>
                 <div id="doneDateArea" class="hidden" style="margin-top: 12px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-                    <label for="newDoneDate" style="font-size: 0.9rem; margin-bottom: 4px;">実施日 (分からない場合は空欄のままでOK ⇒ 自動で 2024/01/01 になります)</label>
+                    <label for="newDoneDate" style="font-size: 0.9rem; margin-bottom: 4px;">実施日 (分からない場合は空欄 ⇒ 自動で 2024/01/01 になります)</label>
                     <input type="date" id="newDoneDate" style="margin-bottom: 0;">
                 </div>
             </div>
@@ -587,11 +584,6 @@
                 <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()">
                 <button type="button" class="search-clear-btn" onclick="clearSearch('manage-search-input', renderManagementList)" title="クリア">×</button>
             </div>
-            
-            <!-- 検索窓直下の注意書き -->
-            <div class="search-subnote">
-                ※追加した論題が表示されない場合、このページを再更新することで表示される場合があります。表示されない場合、再度入力してください。
-            </div>
 
             <div class="grid-2" style="margin-bottom: 8px;">
                 <div>
@@ -614,6 +606,12 @@
                     <option value="done">過去にやった論題のみ</option>
                     <option value="not_done">まだやっていない論題のみ</option>
                 </select>
+            </div>
+
+            <!-- JSONダウンロード（確認・バックアップ用ボタン） -->
+            <div style="margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.85rem; color: #64748b;">現在のDB内容をファイルとして確認・保存：</span>
+                <button class="btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.85rem; min-height: auto;" onclick="downloadMotionsJSON()">motions.jsonをダウンロード</button>
             </div>
 
             <div id="managementListContainer" class="management-list">
@@ -642,6 +640,12 @@
 </div>
 
 <script>
+    // Supabase 接続情報
+    const SUPABASE_URL = 'https://kiewlmqxsqcysswcruiw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let motionsCache = [];
     let selectedMotionText = "未選択";
     let pendingRecordMotionText = ""; 
@@ -657,16 +661,16 @@
         await fetchMotions();
     });
 
+    // Supabaseからデータを取得
     async function fetchMotions() {
         try {
-            // キャッシュ対策としてタイムスタンプを付与
-            const res = await fetch('motions.json?t=' + Date.now());
-            if (res.ok) {
-                motionsCache = await res.json();
-                updateFilterOptions();
-                redrawPreMotions();
-                renderManagementList();
-            }
+            const { data, error } = await supabase.from('motions').select('*');
+            if (error) throw error;
+            
+            motionsCache = data || [];
+            updateFilterOptions();
+            redrawPreMotions();
+            renderManagementList();
         } catch (e) {
             console.error('論題集データベースの読み込みに失敗しました', e);
         }
@@ -1010,6 +1014,7 @@
         document.getElementById('recordConfirmModal').classList.add('hidden');
     }
 
+    // 実施履歴の記録（Supabase更新）
     async function executeRecordMotion() {
         if (!pendingRecordMotionText) return;
         const motionText = pendingRecordMotionText;
@@ -1020,16 +1025,19 @@
         document.getElementById('selectedMotionArea').classList.remove('hidden');
 
         try {
-            await fetch('/api/add-motion', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'recordUsage', selectedMotions: [motionText] })
-            });
             const target = motionsCache.find(m => m.motion === motionText);
             if (target) {
                 if (!Array.isArray(target.history)) target.history = [];
                 target.history.push(new Date().toISOString());
-                target.history = getValidHistory(target.history);
+                const validHistory = getValidHistory(target.history);
+
+                const { error } = await supabase
+                    .from('motions')
+                    .update({ history: validHistory })
+                    .eq('id', target.id);
+
+                if (error) throw error;
+                target.history = validHistory;
             }
         } catch (e) {
             console.error('使用履歴の記録に失敗しました', e);
@@ -1227,7 +1235,6 @@
         document.getElementById('newTournament').value = tournament === '-' ? '' : tournament;
         document.getElementById('newYear').value = year === '-' ? '' : year;
 
-        // 既存の履歴があればチェックボックスと日付を反映
         const target = motionsCache[index];
         const isDoneCheckbox = document.getElementById('newIsDone');
         const doneDateInput = document.getElementById('newDoneDate');
@@ -1329,6 +1336,7 @@
         document.getElementById('motionFormArea').classList.remove('hidden');
     }
 
+    // データの追加または更新（Supabaseへ保存）
     async function addNewMotion() {
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
@@ -1339,7 +1347,6 @@
 
         setStatus(editIndex >= 0 ? '更新中...' : '追加中...', 'loading');
 
-        // 実施履歴の作成（日付が未入力の場合は 2024-01-01 にフォールバック）
         let historyArr = [];
         if (isDone) {
             const dateStr = rawDate ? rawDate : '2024-01-01';
@@ -1348,78 +1355,65 @@
             historyArr = [isoStr];
         }
 
-        let updatedList = [...motionsCache];
-        if (editIndex >= 0) {
-            updatedList[editIndex] = { 
-                ...updatedList[editIndex], 
-                motion, 
-                tournament, 
-                year, 
-                history: isDone ? historyArr : [] 
-            };
-        } else {
-            updatedList.push({ motion, tournament, year, history: historyArr });
-        }
-
         try {
-            const res = await fetch('/api/add-motion', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'overwrite', motions: updatedList })
-            });
+            if (editIndex >= 0 && motionsCache[editIndex]) {
+                const targetId = motionsCache[editIndex].id;
+                const { error } = await supabase
+                    .from('motions')
+                    .update({ motion, tournament, year, history: isDone ? historyArr : [] })
+                    .eq('id', targetId);
 
-            const data = await res.json();
-
-            if (res.ok) {
-                const msg = editIndex >= 0 ? '✅ 論題が正常に更新されました！' : '✅ 論題は正常に追加されました！';
-                setStatus(msg, 'success', true);
-                
-                // 連続登録時にキャッシュズレが起きないよう即時反映
-                motionsCache = updatedList;
-                updateFilterOptions();
-                redrawPreMotions();
-                renderManagementList();
-
-                cancelEdit();
+                if (error) throw error;
+                setStatus('✅ 論題が正常に更新されました！', 'success', true);
             } else {
-                throw new Error(data.error || '処理に失敗しました。');
+                const { error } = await supabase
+                    .from('motions')
+                    .insert([{ motion, tournament, year, history: historyArr }]);
+
+                if (error) throw error;
+                setStatus('✅ 論題は正常に追加されました！', 'success', true);
             }
+
+            cancelEdit();
+            await fetchMotions();
         } catch (err) {
             setStatus(`❌ エラー: ${err.message}`, 'error');
         }
     }
 
+    // データの削除（Supabaseから削除）
     async function deleteMotion(index) {
-        if (!confirm(`“${motionsCache[index].motion}”を削除してもよろしいですか？`)) {
+        const target = motionsCache[index];
+        if (!confirm(`“${target.motion}”を削除してもよろしいですか？`)) {
             return;
         }
-
-        let updatedList = [...motionsCache];
-        updatedList.splice(index, 1);
 
         setStatus('削除中...', 'loading');
 
         try {
-            const res = await fetch('/api/add-motion', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'overwrite', motions: updatedList })
-            });
+            const { error } = await supabase
+                .from('motions')
+                .delete()
+                .eq('id', target.id);
 
-            const data = await res.json();
+            if (error) throw error;
 
-            if (res.ok) {
-                setStatus('論題を削除しました。', 'success', true);
-                motionsCache = updatedList;
-                updateFilterOptions();
-                redrawPreMotions();
-                renderManagementList();
-            } else {
-                throw new Error(data.error || '削除に失敗しました。');
-            }
+            setStatus('論題を削除しました。', 'success', true);
+            await fetchMotions();
         } catch (err) {
             setStatus(`❌ エラー: ${err.message}`, 'error');
         }
+    }
+
+    // JSONダウンロード機能（中身の確認・バックアップ用）
+    function downloadMotionsJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(motionsCache, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "motions.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
     }
 </script>
 
