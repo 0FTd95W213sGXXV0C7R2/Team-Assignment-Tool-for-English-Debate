@@ -361,7 +361,7 @@
             </div>
             
             <p class="note" style="margin-bottom: 10px;">
-                登録ボタンを押すと、確認画面を経て論題集データベースにその論題を採用したことが記録され、一定期間(6ヶ月)その論題が出づらくなります。
+                登録ボタンを押すと、確認画面を経て論題集データベースにその論題を採用したことが記録されます。
             </p>
             
             <!-- ランダム抽出4件エリア -->
@@ -837,26 +837,7 @@
 
         let sampleMotions = [];
         if (motionsCache.length > 0) {
-            const now = new Date();
-            const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-            let freshList = [];
-            let recentList = [];
-
-            motionsCache.forEach(m => {
-                if (!Array.isArray(m.history) || m.history.length === 0) {
-                    freshList.push(m);
-                } else {
-                    const lastUsed = new Date(m.history[m.history.length - 1]);
-                    if (lastUsed < sixMonthsAgo) {
-                        freshList.push(m);
-                    } else {
-                        recentList.push(m);
-                    }
-                }
-            });
-
+            // 単純に全論題をランダムにシャッフルして上から4件抽出
             const shuffleArray = (arr) => {
                 let a = [...arr];
                 for (let i = a.length - 1; i > 0; i--) {
@@ -866,11 +847,7 @@
                 return a;
             };
 
-            freshList = shuffleArray(freshList);
-            recentList = shuffleArray(recentList);
-
-            let combined = [...freshList, ...recentList];
-            sampleMotions = combined.slice(0, 4);
+            sampleMotions = shuffleArray(motionsCache).slice(0, 4);
         }
 
         let html = '';
