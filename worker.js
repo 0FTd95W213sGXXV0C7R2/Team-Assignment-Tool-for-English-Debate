@@ -15,7 +15,6 @@ async function db(env, path, { method = 'GET', body, headers = {} } = {}) {
     method,
     headers: {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-      authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
       'content-type': 'application/json',
       accept: 'application/json',
       ...headers,
