@@ -207,16 +207,6 @@
             margin-top: -8px;
             margin-bottom: 12px;
         }
-        .search-subnote {
-            font-size: 0.8rem;
-            color: #166534;
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-top: -4px;
-            margin-bottom: 12px;
-        }
         .badge {
             display: inline-block;
             background: #2563eb;
@@ -406,7 +396,7 @@
 <div class="container">
     <!-- スクロールしても上部に固定表示されるナビゲーション領域 -->
     <div id="stickyNav" class="sticky-nav-bar hidden">
-        <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
+        <button id="backBtn" class="back-btn">← メニューに戻る</button>
     </div>
 
     <h1>チーム分け＆論題管理システム</h1>
@@ -416,8 +406,8 @@
         <h2>メニュー</h2>
         <p class="note">行いたい操作を選択してください。</p>
         <div class="home-menu">
-            <button onclick="switchView('assignView')">チーム分け ＆ 論題記録システム</button>
-            <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加・管理ページ</button>
+            <button id="btnAssign">チーム分け ＆ 論題記録システム</button>
+            <button id="btnMotion" class="btn-secondary">新規論題追加・管理ページ</button>
         </div>
     </div>
 
@@ -671,7 +661,17 @@
     let customTournaments = []; 
     let statusTimer = null; 
 
+    // 画面ロード時にイベントリスナーを安全に登録
     window.addEventListener('DOMContentLoaded', async () => {
+        // ボタンクリックイベントの設定（インラインonclickの依存を排除）
+        const btnAssign = document.getElementById('btnAssign');
+        const btnMotion = document.getElementById('btnMotion');
+        const backBtn = document.getElementById('backBtn');
+
+        if (btnAssign) btnAssign.addEventListener('click', () => switchView('assignView'));
+        if (btnMotion) btnMotion.addEventListener('click', () => switchView('motionView'));
+        if (backBtn) backBtn.addEventListener('click', () => switchView('homeView'));
+
         const savedParticipants = localStorage.getItem('debate_participants');
         const savedJudges = localStorage.getItem('debate_judges');
         if (savedParticipants) document.getElementById('participants').value = savedParticipants;
@@ -765,18 +765,23 @@
         }
     }
 
-    // 確実にグローバルから呼び出せるように window.switchView として定義
-    window.switchView = function(viewId) {
-        document.getElementById('homeView').classList.add('hidden');
-        document.getElementById('assignView').classList.add('hidden');
-        document.getElementById('motionView').classList.add('hidden');
-
+    // 画面切り替え関数
+    function switchView(viewId) {
+        const homeView = document.getElementById('homeView');
+        const assignView = document.getElementById('assignView');
+        const motionView = document.getElementById('motionView');
         const stickyNav = document.getElementById('stickyNav');
 
-        if (viewId === 'homeView') {
-            stickyNav.classList.add('hidden');
-        } else {
-            stickyNav.classList.remove('hidden');
+        if (homeView) homeView.classList.add('hidden');
+        if (assignView) assignView.classList.add('hidden');
+        if (motionView) motionView.classList.add('hidden');
+
+        if (stickyNav) {
+            if (viewId === 'homeView') {
+                stickyNav.classList.add('hidden');
+            } else {
+                stickyNav.classList.remove('hidden');
+            }
         }
 
         if (viewId === 'assignView') {
@@ -787,19 +792,26 @@
 
         if (viewId === 'motionView') {
             cancelEdit();
-            document.getElementById('manage-search-input').value = '';
-            document.getElementById('filter-tournament').value = '';
-            document.getElementById('filter-year').value = '';
-            document.getElementById('filter-status').value = 'all';
+            const manageSearch = document.getElementById('manage-search-input');
+            const filterTourney = document.getElementById('filter-tournament');
+            const filterYear = document.getElementById('filter-year');
+            const filterStatus = document.getElementById('filter-status');
+
+            if (manageSearch) manageSearch.value = '';
+            if (filterTourney) filterTourney.value = '';
+            if (filterYear) filterYear.value = '';
+            if (filterStatus) filterStatus.value = 'all';
+
             clearStatus();
             clearFormWarning();
             updateFilterOptions();
             renderManagementList();
         }
 
-        document.getElementById(viewId).classList.remove('hidden');
+        const targetView = document.getElementById(viewId);
+        if (targetView) targetView.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    }
 
     function setStatus(text, type, autoDismiss = false) {
         if (statusTimer) {
@@ -808,6 +820,7 @@
         }
 
         const statusEl = document.getElementById('submitStatus');
+        if (!statusEl) return;
         statusEl.className = '';
         statusEl.innerText = text;
         
@@ -830,21 +843,27 @@
             statusTimer = null;
         }
         const statusEl = document.getElementById('submitStatus');
-        statusEl.innerText = '';
-        statusEl.className = 'hidden';
+        if (statusEl) {
+            statusEl.innerText = '';
+            statusEl.className = 'hidden';
+        }
     }
 
     function setFormWarning(text) {
         const el = document.getElementById('formWarningStatus');
-        el.innerText = text;
-        el.className = 'status-error';
-        el.classList.remove('hidden');
+        if (el) {
+            el.innerText = text;
+            el.className = 'status-error';
+            el.classList.remove('hidden');
+        }
     }
 
     function clearFormWarning() {
         const el = document.getElementById('formWarningStatus');
-        el.innerText = '';
-        el.className = 'hidden';
+        if (el) {
+            el.innerText = '';
+            el.className = 'hidden';
+        }
     }
 
     function matchesKeyword(text, keyword) {
