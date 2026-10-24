@@ -1,0 +1,893 @@
+
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>チーム分け＆論題管理システム</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#17253c;background:#f5f7fb}
+*{box-sizing:border-box}
+body{margin:0;padding:0 14px 50px}
+main{max-width:940px;margin:auto}
+header{position:sticky;top:0;z-index:10;background:#f5f7fbeb;backdrop-filter:blur(8px);padding:12px 0;border-bottom:1px solid #dce4ee}
+h1{font-size:clamp(1.2rem,3vw,1.65rem);color:#2056b8;margin:0}
+h2{font-size:1.2rem;margin:0 0 15px}
+h3{font-size:1.05rem;margin:24px 0 10px;color:#2456a4}
+.card{background:white;border:1px solid #e1e8f2;border-radius:14px;padding:20px;margin-top:18px;box-shadow:0 3px 14px #10213a0b}
+.hidden{display:none!important}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.stack{display:grid;gap:12px}
+label{font-weight:650;display:block;margin-bottom:5px}
+input,select,textarea{width:100%;font:inherit;padding:11px;border:1px solid #bbc8d9;border-radius:8px;background:white;min-height:44px}
+textarea{min-height:130px;resize:vertical}
+input[type=checkbox]{width:auto;min-height:0}
+button{font:inherit;cursor:pointer;border:0;border-radius:9px;background:#2563eb;color:white;padding:11px 16px;min-height:44px;font-weight:650}
+button:hover{filter:brightness(.94)}
+button:disabled{opacity:.55;cursor:wait}
+.secondary{background:#64748b}
+.danger{background:#c73333}
+.success{background:#178447}
+.small{font-size:.88rem;padding:7px 10px;min-height:36px}
+.muted{color:#617187;font-size:.9rem}
+.notice{border-radius:8px;padding:12px;margin:12px 0;background:#e9f1ff;color:#174c9c;white-space:pre-wrap}
+.notice.error{background:#fff0f0;color:#a51d2c}
+.notice.ok{background:#e8f8ed;color:#166636}
+.item{border:1px solid #dbe4ee;border-radius:10px;padding:12px;margin:10px 0;background:#fff;overflow-wrap:anywhere}
+.item .row{justify-content:space-between}
+.item .actions{display:flex;gap:7px;flex-shrink:0}
+.panel{background:#f1f5fb;border-radius:10px;padding:14px}
+.scroll{max-height:420px;overflow:auto}
+.match{border-left:4px solid #2563eb;background:#f1f5fb;padding:14px;border-radius:8px;margin:12px 0}
+.badge{display:inline-block;background:#dbeafe;color:#18468e;padding:3px 8px;border-radius:6px}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{width:100%}
+#connection{font-size:.8rem;margin-top:5px}
+.modal{position:fixed;inset:0;z-index:30;background:#15243b9c;display:grid;place-items:center;padding:18px}
+.dialog{background:white;padding:22px;border-radius:14px;width:min(100%,540px);max-height:85vh;overflow:auto}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#back{width:auto}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+@media(max-width:650px){.grid,.filters{grid-template-columns:1fr}.card{padding:15px}.item .row{align-items:flex-start}.item .actions{width:100%}.item .actions button{flex:1}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="toolbar">
+<div>
+<h1>チーム分け＆論題管理システム</h1>
+<div id="connection" class="muted" role="status">データベース接続を確認中…</div>
+</div>
+<button id="back" class="secondary small hidden" type="button">← メニュー</button>
+</div>
+</header>
+
+<section id="home" class="card">
+<h2>メニュー</h2>
+<div class="stack">
+<button id="goAssign">チーム分け ＆ 論題記録</button>
+<button id="goManage" class="secondary">新規論題追加・管理</button>
+<button id="goAdmin" class="secondary">管理者メニュー（履歴・復元・バックアップ）</button>
+</div>
+</section>
+
+<section id="assign" class="hidden">
+<div class="card">
+<h2>1. 論題の選択・実施記録</h2>
+<div class="toolbar">
+<span class="muted">ランダムに最大4件を表示</span>
+<button id="shuffle" class="secondary small">シャッフル</button>
+</div>
+<div id="candidates"></div>
+<h3>論題を検索</h3>
+<input id="preSearch" type="search" placeholder="論題・大会名・年度を検索">
+<div class="filters">
+<select id="preTournament" aria-label="大会名"><option value="">すべての大会</option></select>
+<select id="preYear" aria-label="年度"><option value="">すべての年度</option></select>
+</div>
+<select id="preStatus" aria-label="実施状況">
+<option value="all">すべての実施状況</option>
+<option value="done">直近1年に実施</option>
+<option value="not_done">直近1年に未実施</option>
+</select>
+<div id="preResults" class="scroll"></div>
+<div id="chosen" class="notice ok hidden">
+<div class="row">
+<span id="chosenText"></span>
+<button id="clearChosen" class="danger small">選択解除</button>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h2>2. メンバー・チーム設定</h2>
+<div class="grid">
+<div>
+<label for="participants">メンバー（1行に1人）</label>
+<textarea id="participants"></textarea>
+</div>
+<div>
+<label for="judges">事前指定ジャッジ（任意）</label>
+<textarea id="judges"></textarea>
+</div>
+<div>
+<label for="pairs">試合数</label>
+<select id="pairs"></select>
+</div>
+<div>
+<label for="teamSize">1チームの人数</label>
+<input id="teamSize" type="number" min="1" max="30" value="3">
+</div>
+</div>
+<p class="muted">定員を超えた参加者はジャッジ候補になります。各試合にジャッジを1人ずつ割り当てます。</p>
+<button id="generate" class="full">チームを割り振る</button>
+<div id="assignResult" aria-live="polite"></div>
+</div>
+</section>
+
+<section id="manage" class="hidden">
+<div class="card">
+<h2 id="formHeading">新規論題の追加</h2>
+<div id="form">
+<label for="motion">論題 *</label>
+<input id="motion" placeholder="THW ...">
+<div class="grid">
+<div>
+<label for="tournament">大会名</label>
+<input id="tournament" placeholder="例：HPDU推奨">
+</div>
+<div>
+<label for="year">年度</label>
+<input id="year" placeholder="例：2026">
+</div>
+</div>
+<label class="row" style="margin:10px 0">
+<input type="checkbox" id="done"> 過去に実施したことがある
+</label>
+<div id="doneDateBox" class="hidden">
+<label for="doneDate">実施日（不明なら2024-01-01）</label>
+<input id="doneDate" type="date">
+</div>
+<div class="row">
+<button id="preview" type="button">入力内容を確認</button>
+<button id="cancelEdit" type="button" class="secondary hidden">編集をキャンセル</button>
+</div>
+</div>
+<div id="previewBox" class="panel hidden">
+<h3>登録内容の確認</h3>
+<div id="previewText"></div>
+<div class="row">
+<button id="revise" class="secondary">修正する</button>
+<button id="save" class="success">この内容で決定する</button>
+</div>
+</div>
+<div id="formStatus" class="hidden notice" role="status"></div>
+</div>
+
+<div class="card">
+<h2>登録済み論題一覧</h2>
+<input id="manageSearch" type="search" placeholder="論題・大会名・年度を検索">
+<div class="filters">
+<select id="manageTournament" aria-label="大会名"><option value="">すべての大会</option></select>
+<select id="manageYear" aria-label="年度"><option value="">すべての年度</option></select>
+</div>
+<select id="manageStatus" aria-label="実施状況">
+<option value="all">すべての実施状況</option>
+<option value="done">直近1年に実施</option>
+<option value="not_done">直近1年に未実施</option>
+</select>
+<div class="row" style="margin-top:12px">
+<button id="addTournament" class="secondary small">大会の絞り込み項目を追加</button>
+<button id="export" class="secondary small">motions.jsonをダウンロード</button>
+<button id="reload" class="secondary small">再読み込み</button>
+</div>
+<div id="manageList" class="scroll" aria-live="polite"></div>
+</div>
+</section>
+
+<section id="admin" class="hidden">
+<div class="card">
+<h2>管理者メニュー</h2>
+<p class="muted">管理者パスワードはブラウザに保存されません。閲覧・チーム分け・通常の論題追加と編集にパスワードは不要です。</p>
+<label for="adminPassword">管理者パスワード</label>
+<input id="adminPassword" type="password" autocomplete="off" placeholder="管理者のみ入力">
+<div id="adminStatus" class="notice hidden" role="status"></div>
+</div>
+<div class="card">
+<h2>ごみ箱・個別復元</h2>
+<button id="loadDeleted" class="secondary small">削除済み論題を表示</button>
+<div id="deletedList" class="scroll"></div>
+</div>
+<div class="card">
+<h2>変更履歴</h2>
+<p class="muted">最新100件を表示します。変更前・変更後の内容はサーバー側に記録されます。</p>
+<button id="loadAudit" class="secondary small">変更履歴を表示</button>
+<div id="auditList" class="scroll"></div>
+</div>
+<div class="card">
+<h2>R2バックアップ</h2>
+<p class="muted">毎日午前3時（日本時間）に自動バックアップし、90日間保存します。全件復元は公開中のデータを置き換えるため、事前検証が必要です。</p>
+<div class="row">
+<button id="loadBackups" class="secondary small">バックアップ一覧</button>
+<button id="manualBackup" class="small">今すぐバックアップ</button>
+</div>
+<div id="backupList" class="scroll"></div>
+</div>
+</section>
+</main>
+
+<div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+<div class="dialog">
+<h2 id="confirmTitle">実施履歴の記録</h2>
+<p>次の論題を「本日実施した論題」としてデータベースに記録します。</p>
+<div id="confirmMotion" class="panel"></div>
+<div id="confirmError" class="notice error hidden"></div>
+<div class="row" style="margin-top:16px">
+<button id="closeModal" class="secondary">キャンセル</button>
+<button id="record" class="success">記録を確定する</button>
+</div>
+</div>
+</div>
+
+<script>
+'use strict';
+(() => {
+  const $ = id => document.getElementById(id);
+  const show = (id, visible) => $(id).classList.toggle('hidden', !visible);
+  const node = (tag, text, className) => {
+    const el = document.createElement(tag);
+    if (text !== undefined) el.textContent = String(text);
+    if (className) el.className = className;
+    return el;
+  };
+  const button = (text, fn, cls = 'secondary small') => {
+    const el = node('button', text, cls);
+    el.type = 'button';
+    el.addEventListener('click', fn);
+    return el;
+  };
+  const message = (id, text, type = '') => {
+    $(id).textContent = text;
+    $(id).className = 'notice ' + (type === 'error' ? 'error' : type === 'ok' ? 'ok' : '');
+    show(id, !!text);
+  };
+  let motions = [], selected = null, pendingId = null, editingId = null, busy = false, customTournaments = [];
+
+  const getHistory = m => Array.isArray(m.history)
+    ? m.history.filter(v => typeof v === 'string' && !Number.isNaN(Date.parse(v)))
+    : [];
+
+  const recentHistory = m => {
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 1);
+    return getHistory(m).filter(v => new Date(v) >= cutoff && new Date(v) <= new Date());
+  };
+
+  const normalize = value => {
+    const t = String(value || '').trim();
+    if (!t || t === '-') return 'その他の大会';
+    const low = t.toLowerCase();
+    if (t.includes('部活')) return '部活内';
+    if (low.includes('sola cup')) return 'SOLA CUP';
+    if (t.includes('HEnDA')) return 'HEnDA全国大会';
+    if (t.includes('HPDU推奨')) return 'HPDU推奨';
+    if (/JWSDC|中学生全国大会|中学全国大会|夏合宿・全国大会（中学）/.test(t)) return 'JWSDC';
+    if (/WSDC|世界交流大会/.test(t)) return 'WSDC';
+    if (t.includes('連盟杯')) return 'HPDU連盟杯';
+    if (/新緑杯|新芽杯/.test(t)) return 'HPDU新緑杯・新芽杯';
+    if (t.includes('合宿')) return '夏合宿';
+    if (/PDA首都圏公立|首都圏公立|日比谷/.test(t)) return 'PDA首都圏公立大会';
+    if (/PDA全国大会|全国大会|冬全国大会/.test(t)) return 'PDA全国大会';
+    return t;
+  };
+
+  function changeView(id) {
+    for (const v of ['home', 'assign', 'manage', 'admin']) show(v, v === id);
+    show('back', id !== 'home');
+    if (id === 'assign') renderCandidates();
+    if (id === 'manage') renderManage();
+    if (id === 'home') $('adminPassword').value = '';
+    window.scrollTo(0, 0);
+  }
+
+  function fillSelect(id, values, first) {
+    const el = $(id), old = el.value;
+    el.replaceChildren(new Option(first, ''));
+    values.forEach(v => el.add(new Option(v, v)));
+    el.value = values.includes(old) ? old : '';
+  }
+
+  function updateFilters() {
+    const tournaments = [...new Set([
+      ...motions.map(m => normalize(m.tournament)),
+      ...customTournaments,
+      'その他の大会'
+    ])].sort((a, b) =>
+      a === 'その他の大会' ? 1 :
+      b === 'その他の大会' ? -1 :
+      a.localeCompare(b, 'ja')
+    );
+    const years = [...new Set(
+      motions.map(m => String(m.year || '')).filter(v => v && v !== '-')
+    )].sort((a, b) => b.localeCompare(a, 'ja'));
+    for (const prefix of ['pre', 'manage']) {
+      fillSelect(prefix + 'Tournament', tournaments, 'すべての大会');
+      fillSelect(prefix + 'Year', years, 'すべての年度');
+    }
+  }
+
+  function filtered(prefix) {
+    const query = $(prefix + 'Search').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const tour = $(prefix + 'Tournament').value;
+    const year = $(prefix + 'Year').value;
+    const status = $(prefix + 'Status').value;
+    return motions.filter(m => {
+      const text = [m.motion, m.tournament, normalize(m.tournament), m.year].join(' ').toLowerCase();
+      return query.every(q => text.includes(q))
+        && (!tour || normalize(m.tournament) === tour)
+        && (!year || String(m.year || '') === year)
+        && (status === 'all' || (status === 'done'
+          ? recentHistory(m).length > 0
+          : recentHistory(m).length === 0));
+    });
+  }
+
+  function motionItem(m, manage = false) {
+    const item = node('div', undefined, 'item');
+    const content = node('div');
+    const title = node('strong', m.motion || '（論題なし）');
+    content.append(title);
+    content.append(node('div', `${normalize(m.tournament)} / ${m.year || '年度なし'}`, 'muted'));
+    if (manage) {
+      const hist = recentHistory(m).sort((a, b) => Date.parse(b) - Date.parse(a));
+      content.append(node('div',
+        `直近1年：${hist.length}回${hist.length ? ' / 最終実施 ' + new Date(hist[0]).toLocaleDateString('ja-JP') : ''}`,
+        'muted'));
+    }
+    const row = node('div', undefined, 'row');
+    const actions = node('div', undefined, 'actions');
+    if (manage) {
+      actions.append(
+        button('編集', () => startEdit(m.id)),
+        button('削除', () => deleteMotion(m.id), 'danger small')
+      );
+    } else {
+      actions.append(button('記録する', () => openRecord(m.id)));
+    }
+    row.append(content, actions);
+    item.append(row);
+    return item;
+  }
+
+  function renderCandidates() {
+    const pool = [...motions];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const el = $('candidates');
+    el.replaceChildren();
+    if (!pool.length) el.append(node('p', '論題がありません。接続状態を確認してください。', 'muted'));
+    pool.slice(0, 4).forEach(m => el.append(motionItem(m)));
+    renderPreSearch();
+  }
+
+  function renderPreSearch() {
+    const el = $('preResults');
+    const data = filtered('pre');
+    const active = $('preSearch').value.trim() || $('preTournament').value ||
+      $('preYear').value || $('preStatus').value !== 'all';
+    el.replaceChildren();
+    if (!active) return;
+    el.append(node('p', `${data.length}件ヒット`, 'muted'));
+    data.slice(0, 200).forEach(m => el.append(motionItem(m)));
+    if (data.length > 200) el.append(node('p', '先頭200件を表示しています。絞り込みを追加してください。', 'muted'));
+  }
+
+  function renderManage() {
+    const el = $('manageList'), data = filtered('manage');
+    el.replaceChildren(node('p', `${data.length}件 / 全${motions.length}件`, 'muted'));
+    data.slice(0, 300).forEach(m => el.append(motionItem(m, true)));
+    if (data.length > 300) el.append(node('p', '先頭300件を表示しています。検索で絞り込んでください。', 'muted'));
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(path, {
+      ...options,
+      headers: { 'content-type': 'application/json', ...(options.headers || {}) }
+    });
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error('サーバー応答を読み取れません。'); }
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    return data;
+  }
+
+  const mutate = (action, payload) =>
+    api('/api/mutate', { method: 'POST', body: JSON.stringify({ action, ...payload }) });
+
+  const adminApi = (path, options = {}) =>
+    api(path, {
+      ...options,
+      headers: { 'x-admin-password': $('adminPassword').value, ...(options.headers || {}) }
+    });
+
+  async function fetchMotions() {
+    try {
+      const result = await api('/api/motions');
+      motions = result.rows || [];
+      $('connection').textContent = `データベース接続済み・${motions.length}件`;
+      updateFilters();
+      renderCandidates();
+      renderManage();
+    } catch (err) {
+      $('connection').textContent = 'データ取得エラー：' + err.message;
+      console.error(err);
+    }
+  }
+
+  function openRecord(id) {
+    const m = motions.find(x => String(x.id) === String(id));
+    if (!m) return;
+    pendingId = m.id;
+    $('confirmMotion').textContent = m.motion;
+    message('confirmError', '');
+    show('confirmModal', true);
+  }
+
+  function closeRecord() {
+    pendingId = null;
+    show('confirmModal', false);
+  }
+
+  async function recordMotion() {
+    if (busy || pendingId === null) return;
+    const m = motions.find(x => String(x.id) === String(pendingId));
+    if (!m) return;
+    busy = true;
+    $('record').disabled = true;
+    try {
+      await mutate('record', { id: m.id, expected_revision: m.revision });
+      selected = m.motion;
+      $('chosenText').textContent = '記録済み：' + selected;
+      show('chosen', true);
+      closeRecord();
+      await fetchMotions();
+    } catch (err) {
+      message('confirmError', '記録に失敗しました：' + err.message, 'error');
+    } finally {
+      busy = false;
+      $('record').disabled = false;
+    }
+  }
+
+  function resetForm() {
+    editingId = null;
+    for (const id of ['motion', 'tournament', 'year', 'doneDate']) $(id).value = '';
+    $('done').checked = false;
+    show('doneDateBox', false);
+    show('cancelEdit', false);
+    $('formHeading').textContent = '新規論題の追加';
+    show('form', true);
+    show('previewBox', false);
+  }
+
+  function startEdit(id) {
+    const m = motions.find(x => String(x.id) === String(id));
+    if (!m) return;
+    editingId = m.id;
+    $('motion').value = m.motion || '';
+    $('tournament').value = m.tournament === '-' ? '' : m.tournament || '';
+    $('year').value = m.year === '-' ? '' : m.year || '';
+    const hist = getHistory(m).sort((a, b) => Date.parse(b) - Date.parse(a));
+    $('done').checked = hist.length > 0;
+    show('doneDateBox', hist.length > 0);
+    $('doneDate').value = hist.length ? new Date(hist[0]).toISOString().slice(0, 10) : '';
+    show('cancelEdit', true);
+    $('formHeading').textContent = '論題の編集';
+    show('form', true);
+    show('previewBox', false);
+    message('formStatus', '');
+    window.scrollTo(0, 0);
+  }
+
+  function formData() {
+    return {
+      motion: $('motion').value.trim(),
+      tournament: $('tournament').value.trim(),
+      year: $('year').value.trim(),
+      done: $('done').checked,
+      date: $('doneDate').value || '2024-01-01'
+    };
+  }
+
+  function preview() {
+    const v = formData();
+    if (!v.motion) {
+      message('formStatus', '論題を入力してください。', 'error');
+      return;
+    }
+    const duplicate = motions.find(m =>
+      String(m.id) !== String(editingId) &&
+      (m.motion || '').trim().toLowerCase() === v.motion.toLowerCase() &&
+      (m.tournament || '').trim().toLowerCase() === v.tournament.toLowerCase() &&
+      String(m.year || '').trim().toLowerCase() === v.year.toLowerCase()
+    );
+    if (duplicate) {
+      message('formStatus', '同じ論題・大会名・年度のデータがすでに存在します。', 'error');
+      return;
+    }
+    message('formStatus', '');
+    const el = $('previewText');
+    el.replaceChildren();
+    for (const [label, value] of [
+      ['論題', v.motion],
+      ['大会名', v.tournament || '未入力'],
+      ['年度', v.year || '未入力'],
+      ['実施状況', v.done ? '実施済み（' + v.date + '）' : '未実施']
+    ]) {
+      const p = node('p');
+      p.append(node('strong', label + '：'), node('span', value));
+      el.append(p);
+    }
+    show('form', false);
+    show('previewBox', true);
+  }
+
+  async function saveMotion() {
+    if (busy) return;
+    const v = formData();
+    if (!v.motion) return;
+    const current = motions.find(m => String(m.id) === String(editingId));
+    if (current && !v.done && getHistory(current).length &&
+      !confirm('この論題の過去の実施日をすべて消去しますか？')) return;
+
+    let history = [];
+    if (editingId !== null && current) {
+      history = getHistory(current);
+      if (v.done) {
+        const iso = new Date(v.date + 'T00:00:00Z').toISOString();
+        if (!history.some(h => h.slice(0, 10) === v.date)) history.push(iso);
+      } else history = [];
+    } else if (v.done) {
+      history = [new Date(v.date + 'T00:00:00Z').toISOString()];
+    }
+
+    const row = {
+      motion: v.motion,
+      tournament: v.tournament || 'その他の大会',
+      year: v.year,
+      history
+    };
+    busy = true;
+    $('save').disabled = true;
+    try {
+      if (editingId !== null) {
+        if (!current) throw new Error('編集対象が見つかりません。再読み込みしてください。');
+        await mutate('update', {
+          id: editingId,
+          expected_revision: current.revision,
+          row
+        });
+      } else {
+        await mutate('insert', { row });
+      }
+      resetForm();
+      message('formStatus', '保存しました。', 'ok');
+      await fetchMotions();
+    } catch (err) {
+      message('formStatus', '保存に失敗しました：' + err.message, 'error');
+      show('previewBox', false);
+      show('form', true);
+    } finally {
+      busy = false;
+      $('save').disabled = false;
+    }
+  }
+
+  async function deleteMotion(id) {
+    const m = motions.find(x => String(x.id) === String(id));
+    if (!m || busy) return;
+    if (!confirm(`「${m.motion}」をごみ箱に移動しますか？ 管理者は後から復元できます。`)) return;
+    busy = true;
+    try {
+      await mutate('delete', { id, expected_revision: m.revision });
+      message('formStatus', 'ごみ箱に移動しました。', 'ok');
+      await fetchMotions();
+    } catch (err) {
+      message('formStatus', '削除に失敗しました：' + err.message, 'error');
+    } finally {
+      busy = false;
+    }
+  }
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function generate() {
+    const participants = $('participants').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const judges = $('judges').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const pairs = Number($('pairs').value);
+    const size = Number($('teamSize').value);
+    const el = $('assignResult');
+    el.replaceChildren();
+
+    if (!Number.isInteger(size) || size < 1 || size > 30) {
+      el.append(node('div', 'チーム人数は1～30で指定してください。', 'notice error'));
+      return;
+    }
+    if (!participants.length) {
+      el.append(node('div', '参加者を入力してください。', 'notice error'));
+      return;
+    }
+    try {
+      localStorage.setItem('debate_participants', $('participants').value);
+      localStorage.setItem('debate_judges', $('judges').value);
+    } catch (e) {}
+
+    shuffle(participants);
+    shuffle(judges);
+    const capacity = pairs * 2 * size;
+    const overflow = participants.splice(capacity);
+    judges.push(...overflow);
+    if (overflow.length) {
+      el.append(node('p', `定員超過の${overflow.length}人をジャッジ候補に移しました。`, 'notice'));
+    }
+    const teamCount = Math.min(pairs * 2, Math.floor(participants.length / size));
+    const completePairs = Math.floor(teamCount / 2);
+    if (!completePairs) {
+      el.append(node('div', `少なくとも${size * 2}人必要です。`, 'notice error'));
+      return;
+    }
+    const teams = [];
+    for (let i = 0; i < completePairs * 2; i++) teams.push(participants.splice(0, size));
+    for (let i = 0; i < completePairs; i++) {
+      const match = node('div', undefined, 'match');
+      match.append(node('strong', `Match ${i + 1}`));
+      for (const [label, text] of [
+        ['Government', teams[i * 2].join('、')],
+        ['Opposition', teams[i * 2 + 1].join('、')],
+        ['Judge', judges.shift() || '未割り当て'],
+        ['Motion', selected || '未選択']
+      ]) {
+        const p = node('p');
+        p.append(node('strong', label + '：'), node('span', text));
+        match.append(p);
+      }
+      el.append(match);
+    }
+    if (participants.length) el.append(node('p', `未割り当ての参加者：${participants.join('、')}`, 'muted'));
+    if (judges.length) el.append(node('p', `その他のジャッジ：${judges.join('、')}`, 'muted'));
+  }
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(motions, null, 2)], {
+      type: 'application/json;charset=utf-8'
+    });
+    const url = URLcreate(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'motions.json';
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => window.URL.revokeObjectURL(url), 3000);
+  }
+
+  function URLcreate(blob) {
+    return window.URL.createObjectURL(blob);
+  }
+
+  async function loadDeleted() {
+    try {
+      const data = await adminApi('/api/admin/deleted');
+      const el = $('deletedList');
+      el.replaceChildren(node('p', `${data.rows.length}件の削除済み論題`, 'muted'));
+      for (const m of data.rows) {
+        const box = node('div', undefined, 'item');
+        box.append(
+          node('strong', m.motion),
+          node('div', `${m.tournament} / ${m.year || '年度なし'}`, 'muted'),
+          button('この論題を復元', () => restoreOne(m.id), 'success small')
+        );
+        el.append(box);
+      }
+      message('adminStatus', 'ごみ箱を読み込みました。', 'ok');
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  async function restoreOne(id) {
+    if (!confirm('この論題を復元しますか？')) return;
+    try {
+      await adminApi('/api/admin/restore-one', {
+        method: 'POST',
+        body: JSON.stringify({ id })
+      });
+      await loadDeleted();
+      await fetchMotions();
+      message('adminStatus', '論題を復元しました。', 'ok');
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  async function loadAudit() {
+    try {
+      const data = await adminApi('/api/admin/audit');
+      const el = $('auditList');
+      el.replaceChildren(node('p', `最新${data.rows.length}件`, 'muted'));
+      for (const x of data.rows) {
+        const box = node('div', undefined, 'item');
+        const before = x.before_data || {};
+        const after = x.after_data || {};
+        const action =
+          before.is_deleted === false && after.is_deleted === true ? 'ごみ箱へ移動' :
+          before.is_deleted === true && after.is_deleted === false ? '復元' :
+          x.action === 'INSERT' ? '追加' :
+          x.action === 'DELETE' ? '物理削除' :
+          x.action === 'UPDATE' ? '編集・実施記録' : x.action;
+        box.append(
+          node('strong', `${action} — ${after.motion || before.motion || x.motion_id}`),
+          node('div', new Date(x.changed_at).toLocaleString('ja-JP'), 'muted')
+        );
+        if (before.motion !== undefined && after.motion !== undefined && before.motion !== after.motion) {
+          box.append(node('div', `変更前：${before.motion}`, 'muted'));
+        }
+        el.append(box);
+      }
+      message('adminStatus', '変更履歴を読み込みました。', 'ok');
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  async function loadBackups() {
+    try {
+      const data = await adminApi('/api/admin/backups');
+      const el = $('backupList');
+      el.replaceChildren(node('p', `${data.backups.length}件のバックアップ`, 'muted'));
+      for (const x of data.backups) {
+        const box = node('div', undefined, 'item');
+        box.append(
+          node('strong', x.key),
+          node('div', `${Math.round(x.size / 1024)} KB`, 'muted')
+        );
+        const actions = node('div', undefined, 'row');
+        actions.append(
+          button('ダウンロード', () => downloadBackup(x.key), 'secondary small'),
+          button('全件復元', () => restoreAll(x.key), 'danger small')
+        );
+        box.append(actions);
+        el.append(box);
+      }
+      message('adminStatus', 'バックアップ一覧を読み込みました。', 'ok');
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  async function manualBackup() {
+    try {
+      const data = await adminApi('/api/admin/backup', {
+        method: 'POST',
+        body: '{}'
+      });
+      await loadBackups();
+      message('adminStatus', `${data.count}件をR2に保存しました。`, 'ok');
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  async function downloadBackup(key) {
+    try {
+      const r = await fetch('/api/admin/download?key=' + encodeURIComponent(key), {
+        headers: { 'x-admin-password': $('adminPassword').value }
+      });
+      if (!r.ok) throw new Error('ダウンロードに失敗しました。');
+      const blob = await r.blob();
+      const url = URLcreate(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = key.split('/').pop();
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 3000);
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  async function restoreAll(key) {
+    const answer = prompt('全件復元は現在の論題データを置き換えます。実行するには「全件復元する」と入力してください。');
+    if (answer !== '全件復元する') return;
+    if (!confirm('最終確認：本当に全件復元しますか？')) return;
+    try {
+      const data = await adminApi('/api/admin/restore-all', {
+        method: 'POST',
+        body: JSON.stringify({ key, confirm: answer })
+      });
+      message('adminStatus', `${data.restored}件の復元処理が完了しました。`, 'ok');
+      await fetchMotions();
+      await loadDeleted();
+    } catch (e) {
+      message('adminStatus', e.message, 'error');
+    }
+  }
+
+  function bind() {
+    for (let i = 1; i <= 10; i++) {
+      $('pairs').add(new Option(`${i}組（${i * 2}チーム）`, String(i)));
+    }
+
+    $('goAssign').onclick = () => changeView('assign');
+    $('goManage').onclick = () => changeView('manage');
+    $('goAdmin').onclick = () => changeView('admin');
+    $('loadDeleted').onclick = loadDeleted;
+    $('loadAudit').onclick = loadAudit;
+    $('loadBackups').onclick = loadBackups;
+    $('manualBackup').onclick = manualBackup;
+    $('back').onclick = () => changeView('home');
+    $('shuffle').onclick = renderCandidates;
+    $('generate').onclick = generate;
+    $('clearChosen').onclick = () => {
+      selected = null;
+      show('chosen', false);
+    };
+    $('closeModal').onclick = closeRecord;
+    $('record').onclick = recordMotion;
+    $('confirmModal').addEventListener('click', e => {
+      if (e.target === $('confirmModal')) closeRecord();
+    });
+    $('done').onchange = () => show('doneDateBox', $('done').checked);
+    $('preview').onclick = preview;
+    $('revise').onclick = () => {
+      show('previewBox', false);
+      show('form', true);
+    };
+    $('save').onclick = saveMotion;
+    $('cancelEdit').onclick = () => {
+      resetForm();
+      message('formStatus', '');
+    };
+    $('export').onclick = exportJSON;
+    $('reload').onclick = fetchMotions;
+    $('addTournament').onclick = () => {
+      const value = prompt('追加する大会名を入力してください');
+      if (value && value.trim()) {
+        customTournaments.push(value.trim());
+        updateFilters();
+      }
+    };
+
+    for (const prefix of ['pre', 'manage']) {
+      for (const suffix of ['Search', 'Tournament', 'Year', 'Status']) {
+        $(prefix + suffix).addEventListener(
+          suffix === 'Search' ? 'input' : 'change',
+          prefix === 'pre' ? renderPreSearch : renderManage
+        );
+      }
+    }
+
+    try {
+      $('participants').value = localStorage.getItem('debate_participants') || '';
+      $('judges').value = localStorage.getItem('debate_judges') || '';
+    } catch (e) {}
+  }
+
+  bind();
+  fetchMotions();
+})();
+</script>
+</body>
+</html>
