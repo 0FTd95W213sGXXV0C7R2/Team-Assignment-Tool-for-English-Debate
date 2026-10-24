@@ -185,6 +185,12 @@
             color: #1d4ed8;
             border: 1px solid #bfdbfe;
         }
+        .status-subnote {
+            font-size: 0.8rem;
+            font-weight: normal;
+            margin-top: 6px;
+            color: #166534;
+        }
         .hidden {
             display: none !important;
         }
@@ -671,7 +677,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function setStatus(text, type, autoDismiss = false) {
+    function setStatus(text, type, autoDismiss = false, showNotice = false) {
         if (statusTimer) {
             clearTimeout(statusTimer);
             statusTimer = null;
@@ -679,14 +685,20 @@
 
         const statusEl = document.getElementById('submitStatus');
         statusEl.className = '';
-        statusEl.innerText = text;
+        
+        let htmlContent = text;
+        if (showNotice) {
+            htmlContent += `<div class="status-subnote">※追加した論題が表示されない場合、ページを更新することで表示される場合があります。表示されない場合、再度入力してください。</div>`;
+        }
+        
+        statusEl.innerHTML = htmlContent;
         if (type === 'success') statusEl.classList.add('status-success');
         else if (type === 'error') statusEl.classList.add('status-error');
         else if (type === 'loading') statusEl.classList.add('status-loading');
         
         statusEl.classList.remove('hidden');
 
-        // 成功時などは指定により3秒後に消去する
+        // 成功時などは指定により3秒後に自動消去する
         if (autoDismiss) {
             statusTimer = setTimeout(() => {
                 clearStatus();
@@ -1248,7 +1260,7 @@
 
             if (res.ok) {
                 const msg = editIndex >= 0 ? '✅ 論題が正常に更新されました！' : '✅ 論題は正常に追加されました！';
-                setStatus(msg, 'success', true); // 第3引数trueで3秒後に自動消去
+                setStatus(msg, 'success', true, true); // 第4引数trueで注意書きメッセージを追加表示
                 
                 cancelEdit();
                 await fetchMotions();
@@ -1280,7 +1292,7 @@
             const data = await res.json();
 
             if (res.ok) {
-                setStatus('論題を削除しました。', 'success', true); // 第3引数trueで3秒後に自動消去
+                setStatus('論題を削除しました。', 'success', true);
                 await fetchMotions();
             } else {
                 throw new Error(data.error || '削除に失敗しました。');
