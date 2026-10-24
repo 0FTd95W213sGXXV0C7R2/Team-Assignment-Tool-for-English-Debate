@@ -385,12 +385,29 @@
     <strong>[デバッグコンソール] エラー監視中...</strong>
 </div>
 <script>
+    const con = document.getElementById('debug-console');
+
+    if (con) {
+        con.textContent += '\n診断1：最初のスクリプト実行済み';
+    }
+
     window.onerror = function(msg, url, line) {
-        const con = document.getElementById('debug-console');
-        if (con) {
-            con.innerHTML += `<br>❌ エラー: ${msg} (行: ${line})`;
+        const debugConsole = document.getElementById('debug-console');
+
+        if (debugConsole) {
+            debugConsole.textContent +=
+                `\nエラー: ${msg} (行: ${line})`;
         }
     };
+
+    window.addEventListener('unhandledrejection', function(event) {
+        const debugConsole = document.getElementById('debug-console');
+
+        if (debugConsole) {
+            debugConsole.textContent +=
+                '\nPromiseエラー: ' + String(event.reason);
+        }
+    });
 </script>
 
 <div class="container">
