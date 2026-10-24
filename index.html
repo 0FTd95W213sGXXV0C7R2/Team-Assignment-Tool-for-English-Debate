@@ -151,6 +151,16 @@
             margin-top: -8px;
             margin-bottom: 12px;
         }
+        .search-subnote {
+            font-size: 0.8rem;
+            color: #166534;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: -4px;
+            margin-bottom: 12px;
+        }
         .badge {
             display: inline-block;
             background: #2563eb;
@@ -184,12 +194,6 @@
             background-color: #eff6ff;
             color: #1d4ed8;
             border: 1px solid #bfdbfe;
-        }
-        .status-subnote {
-            font-size: 0.8rem;
-            font-weight: normal;
-            margin-top: 6px;
-            color: #166534;
         }
         .hidden {
             display: none !important;
@@ -367,6 +371,11 @@
             <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">データベースから論題を検索・絞り込み</label>
             <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
             
+            <!-- 検索窓直下の注意書き -->
+            <div class="search-subnote">
+                ※追加した論題が表示されない場合、ページを更新することで表示される場合があります。表示されない場合、再度入力してください。
+            </div>
+
             <div class="grid-2" style="margin-bottom: 8px;">
                 <div>
                     <select id="pre-filter-tournament" onchange="filterPreMotions()">
@@ -504,6 +513,11 @@
             <!-- 検索窓 & 各種絞り込みフィルター -->
             <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
             
+            <!-- 検索窓直下の注意書き -->
+            <div class="search-subnote">
+                ※追加した論題が表示されない場合、ページを更新することで表示される場合があります。表示されない場合、再度入力してください。
+            </div>
+
             <div class="grid-2" style="margin-bottom: 8px;">
                 <div>
                     <select id="filter-tournament" onchange="renderManagementList()">
@@ -677,7 +691,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function setStatus(text, type, autoDismiss = false, showNotice = false) {
+    function setStatus(text, type, autoDismiss = false) {
         if (statusTimer) {
             clearTimeout(statusTimer);
             statusTimer = null;
@@ -685,13 +699,8 @@
 
         const statusEl = document.getElementById('submitStatus');
         statusEl.className = '';
+        statusEl.innerText = text;
         
-        let htmlContent = text;
-        if (showNotice) {
-            htmlContent += `<div class="status-subnote">※追加した論題が表示されない場合、ページを更新することで表示される場合があります。表示されない場合、再度入力してください。</div>`;
-        }
-        
-        statusEl.innerHTML = htmlContent;
         if (type === 'success') statusEl.classList.add('status-success');
         else if (type === 'error') statusEl.classList.add('status-error');
         else if (type === 'loading') statusEl.classList.add('status-loading');
@@ -1260,7 +1269,7 @@
 
             if (res.ok) {
                 const msg = editIndex >= 0 ? '✅ 論題が正常に更新されました！' : '✅ 論題は正常に追加されました！';
-                setStatus(msg, 'success', true, true); // 第4引数trueで注意書きメッセージを追加表示
+                setStatus(msg, 'success', true);
                 
                 cancelEdit();
                 await fetchMotions();
