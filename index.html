@@ -642,6 +642,15 @@
 </div>
 
 <script>
+	console.log('[DEBUG] メインスクリプト開始');
+
+    const debugCon = document.getElementById('debug-console');
+
+    if (debugCon) {
+
+        debugCon.textContent += '\nメインスクリプト開始';
+
+    }
     // Supabase 接続情報
     const SUPABASE_URL = 'https://kiewlmqxsqcysswcruiw.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0';
