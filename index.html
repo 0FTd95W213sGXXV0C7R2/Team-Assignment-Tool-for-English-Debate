@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>チーム分け＆論題管理システム</title>
+    <title>チーム分け＆論題管理ツール</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -128,6 +128,42 @@
             padding: 18px;
         }
 
+        /* 検索窓とクリアボタン（×）用のスタイル */
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            margin-bottom: 0 !important;
+            padding-right: 40px;
+        }
+        .search-clear-btn {
+            position: absolute;
+            right: 8px;
+            background: #cbd5e1;
+            color: #334155;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            min-height: auto !important;
+            width: auto;
+        }
+        .search-clear-btn:hover {
+            background: #94a3b8;
+            color: #fff;
+        }
+
         /* 画面上部に固定されるバー領域 */
         .sticky-nav-bar {
             position: sticky;
@@ -139,9 +175,9 @@
             align-items: center;
         }
 
-        /* メニューに戻るボタン（元のサイズ感・目立つ濃い青色デザイン） */
+        /* メニューに戻るボタン */
         .back-btn {
-            background-color: #1e3a8a; /* 視認性の高い濃いブルー */
+            background-color: #1e3a8a;
             color: #ffffff;
             border: none;
             width: auto;
@@ -360,14 +396,14 @@
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
     </div>
 
-    <h1>チーム分け＆論題管理システム</h1>
+    <h1>チーム分け＆論題管理ツール</h1>
 
     <!-- ホーム画面 -->
     <div class="card" id="homeView">
         <h2>メニュー</h2>
         <p class="note">行いたい操作を選択してください。</p>
         <div class="home-menu">
-            <button onclick="switchView('assignView')">チーム分け ＆ 論題記録システム</button>
+            <button onclick="switchView('assignView')">チーム分け ＆ 論題記録ツール</button>
             <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加・管理ページ</button>
         </div>
     </div>
@@ -392,7 +428,10 @@
 
             <!-- 検索 & 絞り込みエリア -->
             <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">データベースから論題を検索・絞り込み</label>
-            <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
+            <div class="search-input-wrapper">
+                <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()">
+                <button type="button" class="search-clear-btn" onclick="clearSearch('pre-search-input', filterPreMotions)" title="クリア">×</button>
+            </div>
             
             <!-- 検索窓直下の注意書き -->
             <div class="search-subnote">
@@ -484,7 +523,7 @@
         <h2 id="formTitle">新規論題の追加</h2>
         
         <div id="motionFormArea">
-            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。大会名は、必ず登録済み論題一覧に準拠してください。また、部活内での論題を登録する際は、大会名を「2026/01/01 部活内」、年度に「2026」のように入力してください。</p>
+            <p class="note">論題集データベースに新しい論題を追加、または既存の論題を編集します。大会名は、必ず登録済み論題一覧に準拠してください。</p>
             
             <input type="hidden" id="editIndex" value="-1">
 
@@ -499,6 +538,17 @@
                 <div>
                     <label for="newYear">年度 (Year)</label>
                     <input type="text" id="newYear" placeholder="例: 2026">
+                </div>
+            </div>
+
+            <!-- 実施状況の入力セクション -->
+            <div style="background: #f1f5f9; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin-bottom: 0;">
+                    <input type="checkbox" id="newIsDone" onchange="toggleDoneDateInput()" style="width: auto; margin-bottom: 0; transform: scale(1.1);"> 過去に実施したことがある論題
+                </label>
+                <div id="doneDateArea" class="hidden" style="margin-top: 12px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+                    <label for="newDoneDate" style="font-size: 0.9rem; margin-bottom: 4px;">実施日 (分からない場合は空欄のままでOK ⇒ 自動で 2024/01/01 になります)</label>
+                    <input type="date" id="newDoneDate" style="margin-bottom: 0;">
                 </div>
             </div>
 
@@ -517,6 +567,7 @@
                 <p><strong>論題:</strong> <span id="prevMotion"></span></p>
                 <p><strong>大会名:</strong> <span id="prevTournament"></span></p>
                 <p><strong>年度:</strong> <span id="prevYear"></span></p>
+                <p><strong>実施状況:</strong> <span id="prevStatus"></span></p>
             </div>
 
             <div class="grid-2">
@@ -532,8 +583,11 @@
             <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（実施履歴・編集・削除）</h3>
             <p class="note">登録されている論題の検索や、大会名・年度・実施状況での絞り込みが行えます。</p>
             
-            <!-- 検索窓 & 各種絞り込みフィルター -->
-            <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
+            <!-- 管理ページの検索窓 -->
+            <div class="search-input-wrapper">
+                <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()">
+                <button type="button" class="search-clear-btn" onclick="clearSearch('manage-search-input', renderManagementList)" title="クリア">×</button>
+            </div>
             
             <!-- 検索窓直下の注意書き -->
             <div class="search-subnote">
@@ -570,7 +624,7 @@
     </div>
 </div>
 
-<!-- 論題実施の誤操作防止確認モーダル (初期状態：hidden) -->
+<!-- 論題実施の誤操作防止確認モーダル -->
 <div id="recordConfirmModal" class="modal-overlay hidden">
     <div class="modal-content">
         <h3 style="margin-top:0; color:var(--primary-color);">論題実施の確認</h3>
@@ -591,9 +645,9 @@
 <script>
     let motionsCache = [];
     let selectedMotionText = "未選択";
-    let pendingRecordMotionText = ""; // 誤操作防止用の一時保存
-    let customTournaments = []; // 動的に追加された大会名選択肢
-    let statusTimer = null; // メッセージ消去用のタイマー
+    let pendingRecordMotionText = ""; 
+    let customTournaments = []; 
+    let statusTimer = null; 
 
     window.addEventListener('DOMContentLoaded', async () => {
         const savedParticipants = localStorage.getItem('debate_participants');
@@ -618,6 +672,29 @@
         }
     }
 
+    // 検索窓クリア用の汎用関数
+    function clearSearch(inputId, callback) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = '';
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
+    }
+
+    // 新規・編集フォームの実施日入力欄の表示切り替え
+    function toggleDoneDateInput() {
+        const isChecked = document.getElementById('newIsDone').checked;
+        const area = document.getElementById('doneDateArea');
+        if (isChecked) {
+            area.classList.remove('hidden');
+        } else {
+            area.classList.add('hidden');
+            document.getElementById('newDoneDate').value = '';
+        }
+    }
+
     // 1年以内の履歴のみを抽出するヘルパー関数
     function getValidHistory(historyArr) {
         if (!Array.isArray(historyArr) || historyArr.length === 0) return [];
@@ -636,56 +713,21 @@
         if (!rawT || rawT === '-') return 'その他の大会';
         let t = rawT.trim();
 
-        // 1. 部活内
-        if (t.includes('部活内') || t.includes('部活')) {
-            return '部活内';
-        }
-        // 2. SOLA CUP (SOLA Cup と SOLA CUP を統一)
-        if (t.toLowerCase().includes('sola cup')) {
-            return 'SOLA CUP';
-        }
-        // 3. HEnDA全国大会
-        if (t.includes('HEnDA')) {
-            return 'HEnDA全国大会';
-        }
-        // 4. HPDU推奨
-        if (t.includes('HPDU推奨')) {
-            return 'HPDU推奨';
-        }
-        // 5. JWSDC、中学生全国大会、中学全国大会、夏合宿・全国大会（中学）
-        if (t.includes('JWSDC') || t.includes('中学生全国大会') || t.includes('中学全国大会') || t.includes('夏合宿・全国大会（中学）')) {
-            return 'JWSDC';
-        }
-        // 6. WSDC、世界交流大会
-        if (t.includes('WSDC') || t.includes('世界交流大会')) {
-            return 'WSDC';
-        }
-        // 7. 連盟杯 → HPDU連盟杯
-        if (t.includes('連盟杯')) {
-            return 'HPDU連盟杯';
-        }
-        // 8. 新緑杯や新芽杯 → HPDU新緑杯・新芽杯
-        if (t.includes('新緑杯') || t.includes('新芽杯')) {
-            return 'HPDU新緑杯・新芽杯';
-        }
-        // 9. 夏合宿（夏合宿・全国大会（中学）以外）
-        if (t.includes('合宿')) {
-            return '夏合宿';
-        }
-        // 10. PDA首都圏公立大会
-        if (t.includes('PDA首都圏公立') || t.includes('首都圏公立') || t.includes('日比谷')) {
-            return 'PDA首都圏公立大会';
-        }
-        // 11. PDA全国大会
-        if (t.includes('PDA全国大会') || t.includes('全国大会') || t.includes('冬全国大会')) {
-            return 'PDA全国大会';
-        }
+        if (t.includes('部活内') || t.includes('部活')) return '部活内';
+        if (t.toLowerCase().includes('sola cup')) return 'SOLA CUP';
+        if (t.includes('HEnDA')) return 'HEnDA全国大会';
+        if (t.includes('HPDU推奨')) return 'HPDU推奨';
+        if (t.includes('JWSDC') || t.includes('中学生全国大会') || t.includes('中学全国大会') || t.includes('夏合宿・全国大会（中学）')) return 'JWSDC';
+        if (t.includes('WSDC') || t.includes('世界交流大会')) return 'WSDC';
+        if (t.includes('連盟杯')) return 'HPDU連盟杯';
+        if (t.includes('新緑杯') || t.includes('新芽杯')) return 'HPDU新緑杯・新芽杯';
+        if (t.includes('合宿')) return '夏合宿';
+        if (t.includes('PDA首都圏公立') || t.includes('首都圏公立') || t.includes('日比谷')) return 'PDA首都圏公立大会';
+        if (t.includes('PDA全国大会') || t.includes('全国大会') || t.includes('冬全国大会')) return 'PDA全国大会';
 
-        // 上記以外のその他の大会
         return 'その他の大会';
     }
 
-    // 手動でカスタム絞り込み用大会名を追加する処理
     function promptAddCustomTournament() {
         const name = prompt("追加したい大会名の選択肢を入力してください:");
         if (name && name.trim()) {
@@ -789,7 +831,6 @@
         return text.toLowerCase().includes(keyword.toLowerCase());
     }
 
-    // フィルタ用のセレクトボックス選択肢更新（管理ページ用）
     function updateFilterOptions() {
         const tourneySelect = document.getElementById('filter-tournament');
         const yearSelect = document.getElementById('filter-year');
@@ -829,7 +870,6 @@
         yearSelect.innerHTML = yearHtml;
     }
 
-    // フィルタ用のセレクトボックス選択肢更新（チーム分けページ用）
     function updatePreFilterOptions() {
         const tourneySelect = document.getElementById('pre-filter-tournament');
         const yearSelect = document.getElementById('pre-filter-year');
@@ -906,7 +946,6 @@
         container.innerHTML = html;
     }
 
-    // チーム分けページの論題検索・絞り込み処理
     function filterPreMotions() {
         const rawKeyword = document.getElementById('pre-search-input').value.trim();
         const selectedTourney = document.getElementById('pre-filter-tournament').value;
@@ -960,20 +999,17 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    // 誤操作防止の確認モーダルを開く
     function openRecordConfirmModal(motionText) {
         pendingRecordMotionText = motionText;
         document.getElementById('confirmModalMotionText').innerText = motionText;
         document.getElementById('recordConfirmModal').classList.remove('hidden');
     }
 
-    // モーダルを閉じる
     function closeRecordConfirmModal() {
         pendingRecordMotionText = "";
         document.getElementById('recordConfirmModal').classList.add('hidden');
     }
 
-    // モーダルで確定を押したときの実際の記録実行関数
     async function executeRecordMotion() {
         if (!pendingRecordMotionText) return;
         const motionText = pendingRecordMotionText;
@@ -993,7 +1029,7 @@
             if (target) {
                 if (!Array.isArray(target.history)) target.history = [];
                 target.history.push(new Date().toISOString());
-                target.history = getValidHistory(target.history); // 1年以内の履歴のみに整理
+                target.history = getValidHistory(target.history);
             }
         } catch (e) {
             console.error('使用履歴の記録に失敗しました', e);
@@ -1118,7 +1154,6 @@
         return `直近1年の実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
     }
 
-    // 管理ページの論題リスト表示
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const rawKeyword = document.getElementById('manage-search-input').value.trim();
@@ -1192,6 +1227,30 @@
         document.getElementById('newTournament').value = tournament === '-' ? '' : tournament;
         document.getElementById('newYear').value = year === '-' ? '' : year;
 
+        // 既存の履歴があればチェックボックスと日付を反映
+        const target = motionsCache[index];
+        const validHistory = getValidHistory(target.history || []);
+        const isDoneCheckbox = document.getElementById('newIsDone');
+        const doneDateInput = document.getElementById('newDoneDate');
+
+        if (target.history && target.history.length > 0) {
+            isDoneCheckbox.checked = true;
+            document.getElementById('doneDateArea').classList.remove('hidden');
+            const lastDate = new Date(target.history[target.history.length - 1]);
+            if (!isNaN(lastDate)) {
+                const yyyy = lastDate.getFullYear();
+                const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(lastDate.getDate()).padStart(2, '0');
+                doneDateInput.value = `${yyyy}-${mm}-${dd}`;
+            } else {
+                doneDateInput.value = '2024-01-01';
+            }
+        } else {
+            isDoneCheckbox.checked = false;
+            document.getElementById('doneDateArea').classList.add('hidden');
+            doneDateInput.value = '';
+        }
+
         document.getElementById('formTitle').innerText = '論題の編集';
         document.getElementById('editCancelContainer').classList.remove('hidden');
         clearStatus();
@@ -1204,6 +1263,9 @@
         document.getElementById('newMotion').value = '';
         document.getElementById('newTournament').value = '';
         document.getElementById('newYear').value = '';
+        document.getElementById('newIsDone').checked = false;
+        document.getElementById('doneDateArea').classList.add('hidden');
+        document.getElementById('newDoneDate').value = '';
 
         document.getElementById('formTitle').innerText = '新規論題の追加';
         document.getElementById('editCancelContainer').classList.add('hidden');
@@ -1215,6 +1277,8 @@
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
+        const isDone = document.getElementById('newIsDone').checked;
+        const rawDate = document.getElementById('newDoneDate').value.trim();
         const editIndex = parseInt(document.getElementById('editIndex').value);
 
         if (!motion) {
@@ -1242,6 +1306,13 @@
         document.getElementById('prevMotion').innerText = motion;
         document.getElementById('prevTournament').innerText = tournament || '（未入力）';
         document.getElementById('prevYear').innerText = year || '（未入力）';
+        
+        let statusStr = "実施したことなし（未実施）";
+        if (isDone) {
+            const dateUsed = rawDate ? rawDate : '2024/01/01';
+            statusStr = `実施したことあり（実施日: ${dateUsed}）`;
+        }
+        document.getElementById('prevStatus').innerText = statusStr;
 
         const previewTitle = document.getElementById('previewTitle');
         if (editIndex >= 0) {
@@ -1263,16 +1334,32 @@
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
+        const isDone = document.getElementById('newIsDone').checked;
+        const rawDate = document.getElementById('newDoneDate').value.trim();
         const editIndex = parseInt(document.getElementById('editIndex').value);
 
         setStatus(editIndex >= 0 ? '更新中...' : '追加中...', 'loading');
 
+        // 実施履歴の作成
+        let historyArr = [];
+        if (isDone) {
+            const dateStr = rawDate ? rawDate : '2024-01-01';
+            const d = new Date(dateStr);
+            const isoStr = !isNaN(d) ? d.toISOString() : '2024-01-01T00:00:00.000Z';
+            historyArr = [isoStr];
+        }
+
         let updatedList = [...motionsCache];
         if (editIndex >= 0) {
-            updatedList[editIndex] = { ...updatedList[editIndex], motion, tournament, year };
+            updatedList[editIndex] = { 
+                ...updatedList[editIndex], 
+                motion, 
+                tournament, 
+                year, 
+                history: isDone ? historyArr : [] 
+            };
         } else {
-            const initialHistory = (tournament.includes('部活内') || tournament.includes('部活')) ? getValidHistory([new Date().toISOString()]) : [];
-            updatedList.push({ motion, tournament, year, history: initialHistory });
+            updatedList.push({ motion, tournament, year, history: historyArr });
         }
 
         try {
