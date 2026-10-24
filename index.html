@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>チーム分け＆論題管理ツール</title>
+    <title>チーム分け＆論題管理システム</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -128,7 +128,7 @@
             padding: 18px;
         }
 
-        /* 検索窓とクリアボタン（×）用のスタイル（ひらがな一文字分のサイズに調整） */
+        /* 検索窓とクリアボタン（×）用のスタイル */
         .search-input-wrapper {
             position: relative;
             display: flex;
@@ -395,21 +395,21 @@
         <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
     </div>
 
-    <h1>チーム分け＆論題管理ツール</h1>
+    <h1>チーム分け＆論題管理システム</h1>
 
     <!-- ホーム画面 -->
     <div class="card" id="homeView">
         <h2>メニュー</h2>
         <p class="note">行いたい操作を選択してください。</p>
         <div class="home-menu">
-            <button onclick="switchView('assignView')">チーム分け ＆ 論題記録ツール</button>
+            <button onclick="switchView('assignView')">チーム分け ＆ 論題記録システム</button>
             <button class="btn-secondary" onclick="switchView('motionView')">新規論題追加・管理ページ</button>
         </div>
     </div>
 
     <!-- 1. チーム分け＆論題選択セクション -->
     <div class="card hidden" id="assignView">
-        <h2>チーム分け ＆ 論題記録ツール</h2>
+        <h2>チーム分け ＆ 論題記録システム</h2>
         
         <!-- 【事前記録】論題記録セクション（最大4個表示 & 絞り込み対応） -->
         <div class="motion-selection-area">
