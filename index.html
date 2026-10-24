@@ -397,7 +397,9 @@
 <script>
     window.onerror = function(msg, url, line) {
         const con = document.getElementById('debug-console');
-        con.innerHTML += `<br>❌ エラー: ${msg} (行: ${line})`;
+        if (con) {
+            con.innerHTML += `<br>❌ エラー: ${msg} (行: ${line})`;
+        }
     };
 </script>
 
@@ -763,7 +765,8 @@
         }
     }
 
-    function switchView(viewId) {
+    // 確実にグローバルから呼び出せるように window.switchView として定義
+    window.switchView = function(viewId) {
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('assignView').classList.add('hidden');
         document.getElementById('motionView').classList.add('hidden');
@@ -796,7 +799,7 @@
 
         document.getElementById(viewId).classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    };
 
     function setStatus(text, type, autoDismiss = false) {
         if (statusTimer) {
