@@ -18,20 +18,20 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 16px;
+            padding: 0 16px 16px 16px;
             line-height: 1.5;
             -webkit-text-size-adjust: 100%;
         }
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding-top: 45px; /* タイトルと固定ボタンが被らないように上部余白を確保 */
         }
         h1 {
             text-align: center;
             color: var(--primary-color);
+            margin-top: 12px;
             margin-bottom: 20px;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
         }
         .card {
             background: var(--card-bg);
@@ -57,13 +57,10 @@
                 grid-template-columns: 1fr;
             }
             body {
-                padding: 10px;
+                padding: 0 10px 10px 10px;
             }
             .card {
                 padding: 16px;
-            }
-            .container {
-                padding-top: 45px;
             }
         }
         label {
@@ -131,24 +128,33 @@
             padding: 18px;
         }
 
-        /* メニューに戻るボタン（文字サイズと余白を小さくし、左上に固定） */
+        /* 画面上部に固定されるバー領域 */
+        .sticky-nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background-color: var(--bg-color);
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        /* メニューに戻るボタン（元のサイズ感・目立つ濃い青色デザイン） */
         .back-btn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            background-color: #e2e8f0;
-            color: #475569;
+            background-color: #1e3a8a; /* 視認性の高い濃いブルー */
+            color: #ffffff;
+            border: none;
             width: auto;
-            padding: 5px 10px;
-            font-size: 0.75rem;
+            padding: 10px 16px;
+            font-size: 0.9rem;
             font-weight: 600;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
             min-height: auto;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
         .back-btn:hover {
-            background-color: #cbd5e1;
+            background-color: #1d4ed8;
         }
 
         .result-box {
@@ -348,10 +354,12 @@
 </head>
 <body>
 
-<!-- メニューに戻るボタン（左上に常時固定・コンパクト化） -->
-<button id="navBackBtn" class="back-btn hidden" onclick="switchView('homeView')">メニューに戻る</button>
-
 <div class="container">
+    <!-- スクロールしても上部に固定表示されるナビゲーション領域 -->
+    <div id="stickyNav" class="sticky-nav-bar hidden">
+        <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
+    </div>
+
     <h1>チーム分け＆論題管理ツール</h1>
 
     <!-- ホーム画面 -->
@@ -696,12 +704,12 @@
         document.getElementById('assignView').classList.add('hidden');
         document.getElementById('motionView').classList.add('hidden');
 
-        const navBackBtn = document.getElementById('navBackBtn');
+        const stickyNav = document.getElementById('stickyNav');
 
         if (viewId === 'homeView') {
-            navBackBtn.classList.add('hidden');
+            stickyNav.classList.add('hidden');
         } else {
-            navBackBtn.classList.remove('hidden');
+            stickyNav.classList.remove('hidden');
         }
 
         if (viewId === 'assignView') {
@@ -847,7 +855,7 @@
         let tourneyHtml = '<option value="">すべての大会名</option>';
         Array.from(tournaments).sort((a, b) => {
             if (a === 'その他の大会') return 1;
-            if (b === 'Other') return -1;
+            if (b === 'その他の大会') return -1;
             return a.localeCompare(b, 'ja');
         }).forEach(t => {
             tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
@@ -1148,7 +1156,7 @@
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">一致する論題が見つかりませんでした。</p>`;
+            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">条件に一致する論題が見つかりませんでした。</p>`;
             return;
         }
 
