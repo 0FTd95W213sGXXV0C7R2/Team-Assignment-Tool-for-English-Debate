@@ -1,0 +1,29 @@
+{
+  "name": "debate-tool-dev-test",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "vars": {
+    "SUPABASE_URL": "https://wsordbjnkvsmlqbaylrc.supabase.co"
+  },
+  "previews": {
+    "vars": {
+      "SUPABASE_URL": "https://wsordbjnkvsmlqbaylrc.supabase.co"
+    }
+  },
+  "r2_buckets": [
+    {
+      "binding": "BACKUPS",
+      "bucket_name": "debate-tool-backups-dev-local"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  }
+}
