@@ -642,9 +642,16 @@
 <script>
     // Supabase 接続情報
     const SUPABASE_URL = 'https://kiewlmqxsqcysswcruiw.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iOiJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0';
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabase = null;
+    try {
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch (e) {
+        console.error('Supabase初期化エラー:', e);
+    }
 
     let motionsCache = [];
     let selectedMotionText = "未選択";
@@ -663,6 +670,7 @@
 
     // Supabaseからデータを取得
     async function fetchMotions() {
+        if (!supabase) return;
         try {
             const { data, error } = await supabase.from('motions').select('*');
             if (error) throw error;
@@ -1016,6 +1024,7 @@
 
     // 実施履歴の記録（Supabase更新）
     async function executeRecordMotion() {
+        if (!supabase) return;
         if (!pendingRecordMotionText) return;
         const motionText = pendingRecordMotionText;
         closeRecordConfirmModal();
@@ -1338,6 +1347,10 @@
 
     // データの追加または更新（Supabaseへ保存）
     async function addNewMotion() {
+        if (!supabase) {
+            alert('Supabaseに接続されていません。');
+            return;
+        }
         const motion = document.getElementById('newMotion').value.trim();
         const tournament = document.getElementById('newTournament').value.trim();
         const year = document.getElementById('newYear').value.trim();
@@ -1383,6 +1396,7 @@
 
     // データの削除（Supabaseから削除）
     async function deleteMotion(index) {
+        if (!supabase) return;
         const target = motionsCache[index];
         if (!confirm(`“${target.motion}”を削除してもよろしいですか？`)) {
             return;
