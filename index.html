@@ -301,6 +301,26 @@
             font-size: 0.85rem;
             min-height: auto;
         }
+        
+        /* モーダル用スタイリング */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+        .modal-content {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -331,7 +351,7 @@
             </div>
             
             <p class="note" style="margin-bottom: 10px;">
-                登録ボタンを押すと、論題集データベースにその論題を採用したことが記録され、一定期間(6ヶ月)その論題が出づらくなります。
+                登録ボタンを押すと、確認画面を経て論題集データベースにその論題を採用したことが記録され、一定期間(6ヶ月)その論題が出づらくなります。
             </p>
             
             <!-- ランダム抽出4件エリア -->
@@ -342,12 +362,19 @@
             <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
             
             <div class="grid-2" style="margin-bottom: 8px;">
-                <select id="pre-filter-tournament" onchange="filterPreMotions()">
-                    <option value="">すべての大会名</option>
-                </select>
-                <select id="pre-filter-year" onchange="filterPreMotions()">
-                    <option value="">すべての年度</option>
-                </select>
+                <div>
+                    <select id="pre-filter-tournament" onchange="filterPreMotions()">
+                        <option value="">すべての大会名</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="pre-filter-year" onchange="filterPreMotions()">
+                        <option value="">すべての年度</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="promptAddCustomTournament()">+ 大会選択肢を追加</button>
             </div>
             <div style="margin-bottom: 8px;">
                 <select id="pre-filter-status" onchange="filterPreMotions()">
@@ -472,12 +499,19 @@
             <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()" style="margin-bottom: 8px; padding: 12px; font-size: 16px;">
             
             <div class="grid-2" style="margin-bottom: 8px;">
-                <select id="filter-tournament" onchange="renderManagementList()">
-                    <option value="">すべての大会名</option>
-                </select>
-                <select id="filter-year" onchange="renderManagementList()">
-                    <option value="">すべての年度</option>
-                </select>
+                <div>
+                    <select id="filter-tournament" onchange="renderManagementList()">
+                        <option value="">すべての大会名</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="filter-year" onchange="renderManagementList()">
+                        <option value="">すべての年度</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="promptAddCustomTournament()">+ 大会選択肢を追加</button>
             </div>
             <div style="margin-bottom: 12px;">
                 <select id="filter-status" onchange="renderManagementList()">
@@ -494,9 +528,29 @@
     </div>
 </div>
 
+<!-- 論題実施の誤操作防止確認モーダル -->
+<div id="recordConfirmModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:var(--primary-color);">論題実施の確認</h3>
+        <p style="font-size:0.95rem; line-height:1.5;">
+            以下の論題を<strong>「本日実施した論題」</strong>としてデータベースに記録します。<br>
+            よろしいですか？
+        </p>
+        <div class="preview-box" style="margin-bottom:20px;">
+            <strong id="confirmModalMotionText" style="font-size:1rem; color:#1e293b;"></strong>
+        </div>
+        <div class="grid-2">
+            <button class="btn-secondary" onclick="closeRecordConfirmModal()">キャンセル</button>
+            <button class="btn-success" onclick="executeRecordMotion()">記録を確定する</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let motionsCache = [];
     let selectedMotionText = "未選択";
+    let pendingRecordMotionText = ""; // 誤操作防止用の一時保存
+    let customTournaments = []; // 動的に追加された大会名選択肢
 
     window.addEventListener('DOMContentLoaded', async () => {
         const savedParticipants = localStorage.getItem('debate_participants');
@@ -562,13 +616,31 @@
         if (t.includes('合宿')) {
             return '夏合宿';
         }
-        // 10. PDA全国大会
-        if (t.includes('全国大会') || t.includes('冬全国大会') || t.includes('冬 全国大会')) {
+        // 10. PDA首都圏公立大会
+        if (t.includes('PDA首都圏公立') || t.includes('首都圏公立')||t.includes('日比谷‘)) {
+            return 'PDA首都圏公立大会';
+        }
+        // 11. PDA全国大会
+        if (t.includes('PDA全国大会') || t.includes('全国大会')||t.includes('冬全国大会‘)) {
             return 'PDA全国大会';
         }
 
         // 上記以外のその他の大会
         return 'その他の大会';
+    }
+
+    // 手動でカスタム絞り込み用大会名を追加する処理
+    function promptAddCustomTournament() {
+        const name = prompt("追加したい大会名の選択肢を入力してください:");
+        if (name && name.trim()) {
+            const trimmed = name.trim();
+            if (!customTournaments.includes(trimmed)) {
+                customTournaments.push(trimmed);
+                updateFilterOptions();
+                updatePreFilterOptions();
+                alert(`「${trimmed}」を絞り込み選択肢に追加しました。`);
+            }
+        }
     }
 
     function switchView(viewId) {
@@ -649,8 +721,12 @@
         let tournaments = new Set();
         let years = new Set();
 
-        // 常に「その他の大会」を選択肢として追加する
+        // 常に「その他の大会」および「PDA首都圏公立大会」を選択肢として追加する
+        tournaments.add('PDA首都圏公立大会');
         tournaments.add('その他の大会');
+        
+        // ユーザーが手動追加した選択肢を追加
+        customTournaments.forEach(ct => tournaments.add(ct));
 
         motionsCache.forEach(m => {
             const normT = getNormalizedTournament(m.tournament);
@@ -687,8 +763,12 @@
         let tournaments = new Set();
         let years = new Set();
 
-        // 常に「その他の大会」を選択肢として追加する
+        // 常に「その他の大会」および「PDA首都圏公立大会」を選択肢として追加する
+        tournaments.add('PDA首都圏公立大会');
         tournaments.add('その他の大会');
+
+        // ユーザーが手動追加した選択肢を追加
+        customTournaments.forEach(ct => tournaments.add(ct));
 
         motionsCache.forEach(m => {
             const normT = getNormalizedTournament(m.tournament);
@@ -763,7 +843,7 @@
                 html += `
                     <div class="motion-candidate-item">
                         <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${normTourney}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" onclick="selectPreMotion('${safeMotionText}')">記録する</button>
+                        <button class="btn-secondary" onclick="openRecordConfirmModal('${safeMotionText}')">記録する</button>
                     </div>
                 `;
             });
@@ -819,7 +899,7 @@
             resHtml += `
                 <div class="search-result-item">
                     <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${normTourney}, ${m.year || '-'})</span></span>
-                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="selectPreMotion('${safeText}')">記録</button>
+                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="openRecordConfirmModal('${safeText}')">記録</button>
                 </div>
             `;
         });
@@ -827,7 +907,25 @@
         resultsContainer.innerHTML = resHtml;
     }
 
-    async function selectPreMotion(motionText) {
+    // 誤操作防止の確認モーダルを開く
+    function openRecordConfirmModal(motionText) {
+        pendingRecordMotionText = motionText;
+        document.getElementById('confirmModalMotionText').innerText = motionText;
+        document.getElementById('recordConfirmModal').classList.remove('hidden');
+    }
+
+    // モーダルを閉じる
+    function closeRecordConfirmModal() {
+        pendingRecordMotionText = "";
+        document.getElementById('recordConfirmModal').classList.add('hidden');
+    }
+
+    // モーダルで確定を押したときの実際の記録実行関数
+    async function executeRecordMotion() {
+        if (!pendingRecordMotionText) return;
+        const motionText = pendingRecordMotionText;
+        closeRecordConfirmModal();
+
         selectedMotionText = motionText;
         document.getElementById('selectedMotionDisplay').innerText = motionText;
         document.getElementById('selectedMotionArea').classList.remove('hidden');
