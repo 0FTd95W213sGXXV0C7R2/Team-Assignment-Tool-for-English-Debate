@@ -390,6 +390,16 @@
     </style>
 </head>
 <body>
+<!-- 画面上の簡易エラー表示エリア -->
+<div id="debug-console" style="background: #000; color: #00ff00; padding: 10px; font-family: monospace; font-size: 12px; max-height: 150px; overflow-y: auto; margin-bottom: 10px; z-index: 99999; position: relative;">
+    <strong>[デバッグコンソール] エラー監視中...</strong>
+</div>
+<script>
+    window.onerror = function(msg, url, line) {
+        const con = document.getElementById('debug-console');
+        con.innerHTML += `<br>❌ エラー: ${msg} (行: ${line})`;
+    };
+</script>
 
 <div class="container">
     <!-- スクロールしても上部に固定表示されるナビゲーション領域 -->
