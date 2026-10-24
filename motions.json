@@ -7303,14 +7303,20 @@
     "motion": "Living in an apartment is better than living in a house.",
     "tournament": "PDA首都圏公立大会",
     "year": "2019",
-    "_originalIndex":911,
+    "_originalIndex": 911,
     "history": []
   },
   {
     "motion": "We should legalize euthanasia in Japan.",
     "tournament": "PDA首都圏公立大会",
     "year": "2019",
-    "_originalIndex":912,
+    "_originalIndex": 912,
+    "history": []
+  },
+  {
+    "motion": "It is better to study abroad more than one year during high school days than after entering university in Japan.",
+    "tournament": "PDA首都圏公立大会",
+    "year": "2018",
     "history": []
   }
 ]
