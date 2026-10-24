@@ -186,7 +186,7 @@
             border: 1px solid #bfdbfe;
         }
         .hidden {
-            display: none;
+            display: none !important;
         }
         .motion-selection-area {
             background: #f1f5f9;
@@ -528,7 +528,7 @@
     </div>
 </div>
 
-<!-- 論題実施の誤操作防止確認モーダル -->
+<!-- 論題実施の誤操作防止確認モーダル (初期状態：hidden) -->
 <div id="recordConfirmModal" class="modal-overlay hidden">
     <div class="modal-content">
         <h3 style="margin-top:0; color:var(--primary-color);">論題実施の確認</h3>
