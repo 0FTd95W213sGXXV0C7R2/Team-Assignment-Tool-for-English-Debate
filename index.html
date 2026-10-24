@@ -1,1494 +1,1097 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>チーム分け＆論題管理システム</title>
-    <!-- Supabase SDK の読み込み -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
-        }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0 16px 16px 16px;
-            line-height: 1.5;
-            -webkit-text-size-adjust: 100%;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-top: 12px;
-            margin-bottom: 20px;
-            font-size: 1.6rem;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            font-size: 1.2rem;
-            margin-top: 0;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 8px;
-            margin-bottom: 16px;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-            body {
-                padding: 0 10px 10px 10px;
-            }
-            .card {
-                padding: 16px;
-            }
-        }
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 0.95rem;
-        }
-        textarea, input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-            background-color: #fff;
-        }
-        textarea {
-            resize: vertical;
-            height: 120px;
-        }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.2s;
-            min-height: 48px;
-        }
-        button:hover {
-            background-color: var(--primary-hover);
-        }
-        .btn-secondary {
-            background-color: #64748b;
-        }
-        .btn-secondary:hover {
-            background-color: #475569;
-        }
-        .btn-success {
-            background-color: #16a34a;
-        }
-        .btn-success:hover {
-            background-color: #15803d;
-        }
-        .btn-danger {
-            background-color: #dc2626;
-        }
-        .btn-danger:hover {
-            background-color: #b91c1c;
-        }
-        .home-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-top: 20px;
-        }
-        .home-menu button {
-            font-size: 1.1rem;
-            padding: 18px;
-        }
-
-        /* 検索窓とクリアボタン（×）用のスタイル */
-        .search-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .search-input-wrapper input {
-            width: 100%;
-            margin-bottom: 0 !important;
-            padding-right: 40px;
-        }
-        .search-clear-btn {
-            position: absolute;
-            right: 8px;
-            background: #cbd5e1;
-            color: #334155;
-            border: none;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 11px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            padding: 0;
-            min-height: auto !important;
-        }
-        .search-clear-btn:hover {
-            background: #94a3b8;
-            color: #fff;
-        }
-
-        /* 画面上部に固定されるバー領域 */
-        .sticky-nav-bar {
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            background-color: var(--bg-color);
-            padding: 10px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        /* メニューに戻るボタン */
-        .back-btn {
-            background-color: #1e3a8a;
-            color: #ffffff;
-            border: none;
-            width: auto;
-            padding: 10px 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            min-height: auto;
-            cursor: pointer;
-        }
-        .back-btn:hover {
-            background-color: #1d4ed8;
-        }
-
-        .result-box {
-            background: #f1f5f9;
-            border-left: 4px solid var(--primary-color);
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 16px;
-        }
-        .note {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-top: -8px;
-            margin-bottom: 12px;
-        }
-        .badge {
-            display: inline-block;
-            background: #2563eb;
-            color: #ffffff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            word-break: break-all;
-            margin-top: 4px;
-        }
-        #submitStatus, #formWarningStatus {
-            margin-top: 16px;
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: bold;
-            text-align: center;
-            font-size: 1rem;
-        }
-        .status-success {
-            background-color: #dcfce7;
-            color: #15803d;
-            border: 1px solid #86efac;
-        }
-        .status-error {
-            background-color: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #fca5a5;
-        }
-        .status-loading {
-            background-color: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .motion-selection-area {
-            background: #f1f5f9;
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-        .motion-candidate-item {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        @media (min-width: 600px) {
-            .motion-candidate-item {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-        .motion-candidate-item button {
-            width: auto;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            min-height: auto;
-            white-space: nowrap;
-        }
-        .search-results-box {
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 8px;
-            background: #ffffff;
-            margin-top: 8px;
-        }
-        .search-result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 8px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 0.95rem;
-            gap: 10px;
-        }
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-        .selected-box {
-            background: #e0f2fe;
-            border: 1px solid #38bdf8;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-        .selected-box button {
-            width: auto;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            min-height: auto;
-        }
-        .preview-box {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-        .management-list {
-            max-height: 350px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            background: #f8fafc;
-            margin-top: 12px;
-        }
-        .management-item {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        @media (min-width: 600px) {
-            .management-item {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-        .management-actions {
-            display: flex;
-            gap: 6px;
-        }
-        .management-actions button {
-            width: auto;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            min-height: auto;
-        }
-        
-        /* モーダル用スタイリング */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 16px;
-        }
-        .modal-content {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>チーム分け＆論題管理システム</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+  background: #f8fafc;
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 12px 14px 40px; }
+main { max-width: 920px; margin: auto; }
+h1 { font-size: 1.5rem; color: #2563eb; }
+h2 { font-size: 1.2rem; margin-top: 0; }
+h3 { font-size: 1.05rem; color: #2563eb; }
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 10px #00000010;
+}
+.hidden { display: none !important; }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+label { display: block; font-weight: 600; margin: 12px 0 5px; }
+input, textarea, select {
+  width: 100%;
+  padding: 11px;
+  font: inherit;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+textarea { min-height: 120px; resize: vertical; }
+input[type="checkbox"] { width: auto; }
+button {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 15px;
+  min-height: 44px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:disabled { opacity: .5; }
+.secondary { background: #64748b; }
+.danger { background: #dc2626; }
+.success { background: #16a34a; }
+.small { font-size: .85rem; padding: 7px 11px; min-height: 36px; }
+.full { width: 100%; }
+.muted { font-size: .88rem; color: #64748b; }
+.item {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  margin: 9px 0;
+  overflow-wrap: anywhere;
+}
+.item-actions { display: flex; gap: 7px; margin-top: 9px; }
+.panel { background: #f1f5f9; padding: 14px; border-radius: 9px; }
+.notice {
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 8px;
+  background: #dbeafe;
+  white-space: pre-wrap;
+}
+.error { background: #fee2e2; color: #991b1b; }
+.ok { background: #dcfce7; color: #166534; }
+.scroll { max-height: 400px; overflow-y: auto; }
+.match {
+  padding: 14px;
+  border-left: 4px solid #2563eb;
+  background: #f1f5f9;
+  margin: 12px 0;
+  border-radius: 8px;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f8fafc;
+  padding: 5px 0 10px;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #0008;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.dialog {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  width: min(100%, 500px);
+}
+@media (max-width: 650px) {
+  .grid { grid-template-columns: 1fr; }
+  .card { padding: 15px; }
+}
+</style>
 </head>
 <body>
-<!-- 画面上の簡易エラー表示エリア -->
-<div id="debug-console" style="background: #000; color: #00ff00; padding: 10px; font-family: monospace; font-size: 12px; max-height: 150px; overflow-y: auto; margin-bottom: 10px; z-index: 99999; position: relative;">
-    <strong>[デバッグコンソール] エラー監視中...</strong>
-</div>
-<script>
-    const con = document.getElementById('debug-console');
+<main>
+<header>
+  <div class="row" style="justify-content:space-between">
+    <h1>チーム分け＆論題管理システム</h1>
+    <button id="back" class="secondary small hidden">← メニュー</button>
+  </div>
+  <div id="connection" class="muted">データベース接続確認中…</div>
+</header>
 
-    if (con) {
-        con.textContent += '\n診断1：最初のスクリプト実行済み';
+<section id="home" class="card">
+  <h2>メニュー</h2>
+  <button id="goAssign" class="full">チーム分け ＆ 論題記録</button>
+  <button id="goManage" class="secondary full" style="margin-top:12px">
+    新規論題追加・管理
+  </button>
+</section>
+
+<section id="assign" class="hidden">
+  <div class="card">
+    <h2>1. 論題の選択・実施記録</h2>
+    <div class="row" style="justify-content:space-between">
+      <span class="muted">ランダムに最大4件表示</span>
+      <button id="shuffle" class="secondary small">シャッフル</button>
+    </div>
+    <div id="candidates"></div>
+
+    <h3>論題を検索・絞り込み</h3>
+    <input id="preSearch" type="search" placeholder="キーワード検索">
+    <div class="grid">
+      <select id="preTournament"><option value="">すべての大会</option></select>
+      <select id="preYear"><option value="">すべての年度</option></select>
+    </div>
+    <select id="preStatus" style="margin-top:10px">
+      <option value="all">すべての実施状況</option>
+      <option value="done">直近1年に実施した論題</option>
+      <option value="not_done">直近1年に未実施の論題</option>
+    </select>
+    <div id="preResults" class="scroll"></div>
+
+    <div id="chosen" class="notice ok hidden">
+      <div id="chosenText"></div>
+      <button id="clearChosen" class="danger small" style="margin-top:8px">
+        選択解除
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. メンバー・チーム設定</h2>
+    <div class="grid">
+      <div>
+        <label for="participants">メンバー（1行に1人）</label>
+        <textarea id="participants"></textarea>
+      </div>
+      <div>
+        <label for="judges">事前指定ジャッジ</label>
+        <textarea id="judges"></textarea>
+      </div>
+      <div>
+        <label for="pairs">試合数</label>
+        <select id="pairs"></select>
+      </div>
+      <div>
+        <label for="teamSize">1チームの人数</label>
+        <input id="teamSize" type="number" min="1" max="30" value="3">
+      </div>
+    </div>
+    <p class="muted">
+      定員を超えたメンバーはジャッジ候補になります。
+    </p>
+    <button id="generate" class="full">チームを割り振る</button>
+    <div id="assignResult"></div>
+  </div>
+</section>
+
+<section id="manage" class="hidden">
+  <div class="card">
+    <h2 id="formHeading">新規論題の追加</h2>
+
+    <div id="motionForm">
+      <label for="motion">論題 *</label>
+      <input id="motion" placeholder="THW ...">
+
+      <div class="grid">
+        <div>
+          <label for="tournament">大会名</label>
+          <input id="tournament" placeholder="HPDU推奨">
+        </div>
+        <div>
+          <label for="year">年度</label>
+          <input id="year" placeholder="2026">
+        </div>
+      </div>
+
+      <label>
+        <input id="done" type="checkbox">
+        過去に実施したことがある
+      </label>
+
+      <div id="doneDateBox" class="hidden">
+        <label for="doneDate">実施日（不明なら2024-01-01）</label>
+        <input id="doneDate" type="date">
+      </div>
+
+      <div class="row" style="margin-top:15px">
+        <button id="preview">入力内容を確認する</button>
+        <button id="cancelEdit" class="secondary hidden">
+          編集をキャンセル
+        </button>
+      </div>
+    </div>
+
+    <div id="previewBox" class="panel hidden">
+      <h3>登録内容の確認</h3>
+      <div id="previewText"></div>
+      <div class="row">
+        <button id="revise" class="secondary">修正する</button>
+        <button id="save" class="success">この内容で決定する</button>
+      </div>
+    </div>
+
+    <div id="formStatus" class="notice hidden"></div>
+  </div>
+
+  <div class="card">
+    <h2>登録済み論題一覧</h2>
+    <input id="manageSearch" type="search" placeholder="キーワード検索">
+
+    <div class="grid">
+      <select id="manageTournament">
+        <option value="">すべての大会</option>
+      </select>
+      <select id="manageYear">
+        <option value="">すべての年度</option>
+      </select>
+    </div>
+
+    <select id="manageStatus" style="margin-top:10px">
+      <option value="all">すべての実施状況</option>
+      <option value="done">直近1年に実施</option>
+      <option value="not_done">直近1年に未実施</option>
+    </select>
+
+    <div class="row" style="margin-top:12px">
+      <button id="addTournament" class="secondary small">
+        大会選択肢を追加
+      </button>
+      <button id="export" class="secondary small">
+        motions.jsonをダウンロード
+      </button>
+      <button id="reload" class="secondary small">
+        再読み込み
+      </button>
+    </div>
+
+    <div id="manageList" class="scroll"></div>
+  </div>
+</section>
+</main>
+
+<div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <h2>論題実施の確認</h2>
+    <p>次の論題を本日実施したものとして記録します。</p>
+    <div id="confirmMotion" class="panel"></div>
+    <div id="confirmError" class="notice error hidden"></div>
+    <div class="row" style="margin-top:15px">
+      <button id="closeModal" class="secondary">キャンセル</button>
+      <button id="record" class="success">記録を確定する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+(() => {
+  const SUPABASE_URL = "https://kiewlmqxsqcysswcruiw.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0";
+
+  const $ = id => document.getElementById(id);
+
+  const show = (id, visible) => {
+    $(id).classList.toggle("hidden", !visible);
+  };
+
+  function element(tag, text, className = "") {
+    const el = document.createElement(tag);
+    if (text !== undefined) el.textContent = String(text);
+    if (className) el.className = className;
+    return el;
+  }
+
+  function makeButton(text, handler, className = "secondary small") {
+    const btn = element("button", text, className);
+    btn.type = "button";
+    btn.addEventListener("click", handler);
+    return btn;
+  }
+
+  function setMessage(id, text, type = "") {
+    const el = $(id);
+    el.textContent = text;
+    el.className = "notice" + (type ? " " + type : "");
+    show(id, Boolean(text));
+  }
+
+  let db = null;
+  let motions = [];
+  let selectedMotion = null;
+  let pendingId = null;
+  let editingId = null;
+  let busy = false;
+  let customTournaments = [];
+
+  function historyOf(motion) {
+    return Array.isArray(motion.history)
+      ? motion.history.filter(v =>
+          typeof v === "string" && !Number.isNaN(Date.parse(v))
+        )
+      : [];
+  }
+
+  function recentHistory(motion) {
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 1);
+    const now = new Date();
+
+    return historyOf(motion).filter(v => {
+      const date = new Date(v);
+      return date >= cutoff && date <= now;
+    });
+  }
+
+  function normalizeTournament(value) {
+    const t = String(value || "").trim();
+    if (!t || t === "-") return "その他の大会";
+
+    if (t.includes("部活")) return "部活内";
+    if (t.toLowerCase().includes("sola cup")) return "SOLA CUP";
+    if (t.includes("HEnDA")) return "HEnDA全国大会";
+    if (t.includes("HPDU推奨")) return "HPDU推奨";
+    if (/JWSDC|中学生全国大会|中学全国大会/.test(t)) return "JWSDC";
+    if (/WSDC|世界交流大会/.test(t)) return "WSDC";
+    if (t.includes("連盟杯")) return "HPDU連盟杯";
+    if (/新緑杯|新芽杯/.test(t)) return "HPDU新緑杯・新芽杯";
+    if (t.includes("合宿")) return "夏合宿";
+    if (/PDA首都圏公立|首都圏公立|日比谷/.test(t)) {
+      return "PDA首都圏公立大会";
+    }
+    if (/PDA全国大会|全国大会|冬全国大会/.test(t)) {
+      return "PDA全国大会";
+    }
+    return t;
+  }
+
+  function changeView(view) {
+    ["home", "assign", "manage"].forEach(id => {
+      show(id, id === view);
+    });
+    show("back", view !== "home");
+
+    if (view === "assign") renderCandidates();
+    if (view === "manage") renderManagement();
+
+    window.scrollTo(0, 0);
+  }
+
+  function updateSelect(id, values, firstLabel) {
+    const select = $(id);
+    const previous = select.value;
+    select.replaceChildren(new Option(firstLabel, ""));
+
+    values.forEach(value => {
+      select.add(new Option(value, value));
+    });
+
+    select.value = values.includes(previous) ? previous : "";
+  }
+
+  function updateFilters() {
+    const tournaments = [...new Set([
+      ...motions.map(m => normalizeTournament(m.tournament)),
+      ...customTournaments,
+      "その他の大会"
+    ])].sort((a, b) => a.localeCompare(b, "ja"));
+
+    const years = [...new Set(
+      motions.map(m => String(m.year || ""))
+        .filter(y => y && y !== "-")
+    )].sort((a, b) => b.localeCompare(a, "ja"));
+
+    updateSelect("preTournament", tournaments, "すべての大会");
+    updateSelect("manageTournament", tournaments, "すべての大会");
+    updateSelect("preYear", years, "すべての年度");
+    updateSelect("manageYear", years, "すべての年度");
+  }
+
+  function matchesKeywords(text, search) {
+    const words = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const target = text.toLowerCase();
+    return words.every(word => target.includes(word));
+  }
+
+  function filteredMotions(prefix) {
+    const search = $(prefix + "Search").value;
+    const tournament = $(prefix + "Tournament").value;
+    const year = $(prefix + "Year").value;
+    const status = $(prefix + "Status").value;
+
+    return motions.filter(m => {
+      const norm = normalizeTournament(m.tournament);
+      const y = String(m.year || "");
+      const target = [m.motion || "", norm, m.tournament || "", y].join(" ");
+
+      if (!matchesKeywords(target, search)) return false;
+      if (tournament && norm !== tournament) return false;
+      if (year && y !== year) return false;
+
+      const done = recentHistory(m).length > 0;
+      if (status === "done" && !done) return false;
+      if (status === "not_done" && done) return false;
+
+      return true;
+    });
+  }
+
+  function motionItem(m, management = false) {
+    const item = element("div", undefined, "item");
+    const title = element("strong", m.motion || "論題名なし");
+    const meta = element(
+      "div",
+      `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`,
+      "muted"
+    );
+
+    item.append(title, meta);
+
+    if (management) {
+      const history = recentHistory(m);
+      item.append(element(
+        "div",
+        `直近1年の実施回数：${history.length}回`,
+        "muted"
+      ));
+
+      const actions = element("div", undefined, "item-actions");
+      actions.append(
+        makeButton("編集", () => startEdit(m.id)),
+        makeButton("削除", () => deleteMotion(m.id), "danger small")
+      );
+      item.append(actions);
+    } else {
+      item.append(makeButton(
+        "記録する",
+        () => openRecordModal(m.id)
+      ));
     }
 
-    window.onerror = function(msg, url, line) {
-        const debugConsole = document.getElementById('debug-console');
+    return item;
+  }
 
-        if (debugConsole) {
-            debugConsole.textContent +=
-                `\nエラー: ${msg} (行: ${line})`;
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function renderCandidates() {
+    const container = $("candidates");
+    container.replaceChildren();
+
+    const candidates = shuffleArray([...motions]).slice(0, 4);
+
+    if (!candidates.length) {
+      container.append(element("p", "論題がありません。", "muted"));
+    }
+
+    candidates.forEach(m => container.append(motionItem(m)));
+    renderPreSearch();
+  }
+
+  function renderPreSearch() {
+    const container = $("preResults");
+    container.replaceChildren();
+
+    const active =
+      $("preSearch").value.trim() ||
+      $("preTournament").value ||
+      $("preYear").value ||
+      $("preStatus").value !== "all";
+
+    if (!active) return;
+
+    const results = filteredMotions("pre");
+    container.append(element("p", `${results.length}件ヒット`, "muted"));
+
+    results.slice(0, 200).forEach(m => {
+      container.append(motionItem(m));
+    });
+
+    if (results.length > 200) {
+      container.append(element(
+        "p",
+        "先頭200件を表示しています。検索条件を追加してください。",
+        "muted"
+      ));
+    }
+  }
+
+  function renderManagement() {
+    const container = $("manageList");
+    container.replaceChildren();
+
+    const results = filteredMotions("manage");
+
+    container.append(element(
+      "p",
+      `${results.length}件 / 全${motions.length}件`,
+      "muted"
+    ));
+
+    results.slice(0, 300).forEach(m => {
+      container.append(motionItem(m, true));
+    });
+
+    if (results.length > 300) {
+      container.append(element(
+        "p",
+        "先頭300件を表示しています。",
+        "muted"
+      ));
+    }
+  }
+
+  async function fetchMotions() {
+    if (!db) {
+      $("connection").textContent = "Supabaseに接続できません。";
+      return;
+    }
+
+    try {
+      const all = [];
+      let offset = 0;
+
+      while (true) {
+        const { data, error } = await db
+          .from("motions")
+          .select("*")
+          .order("id", { ascending: true })
+          .range(offset, offset + 999);
+
+        if (error) throw error;
+
+        all.push(...(data || []));
+
+        if (!data || data.length < 1000) break;
+
+        offset += 1000;
+        if (offset >= 50000) {
+          throw new Error("取得上限を超えました。");
         }
+      }
+
+      motions = all;
+      $("connection").textContent =
+        `データベース接続済み・${motions.length}件`;
+
+      updateFilters();
+      renderCandidates();
+      renderManagement();
+
+    } catch (error) {
+      $("connection").textContent =
+        "データ取得エラー：" + error.message;
+      console.error(error);
+    }
+  }
+
+  function openRecordModal(id) {
+    const m = motions.find(x => String(x.id) === String(id));
+    if (!m) return;
+
+    pendingId = m.id;
+    $("confirmMotion").textContent = m.motion;
+    setMessage("confirmError", "");
+    show("confirmModal", true);
+  }
+
+  function closeRecordModal() {
+    pendingId = null;
+    show("confirmModal", false);
+  }
+
+  async function recordMotion() {
+    if (busy || pendingId === null) return;
+
+    if (!db) {
+      setMessage("confirmError", "DBに接続できません。", "error");
+      return;
+    }
+
+    const m = motions.find(x => String(x.id) === String(pendingId));
+    if (!m) return;
+
+    busy = true;
+    $("record").disabled = true;
+
+    try {
+      const history = [...historyOf(m), new Date().toISOString()];
+
+      const { error } = await db
+        .from("motions")
+        .update({ history })
+        .eq("id", m.id);
+
+      if (error) throw error;
+
+      selectedMotion = m.motion;
+      $("chosenText").textContent = "記録済み：" + selectedMotion;
+      show("chosen", true);
+
+      closeRecordModal();
+      await fetchMotions();
+
+    } catch (error) {
+      setMessage(
+        "confirmError",
+        "記録に失敗しました：" + error.message,
+        "error"
+      );
+    } finally {
+      busy = false;
+      $("record").disabled = false;
+    }
+  }
+
+  function resetForm() {
+    editingId = null;
+
+    ["motion", "tournament", "year", "doneDate"].forEach(id => {
+      $(id).value = "";
+    });
+
+    $("done").checked = false;
+    show("doneDateBox", false);
+    show("cancelEdit", false);
+    show("motionForm", true);
+    show("previewBox", false);
+
+    $("formHeading").textContent = "新規論題の追加";
+  }
+
+  function startEdit(id) {
+    const m = motions.find(x => String(x.id) === String(id));
+    if (!m) return;
+
+    editingId = m.id;
+
+    $("motion").value = m.motion || "";
+    $("tournament").value = m.tournament === "-" ? "" : m.tournament || "";
+    $("year").value = m.year === "-" ? "" : m.year || "";
+
+    const history = historyOf(m).sort(
+      (a, b) => Date.parse(b) - Date.parse(a)
+    );
+
+    $("done").checked = history.length > 0;
+    show("doneDateBox", history.length > 0);
+
+    $("doneDate").value = history.length
+      ? new Date(history[0]).toISOString().slice(0, 10)
+      : "";
+
+    $("formHeading").textContent = "論題の編集";
+
+    show("cancelEdit", true);
+    show("motionForm", true);
+    show("previewBox", false);
+    setMessage("formStatus", "");
+
+    window.scrollTo(0, 0);
+  }
+
+  function formData() {
+    return {
+      motion: $("motion").value.trim(),
+      tournament: $("tournament").value.trim(),
+      year: $("year").value.trim(),
+      done: $("done").checked,
+      date: $("doneDate").value || "2024-01-01"
+    };
+  }
+
+  function previewMotion() {
+    const v = formData();
+
+    if (!v.motion) {
+      setMessage("formStatus", "論題を入力してください。", "error");
+      return;
+    }
+
+    const duplicate = motions.find(m =>
+      String(m.id) !== String(editingId) &&
+      (m.motion || "").trim().toLowerCase() === v.motion.toLowerCase() &&
+      (m.tournament || "").trim().toLowerCase() === v.tournament.toLowerCase() &&
+      String(m.year || "").trim().toLowerCase() === v.year.toLowerCase()
+    );
+
+    if (duplicate) {
+      setMessage(
+        "formStatus",
+        "同一の論題・大会名・年度のデータが存在します。",
+        "error"
+      );
+      return;
+    }
+
+    setMessage("formStatus", "");
+
+    const container = $("previewText");
+    container.replaceChildren();
+
+    const fields = [
+      ["論題", v.motion],
+      ["大会名", v.tournament || "未入力"],
+      ["年度", v.year || "未入力"],
+      ["実施状況", v.done ? `実施済み（${v.date}）` : "未実施"]
+    ];
+
+    fields.forEach(([label, value]) => {
+      const p = element("p");
+      p.append(
+        element("strong", label + "："),
+        element("span", value)
+      );
+      container.append(p);
+    });
+
+    show("motionForm", false);
+    show("previewBox", true);
+  }
+
+  async function saveMotion() {
+    if (busy) return;
+
+    if (!db) {
+      setMessage("formStatus", "DBに接続できません。", "error");
+      return;
+    }
+
+    const v = formData();
+    if (!v.motion) return;
+
+    const current = motions.find(
+      m => String(m.id) === String(editingId)
+    );
+
+    let history = [];
+
+    if (editingId !== null && current) {
+      history = historyOf(current);
+
+      if (v.done) {
+        const iso = new Date(v.date + "T00:00:00").toISOString();
+        if (!history.some(h => h.slice(0, 10) === v.date)) {
+          history.push(iso);
+        }
+      } else {
+        history = [];
+      }
+    } else if (v.done) {
+      history = [new Date(v.date + "T00:00:00").toISOString()];
+    }
+
+    const payload = {
+      motion: v.motion,
+      tournament: v.tournament,
+      year: v.year,
+      history
     };
 
-    window.addEventListener('unhandledrejection', function(event) {
-        const debugConsole = document.getElementById('debug-console');
+    busy = true;
+    $("save").disabled = true;
 
-        if (debugConsole) {
-            debugConsole.textContent +=
-                '\nPromiseエラー: ' + String(event.reason);
-        }
-    });
-</script>
-
-<div class="container">
-    <!-- スクロールしても上部に固定表示されるナビゲーション領域 -->
-    <div id="stickyNav" class="sticky-nav-bar hidden">
-        <button id="backBtn" class="back-btn">← メニューに戻る</button>
-    </div>
-
-    <h1>チーム分け＆論題管理システム</h1>
-
-    <!-- ホーム画面 -->
-    <div class="card" id="homeView">
-        <h2>メニュー</h2>
-        <p class="note">行いたい操作を選択してください。</p>
-        <div class="home-menu">
-            <button id="btnAssign">チーム分け ＆ 論題記録システム</button>
-            <button id="btnMotion" class="btn-secondary">新規論題追加・管理ページ</button>
-        </div>
-    </div>
-
-    <!-- 1. チーム分け＆論題選択セクション -->
-    <div class="card hidden" id="assignView">
-        <h2>チーム分け ＆ 論題記録システム</h2>
-        
-        <!-- 【事前記録】論題記録セクション（最大4個表示 & 絞り込み対応） -->
-        <div class="motion-selection-area">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-size: 1.05rem; color: var(--primary-color);">1. 自動抽出された論題</h3>
-                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="redrawPreMotions()">シャッフル</button>
-            </div>
-            
-            <p class="note" style="margin-bottom: 10px;">
-                登録ボタンを押すと、確認画面を経てSupabaseデータベースにその論題の採用が記録されます。
-            </p>
-            
-            <!-- ランダム抽出4件エリア -->
-            <div id="pre-candidates-container"></div>
-
-            <!-- 検索 & 絞り込みエリア -->
-            <label for="pre-search-input" style="margin-top: 14px; margin-bottom: 4px;">データベースから論題を検索・絞り込み</label>
-            <div class="search-input-wrapper">
-                <input type="text" id="pre-search-input" placeholder="キーワードを入力..." oninput="filterPreMotions()">
-                <button type="button" class="search-clear-btn" onclick="clearSearch('pre-search-input', filterPreMotions)" title="クリア">×</button>
-            </div>
-
-            <div class="grid-2" style="margin-bottom: 8px;">
-                <div>
-                    <select id="pre-filter-tournament" onchange="filterPreMotions()">
-                        <option value="">すべての大会名</option>
-                    </select>
-                </div>
-                <div>
-                    <select id="pre-filter-year" onchange="filterPreMotions()">
-                        <option value="">すべての年度</option>
-                    </select>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="promptAddCustomTournament()">+ 大会選択肢を追加</button>
-            </div>
-            <div style="margin-bottom: 8px;">
-                <select id="pre-filter-status" onchange="filterPreMotions()">
-                    <option value="all">すべての実施状況</option>
-                    <option value="done">過去にやった論題のみ</option>
-                    <option value="not_done">まだやっていない論題のみ</option>
-                </select>
-            </div>
-
-            <div id="pre-search-results"></div>
-
-            <!-- 記録中の論題状態表示エリア -->
-            <div id="selectedMotionArea" class="selected-box hidden">
-                <div>
-                    <span style="font-size:0.8rem; font-weight:bold; color:#0284c7; background:#ffffff; padding:2px 6px; border-radius:4px; border:1px solid #bae6fd;">記録中 ✓ (Supabase保存済み)</span><br>
-                    <strong id="selectedMotionDisplay" style="font-size:0.95rem;"></strong>
-                </div>
-                <button class="btn-danger" onclick="clearSelectedMotion()">記録を取り消す</button>
-            </div>
-        </div>
-
-        <h3 style="font-size: 1.05rem; color: var(--primary-color); margin-top: 24px; margin-bottom: 12px;">2. メンバー・チーム設定</h3>
-
-        <div class="grid-2">
-            <div>
-                <label for="participants">メンバー (1人入力するごとに改行)</label>
-                <textarea id="participants" placeholder=""></textarea>
-                <div class="note">※定員を超えた場合は自動的にジャッジに回ります</div>
-            </div>
-            <div>
-                <label for="judges">事前指定ジャッジ (1人入力するごとに改行/任意入力)</label>
-                <textarea id="judges" placeholder=""></textarea>
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div>
-                <label for="targetPairs">作成する試合数 (組)</label>
-                <select id="targetPairs">
-                    <option value="1" selected>1組 (2チーム)</option>
-                    <option value="2">2組 (4チーム)</option>
-                    <option value="3">3組 (6チーム)</option>
-                    <option value="4">4組 (8チーム)</option>
-                    <option value="5">5組 (10チーム)</option>
-                    <option value="6">6組 (12チーム)</option>
-                    <option value="7">7組 (14チーム)</option>
-                    <option value="8">8組 (16チーム)</option>
-                    <option value="9">9組 (18チーム)</option>
-                    <option value="10">10組 (20チーム)</option>
-                </select>
-            </div>
-            <div>
-                <label for="membersPerTeam">1チームあたりの人数</label>
-                <input type="number" id="membersPerTeam" value="3" min="1">
-            </div>
-        </div>
-
-        <button onclick="generateAssignments()" style="margin-top: 12px;">チームを割り振る</button>
-
-        <!-- 割り当て結果表示エリア -->
-        <div id="resultCard" class="hidden" style="margin-top: 24px;">
-            <h3 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">結果</h3>
-            <div id="resultContent"></div>
-        </div>
-    </div>
-
-    <!-- 2. 新規論題追加・管理セクション -->
-    <div class="card hidden" id="motionView">
-        <h2 id="formTitle">新規論題の追加</h2>
-        
-        <div id="motionFormArea">
-            <p class="note">Supabaseデータベースに新しい論題を追加、または既存の論題を編集します。</p>
-            
-            <input type="hidden" id="editIndex" value="-1">
-
-            <label for="newMotion">論題 (Motion) <span style="color:red;">*</span></label>
-            <input type="text" id="newMotion" placeholder="THW...">
-
-            <div class="grid-2">
-                <div>
-                    <label for="newTournament">大会名 (Tournament)</label>
-                    <input type="text" id="newTournament" placeholder="例: PDA全国大会">
-                </div>
-                <div>
-                    <label for="newYear">年度 (Year)</label>
-                    <input type="text" id="newYear" placeholder="例: 2026">
-                </div>
-            </div>
-
-            <!-- 実施状況の入力セクション -->
-            <div style="background: #f1f5f9; padding: 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;">
-                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin-bottom: 0;">
-                    <input type="checkbox" id="newIsDone" onchange="toggleDoneDateInput()" style="width: auto; margin-bottom: 0; transform: scale(1.1);"> 過去に実施したことがある論題
-                </label>
-                <div id="doneDateArea" class="hidden" style="margin-top: 12px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-                    <label for="newDoneDate" style="font-size: 0.9rem; margin-bottom: 4px;">実施日 (分からない場合は空欄 ⇒ 自動で 2024/01/01 になります)</label>
-                    <input type="date" id="newDoneDate" style="margin-bottom: 0;">
-                </div>
-            </div>
-
-            <div id="formButtons">
-                <button class="btn-secondary" onclick="showPreview()">入力内容を確認する</button>
-            </div>
-            <div id="editCancelContainer" class="hidden" style="margin-top: 10px;">
-                <button class="btn-secondary" onclick="cancelEdit()">編集をキャンセル</button>
-            </div>
-        </div>
-
-        <div id="motionPreviewArea" class="hidden">
-            <p class="note" style="color: #2563eb; font-weight: bold;" id="previewTitle">以下の内容でデータベースに追加します。よろしいですか？</p>
-            
-            <div class="preview-box">
-                <p><strong>論題:</strong> <span id="prevMotion"></span></p>
-                <p><strong>大会名:</strong> <span id="prevTournament"></span></p>
-                <p><strong>年度:</strong> <span id="prevYear"></span></p>
-                <p><strong>実施状況:</strong> <span id="prevStatus"></span></p>
-            </div>
-
-            <div class="grid-2">
-                <button class="btn-secondary" onclick="hidePreview()">← 修正する</button>
-                <button class="btn-success" onclick="addNewMotion()">この内容で決定する</button>
-            </div>
-        </div>
-
-        <div id="formWarningStatus" class="hidden"></div>
-        <div id="submitStatus" class="hidden"></div>
-
-        <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
-            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">登録済み論題一覧（実施履歴・編集・削除）</h3>
-            <p class="note">登録されている論題の検索や、大会名・年度・実施状況での絞り込みが行えます。</p>
-            
-            <!-- 管理ページの検索窓 -->
-            <div class="search-input-wrapper">
-                <input type="text" id="manage-search-input" placeholder="キーワードで絞り込み..." oninput="renderManagementList()">
-                <button type="button" class="search-clear-btn" onclick="clearSearch('manage-search-input', renderManagementList)" title="クリア">×</button>
-            </div>
-
-            <div class="grid-2" style="margin-bottom: 8px;">
-                <div>
-                    <select id="filter-tournament" onchange="renderManagementList()">
-                        <option value="">すべての大会名</option>
-                    </select>
-                </div>
-                <div>
-                    <select id="filter-year" onchange="renderManagementList()">
-                        <option value="">すべての年度</option>
-                    </select>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="promptAddCustomTournament()">+ 大会選択肢を追加</button>
-            </div>
-            <div style="margin-bottom: 12px;">
-                <select id="filter-status" onchange="renderManagementList()">
-                    <option value="all">すべての実施状況</option>
-                    <option value="done">過去にやった論題のみ</option>
-                    <option value="not_done">まだやっていない論題のみ</option>
-                </select>
-            </div>
-
-            <!-- JSONダウンロード（確認・バックアップ用ボタン） -->
-            <div style="margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.85rem; color: #64748b;">現在のDB内容をファイルとして確認・保存：</span>
-                <button class="btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.85rem; min-height: auto;" onclick="downloadMotionsJSON()">motions.jsonをダウンロード</button>
-            </div>
-
-            <div id="managementListContainer" class="management-list">
-                <p style="font-size: 0.9rem; color: #64748b;">読み込み中...</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 論題実施の誤操作防止確認モーダル -->
-<div id="recordConfirmModal" class="modal-overlay hidden">
-    <div class="modal-content">
-        <h3 style="margin-top:0; color:var(--primary-color);">論題実施の確認</h3>
-        <p style="font-size:0.95rem; line-height:1.5;">
-            以下の論題を<strong>「本日実施した論題」</strong>としてデータベースに記録します。<br>
-            よろしいですか？
-        </p>
-        <div class="preview-box" style="margin-bottom:20px;">
-            <strong id="confirmModalMotionText" style="font-size:1rem; color:#1e293b;"></strong>
-        </div>
-        <div class="grid-2">
-            <button class="btn-secondary" onclick="closeRecordConfirmModal()">キャンセル</button>
-            <button class="btn-success" onclick="executeRecordMotion()">記録を確定する</button>
-        </div>
-    </div>
-</div>
-<script>
-    document.getElementById('debug-console').textContent
-        += '\n診断2：メインスクリプト直前まで到達';
-</script>
-<script>
-document.getElementById('debug-console').textContent
-    += '\n診断4：メインスクリプト実行開始';
-
-alert('診断4：メインスクリプトが実行されました');
-    // Supabase 接続情報
-    const SUPABASE_URL = 'https://kiewlmqxsqcysswcruiw.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0';
-
-    let supabase = null;
     try {
-        if (window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-    } catch (e) {
-        console.error('Supabase初期化エラー:', e);
+      let result;
+
+      if (editingId !== null) {
+        result = await db
+          .from("motions")
+          .update(payload)
+          .eq("id", editingId);
+      } else {
+        result = await db
+          .from("motions")
+          .insert([payload]);
+      }
+
+      if (result.error) throw result.error;
+
+      resetForm();
+      setMessage("formStatus", "保存しました。", "ok");
+      await fetchMotions();
+
+    } catch (error) {
+      setMessage(
+        "formStatus",
+        "保存に失敗しました：" + error.message,
+        "error"
+      );
+    } finally {
+      busy = false;
+      $("save").disabled = false;
+    }
+  }
+
+  async function deleteMotion(id) {
+    const m = motions.find(x => String(x.id) === String(id));
+
+    if (!m || !db || busy) return;
+
+    if (!confirm(`「${m.motion}」を削除しますか？`)) return;
+
+    busy = true;
+
+    try {
+      const { error } = await db
+        .from("motions")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setMessage("formStatus", "削除しました。", "ok");
+      await fetchMotions();
+
+    } catch (error) {
+      setMessage(
+        "formStatus",
+        "削除に失敗しました：" + error.message,
+        "error"
+      );
+    } finally {
+      busy = false;
+    }
+  }
+
+  function generateAssignments() {
+    const participants = $("participants").value
+      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+
+    const judges = $("judges").value
+      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+
+    const pairs = Number($("pairs").value);
+    const size = Number($("teamSize").value);
+    const result = $("assignResult");
+
+    result.replaceChildren();
+
+    if (!Number.isInteger(size) || size < 1 || size > 30) {
+      result.append(element(
+        "div",
+        "チーム人数は1～30で指定してください。",
+        "notice error"
+      ));
+      return;
     }
 
-    let motionsCache = [];
-    let selectedMotionText = "未選択";
-    let pendingRecordMotionText = ""; 
-    let customTournaments = []; 
-    let statusTimer = null; 
+    if (!participants.length) {
+      result.append(element(
+        "div",
+        "参加者を入力してください。",
+        "notice error"
+      ));
+      return;
+    }
 
-    // 画面ロード時にイベントリスナーを安全に登録
-    window.addEventListener('DOMContentLoaded', async () => {
-        // ボタンクリックイベントの設定（インラインonclickの依存を排除）
-        const btnAssign = document.getElementById('btnAssign');
-        const btnMotion = document.getElementById('btnMotion');
-        const backBtn = document.getElementById('backBtn');
+    try {
+      localStorage.setItem("debate_participants", $("participants").value);
+      localStorage.setItem("debate_judges", $("judges").value);
+    } catch (error) {
+      console.warn(error);
+    }
 
-        if (btnAssign) btnAssign.addEventListener('click', () => switchView('assignView'));
-        if (btnMotion) btnMotion.addEventListener('click', () => switchView('motionView'));
-        if (backBtn) backBtn.addEventListener('click', () => switchView('homeView'));
+    shuffleArray(participants);
+    shuffleArray(judges);
 
-        const savedParticipants = localStorage.getItem('debate_participants');
-        const savedJudges = localStorage.getItem('debate_judges');
-        if (savedParticipants) document.getElementById('participants').value = savedParticipants;
-        if (savedJudges) document.getElementById('judges').value = savedJudges;
+    const capacity = pairs * 2 * size;
+    const overflow = participants.splice(capacity);
+    judges.push(...overflow);
 
-        await fetchMotions();
+    if (overflow.length) {
+      result.append(element(
+        "p",
+        `定員超過の${overflow.length}人をジャッジ候補にしました。`,
+        "notice"
+      ));
+    }
+
+    const completePairs = Math.min(
+      pairs,
+      Math.floor(participants.length / (size * 2))
+    );
+
+    if (!completePairs) {
+      result.append(element(
+        "div",
+        `最低${size * 2}人必要です。`,
+        "notice error"
+      ));
+      return;
+    }
+
+    const teams = [];
+
+    for (let i = 0; i < completePairs * 2; i++) {
+      teams.push(participants.splice(0, size));
+    }
+
+    for (let i = 0; i < completePairs; i++) {
+      const match = element("div", undefined, "match");
+      match.append(element("strong", `Match ${i + 1}`));
+
+      const fields = [
+        ["Government", teams[i * 2].join("、")],
+        ["Opposition", teams[i * 2 + 1].join("、")],
+        ["Judge", judges.shift() || "未割り当て"],
+        ["Motion", selectedMotion || "未選択"]
+      ];
+
+      fields.forEach(([label, value]) => {
+        const p = element("p");
+        p.append(
+          element("strong", label + "："),
+          element("span", value)
+        );
+        match.append(p);
+      });
+
+      result.append(match);
+    }
+
+    if (participants.length) {
+      result.append(element(
+        "p",
+        "未割り当ての参加者：" + participants.join("、"),
+        "muted"
+      ));
+    }
+
+    if (judges.length) {
+      result.append(element(
+        "p",
+        "その他のジャッジ：" + judges.join("、"),
+        "muted"
+      ));
+    }
+  }
+
+  function downloadJSON() {
+    const blob = new Blob(
+      [JSON.stringify(motions, null, 2)],
+      { type: "application/json;charset=utf-8" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "motions.json";
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
+  function bindEvents() {
+    for (let i = 1; i <= 10; i++) {
+      $("pairs").add(new Option(
+        `${i}組（${i * 2}チーム）`,
+        String(i)
+      ));
+    }
+
+    $("goAssign").addEventListener("click", () => changeView("assign"));
+    $("goManage").addEventListener("click", () => changeView("manage"));
+    $("back").addEventListener("click", () => changeView("home"));
+
+    $("shuffle").addEventListener("click", renderCandidates);
+    $("generate").addEventListener("click", generateAssignments);
+
+    $("clearChosen").addEventListener("click", () => {
+      selectedMotion = null;
+      show("chosen", false);
     });
 
-    // Supabaseからデータを取得
-    async function fetchMotions() {
-        if (!supabase) return;
-        try {
-            const { data, error } = await supabase.from('motions').select('*');
-            if (error) throw error;
-            
-            motionsCache = data || [];
-            updateFilterOptions();
-            redrawPreMotions();
-            renderManagementList();
-        } catch (e) {
-            console.error('論題集データベースの読み込みに失敗しました', e);
-        }
+    $("closeModal").addEventListener("click", closeRecordModal);
+    $("record").addEventListener("click", recordMotion);
+
+    $("done").addEventListener("change", () => {
+      show("doneDateBox", $("done").checked);
+    });
+
+    $("preview").addEventListener("click", previewMotion);
+
+    $("revise").addEventListener("click", () => {
+      show("previewBox", false);
+      show("motionForm", true);
+    });
+
+    $("save").addEventListener("click", saveMotion);
+
+    $("cancelEdit").addEventListener("click", () => {
+      resetForm();
+      setMessage("formStatus", "");
+    });
+
+    $("export").addEventListener("click", downloadJSON);
+    $("reload").addEventListener("click", fetchMotions);
+
+    $("addTournament").addEventListener("click", () => {
+      const name = prompt("追加する大会名を入力してください。");
+      if (name && name.trim()) {
+        customTournaments.push(name.trim());
+        updateFilters();
+      }
+    });
+
+    ["pre", "manage"].forEach(prefix => {
+      ["Search", "Tournament", "Year", "Status"].forEach(suffix => {
+        const event = suffix === "Search" ? "input" : "change";
+        const render = prefix === "pre"
+          ? renderPreSearch
+          : renderManagement;
+
+        $(prefix + suffix).addEventListener(event, render);
+      });
+    });
+
+    try {
+      $("participants").value =
+        localStorage.getItem("debate_participants") || "";
+      $("judges").value =
+        localStorage.getItem("debate_judges") || "";
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
+  bindEvents();
+
+  try {
+    if (!window.supabase ||
+        typeof window.supabase.createClient !== "function") {
+      throw new Error("Supabase SDKを読み込めませんでした。");
     }
 
-    // 検索窓クリア用の汎用関数
-    function clearSearch(inputId, callback) {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.value = '';
-            if (typeof callback === 'function') {
-                callback();
-            }
-        }
-    }
-
-    // 新規・編集フォームの実施日入力欄の表示切り替え
-    function toggleDoneDateInput() {
-        const isChecked = document.getElementById('newIsDone').checked;
-        const area = document.getElementById('doneDateArea');
-        if (isChecked) {
-            area.classList.remove('hidden');
-        } else {
-            area.classList.add('hidden');
-            document.getElementById('newDoneDate').value = '';
-        }
-    }
-
-    // 1年以内の履歴のみを抽出するヘルパー関数
-    function getValidHistory(historyArr) {
-        if (!Array.isArray(historyArr) || historyArr.length === 0) return [];
-        const now = new Date();
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(now.getFullYear() - 1);
-
-        return historyArr.filter(dateStr => {
-            const d = new Date(dateStr);
-            return !isNaN(d) && d >= oneYearAgo;
-        });
-    }
-
-    // 大会名の正規化・グループ化ルール関数
-    function getNormalizedTournament(rawT) {
-        if (!rawT || rawT === '-') return 'その他の大会';
-        let t = rawT.trim();
-
-        if (t.includes('部活内') || t.includes('部活')) return '部活内';
-        if (t.toLowerCase().includes('sola cup')) return 'SOLA CUP';
-        if (t.includes('HEnDA')) return 'HEnDA全国大会';
-        if (t.includes('HPDU推奨')) return 'HPDU推奨';
-        if (t.includes('JWSDC') || t.includes('中学生全国大会') || t.includes('中学全国大会') || t.includes('夏合宿・全国大会（中学）')) return 'JWSDC';
-        if (t.includes('WSDC') || t.includes('世界交流大会')) return 'WSDC';
-        if (t.includes('連盟杯')) return 'HPDU連盟杯';
-        if (t.includes('新緑杯') || t.includes('新芽杯')) return 'HPDU新緑杯・新芽杯';
-        if (t.includes('合宿')) return '夏合宿';
-        if (t.includes('PDA首都圏公立') || t.includes('首都圏公立') || t.includes('日比谷')) return 'PDA首都圏公立大会';
-        if (t.includes('PDA全国大会') || t.includes('全国大会') || t.includes('冬全国大会')) return 'PDA全国大会';
-
-        return 'その他の大会';
-    }
-
-    function promptAddCustomTournament() {
-        const name = prompt("追加したい大会名の選択肢を入力してください:");
-        if (name && name.trim()) {
-            const trimmed = name.trim();
-            if (!customTournaments.includes(trimmed)) {
-                customTournaments.push(trimmed);
-                updateFilterOptions();
-                updatePreFilterOptions();
-                alert(`「${trimmed}」を絞り込み選択肢に追加しました。`);
-            }
-        }
-    }
-
-    // 画面切り替え関数
-    function switchView(viewId) {
-        const homeView = document.getElementById('homeView');
-        const assignView = document.getElementById('assignView');
-        const motionView = document.getElementById('motionView');
-        const stickyNav = document.getElementById('stickyNav');
-
-        if (homeView) homeView.classList.add('hidden');
-        if (assignView) assignView.classList.add('hidden');
-        if (motionView) motionView.classList.add('hidden');
-
-        if (stickyNav) {
-            if (viewId === 'homeView') {
-                stickyNav.classList.add('hidden');
-            } else {
-                stickyNav.classList.remove('hidden');
-            }
-        }
-
-        if (viewId === 'assignView') {
-            updatePreFilterOptions();
-            redrawPreMotions();
-            filterPreMotions();
-        }
-
-        if (viewId === 'motionView') {
-            cancelEdit();
-            const manageSearch = document.getElementById('manage-search-input');
-            const filterTourney = document.getElementById('filter-tournament');
-            const filterYear = document.getElementById('filter-year');
-            const filterStatus = document.getElementById('filter-status');
-
-            if (manageSearch) manageSearch.value = '';
-            if (filterTourney) filterTourney.value = '';
-            if (filterYear) filterYear.value = '';
-            if (filterStatus) filterStatus.value = 'all';
-
-            clearStatus();
-            clearFormWarning();
-            updateFilterOptions();
-            renderManagementList();
-        }
-
-        const targetView = document.getElementById(viewId);
-        if (targetView) targetView.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function setStatus(text, type, autoDismiss = false) {
-        if (statusTimer) {
-            clearTimeout(statusTimer);
-            statusTimer = null;
-        }
-
-        const statusEl = document.getElementById('submitStatus');
-        if (!statusEl) return;
-        statusEl.className = '';
-        statusEl.innerText = text;
-        
-        if (type === 'success') statusEl.classList.add('status-success');
-        else if (type === 'error') statusEl.classList.add('status-error');
-        else if (type === 'loading') statusEl.classList.add('status-loading');
-        
-        statusEl.classList.remove('hidden');
-
-        if (autoDismiss) {
-            statusTimer = setTimeout(() => {
-                clearStatus();
-            }, 3000);
-        }
-    }
-
-    function clearStatus() {
-        if (statusTimer) {
-            clearTimeout(statusTimer);
-            statusTimer = null;
-        }
-        const statusEl = document.getElementById('submitStatus');
-        if (statusEl) {
-            statusEl.innerText = '';
-            statusEl.className = 'hidden';
-        }
-    }
-
-    function setFormWarning(text) {
-        const el = document.getElementById('formWarningStatus');
-        if (el) {
-            el.innerText = text;
-            el.className = 'status-error';
-            el.classList.remove('hidden');
-        }
-    }
-
-    function clearFormWarning() {
-        const el = document.getElementById('formWarningStatus');
-        if (el) {
-            el.innerText = '';
-            el.className = 'hidden';
-        }
-    }
-
-    function matchesKeyword(text, keyword) {
-        if (!keyword) return true;
-        if (/^[a-z0-9]+$/i.test(keyword)) {
-            const regex = new RegExp(`\\b${keyword}\\b`, 'i');
-            return regex.test(text);
-        }
-        return text.toLowerCase().includes(keyword.toLowerCase());
-    }
-
-    function updateFilterOptions() {
-        const tourneySelect = document.getElementById('filter-tournament');
-        const yearSelect = document.getElementById('filter-year');
-        if (!tourneySelect || !yearSelect) return;
-
-        const currentTourney = tourneySelect.value;
-        const currentYear = yearSelect.value;
-
-        let tournaments = new Set();
-        let years = new Set();
-
-        tournaments.add('PDA首都圏公立大会');
-        tournaments.add('その他の大会');
-        
-        customTournaments.forEach(ct => tournaments.add(ct));
-
-        motionsCache.forEach(m => {
-            const normT = getNormalizedTournament(m.tournament);
-            if (normT) tournaments.add(normT);
-            if (m.year && m.year !== '-') years.add(m.year);
-        });
-
-        let tourneyHtml = '<option value="">すべての大会名</option>';
-        Array.from(tournaments).sort((a, b) => {
-            if (a === 'その他の大会') return 1;
-            if (b === 'その他の大会') return -1;
-            return a.localeCompare(b, 'ja');
-        }).forEach(t => {
-            tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
-        });
-        tourneySelect.innerHTML = tourneyHtml;
-
-        let yearHtml = '<option value="">すべての年度</option>';
-        Array.from(years).sort().reverse().forEach(y => {
-            yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
-        });
-        yearSelect.innerHTML = yearHtml;
-    }
-
-    function updatePreFilterOptions() {
-        const tourneySelect = document.getElementById('pre-filter-tournament');
-        const yearSelect = document.getElementById('pre-filter-year');
-        if (!tourneySelect || !yearSelect) return;
-
-        const currentTourney = tourneySelect.value;
-        const currentYear = yearSelect.value;
-
-        let tournaments = new Set();
-        let years = new Set();
-
-        tournaments.add('PDA首都圏公立大会');
-        tournaments.add('その他の大会');
-
-        customTournaments.forEach(ct => tournaments.add(ct));
-
-        motionsCache.forEach(m => {
-            const normT = getNormalizedTournament(m.tournament);
-            if (normT) tournaments.add(normT);
-            if (m.year && m.year !== '-') years.add(m.year);
-        });
-
-        let tourneyHtml = '<option value="">すべての大会名</option>';
-        Array.from(tournaments).sort((a, b) => {
-            if (a === 'その他の大会') return 1;
-            if (b === 'その他の大会') return -1;
-            return a.localeCompare(b, 'ja');
-        }).forEach(t => {
-            tourneyHtml += `<option value="${t}" ${t === currentTourney ? 'selected' : ''}>${t}</option>`;
-        });
-        tourneySelect.innerHTML = tourneyHtml;
-
-        let yearHtml = '<option value="">すべての年度</option>';
-        Array.from(years).sort().reverse().forEach(y => {
-            yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
-        });
-        yearSelect.innerHTML = yearHtml;
-    }
-
-    function redrawPreMotions() {
-        const container = document.getElementById('pre-candidates-container');
-        if (!container) return;
-
-        let sampleMotions = [];
-        if (motionsCache.length > 0) {
-            const shuffleArray = (arr) => {
-                let a = [...arr];
-                for (let i = a.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]];
-                }
-                return a;
-            };
-
-            sampleMotions = shuffleArray(motionsCache).slice(0, 4);
-        }
-
-        let html = '';
-        if (sampleMotions.length > 0) {
-            sampleMotions.forEach((m) => {
-                const safeMotionText = m.motion.replace(/'/g, "\\'");
-                const normTourney = getNormalizedTournament(m.tournament);
-                html += `
-                    <div class="motion-candidate-item">
-                        <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${normTourney}, ${m.year || '年度なし'})</span></span>
-                        <button class="btn-secondary" onclick="openRecordConfirmModal('${safeMotionText}')">記録する</button>
-                    </div>
-                `;
-            });
-        } else {
-            html = `<p style="font-size:0.9rem; color:#64748b;">登録されている論題がありません。</p>`;
-        }
-
-        container.innerHTML = html;
-    }
-
-    function filterPreMotions() {
-        const rawKeyword = document.getElementById('pre-search-input').value.trim();
-        const selectedTourney = document.getElementById('pre-filter-tournament').value;
-        const selectedYear = document.getElementById('pre-filter-year').value;
-        const selectedStatus = document.getElementById('pre-filter-status').value;
-        const resultsContainer = document.getElementById('pre-search-results');
-
-        if (!rawKeyword && !selectedTourney && !selectedYear && selectedStatus === 'all') {
-            resultsContainer.innerHTML = '';
-            return;
-        }
-
-        const keywords = rawKeyword ? rawKeyword.split(/\s+/) : [];
-
-        const filtered = motionsCache.filter(m => {
-            const text = m.motion || '';
-            const normTourney = getNormalizedTournament(m.tournament);
-            const year = m.year || '';
-            const targetString = `${text} ${normTourney} ${year}`;
-
-            const matchKeyword = keywords.every(kw => matchesKeyword(targetString, kw));
-            const matchTourney = !selectedTourney || normTourney === selectedTourney;
-            const matchYear = !selectedYear || year === selectedYear;
-
-            const validHistory = getValidHistory(m.history);
-            const hasDone = validHistory.length > 0;
-            let matchStatus = true;
-            if (selectedStatus === 'done') matchStatus = hasDone;
-            else if (selectedStatus === 'not_done') matchStatus = !hasDone;
-
-            return matchKeyword && matchTourney && matchYear && matchStatus;
-        });
-
-        if (filtered.length === 0) {
-            resultsContainer.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">一致する論題が見つかりませんでした。</p>`;
-            return;
-        }
-
-        let resHtml = `<p style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px; padding-left: 2px;">${filtered.length}件ヒットしました</p><div class="search-results-box">`;
-        filtered.forEach(m => {
-            const safeText = m.motion.replace(/'/g, "\\'");
-            const normTourney = getNormalizedTournament(m.tournament);
-            resHtml += `
-                <div class="search-result-item">
-                    <span><strong>${m.motion}</strong> <span style="font-size:0.85rem; color:#64748b;">(${normTourney}, ${m.year || '-'})</span></span>
-                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; min-height: auto;" onclick="openRecordConfirmModal('${safeText}')">記録</button>
-                </div>
-            `;
-        });
-        resHtml += `</div>`;
-        resultsContainer.innerHTML = resHtml;
-    }
-
-    function openRecordConfirmModal(motionText) {
-        pendingRecordMotionText = motionText;
-        document.getElementById('confirmModalMotionText').innerText = motionText;
-        document.getElementById('recordConfirmModal').classList.remove('hidden');
-    }
-
-    function closeRecordConfirmModal() {
-        pendingRecordMotionText = "";
-        document.getElementById('recordConfirmModal').classList.add('hidden');
-    }
-
-    // 実施履歴の記録（Supabase更新）
-    async function executeRecordMotion() {
-        if (!supabase) return;
-        if (!pendingRecordMotionText) return;
-        const motionText = pendingRecordMotionText;
-        closeRecordConfirmModal();
-
-        selectedMotionText = motionText;
-        document.getElementById('selectedMotionDisplay').innerText = motionText;
-        document.getElementById('selectedMotionArea').classList.remove('hidden');
-
-        try {
-            const target = motionsCache.find(m => m.motion === motionText);
-            if (target) {
-                if (!Array.isArray(target.history)) target.history = [];
-                target.history.push(new Date().toISOString());
-                const validHistory = getValidHistory(target.history);
-
-                const { error } = await supabase
-                    .from('motions')
-                    .update({ history: validHistory })
-                    .eq('id', target.id);
-
-                if (error) throw error;
-                target.history = validHistory;
-            }
-        } catch (e) {
-            console.error('使用履歴の記録に失敗しました', e);
-        }
-    }
-
-    function clearSelectedMotion() {
-        selectedMotionText = "未選択";
-        document.getElementById('selectedMotionDisplay').innerText = '';
-        document.getElementById('selectedMotionArea').classList.add('hidden');
-    }
-
-    function generateAssignments() {
-        const participantsText = document.getElementById('participants').value.trim();
-        const judgesText = document.getElementById('judges').value.trim();
-        const targetPairs = parseInt(document.getElementById('targetPairs').value) || 1;
-        const membersPerTeam = parseInt(document.getElementById('membersPerTeam').value) || 3;
-
-        if (!participantsText) {
-            alert('参加者リストを入力してください。');
-            return;
-        }
-
-        localStorage.setItem('debate_participants', participantsText);
-        localStorage.setItem('debate_judges', judgesText);
-
-        let participants = participantsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-        let judges = judgesText ? judgesText.split('\n').map(s => s.trim()).filter(s => s.length > 0) : [];
-
-        const shuffle = (array) => {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        };
-
-        shuffle(participants);
-        shuffle(judges);
-
-        const requiredTeams = targetPairs * 2;
-        const totalCapacity = requiredTeams * membersPerTeam;
-        let overflowNotice = "";
-
-        if (participants.length > totalCapacity) {
-            const extraCount = participants.length - totalCapacity;
-            const extraParticipants = participants.splice(totalCapacity);
-            judges = judges.concat(extraParticipants);
-            overflowNotice = `<p style="color: #d97706; font-weight: bold; font-size: 0.9rem;">⚠️ 参加者が定員（${totalCapacity}人）より ${extraCount} 人多いため、あふれたメンバーを自動的にジャッジに割り振りました。</p>`;
-        }
-
-        let teams = [];
-        for (let i = 0; i < requiredTeams; i++) {
-            let members = participants.splice(0, membersPerTeam);
-            if (members.length > 0) {
-                teams.push({
-                    name: `Team ${i + 1}`,
-                    members: members
-                });
-            }
-        }
-
-        let html = overflowNotice;
-        let matchCount = Math.floor(teams.length / 2);
-
-        if (matchCount === 0) {
-            html += `<p>チームを組むのに十分な参加者がいません（最低でも1組＝2チーム分の人数が必要です）。</p>`;
-        } else {
-            for (let i = 0; i < matchCount; i++) {
-                const gov = teams[i * 2];
-                const opp = teams[i * 2 + 1];
-                const assignedJudge = judges.length > 0 ? judges.shift() : 'ジャッジ不足（追加してください）';
-
-                html += `
-                    <div class="result-box">
-                        <strong>Match ${i + 1} (第 ${i + 1} 組)</strong><br>
-                        <strong>Government:</strong> ${gov.members.join(', ')}<br>
-                        <strong>Opposition:</strong> ${opp.members.join(', ')}<br>
-                        <strong>Judge:</strong> <span style="color: #2563eb; font-weight: bold;">${assignedJudge}</span><br>
-                        <div style="margin-top: 6px;">
-                            <strong>Motion:</strong> <span class="badge">${selectedMotionText}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        if (judges.length > 0) {
-            html += `<div style="margin-top: 20px;"><strong>その他のジャッジ:</strong> ${judges.join(', ')}</div>`;
-        }
-
-        document.getElementById('resultContent').innerHTML = html;
-        document.getElementById('resultCard').classList.remove('hidden');
-    }
-
-    function formatHistory(historyArr) {
-        const validHistory = getValidHistory(historyArr);
-        if (validHistory.length === 0) {
-            return '<span style="color:#64748b;">実施履歴なし (過去1年間)</span>';
-        }
-
-        const count = validHistory.length;
-        const lastDateStr = validHistory[validHistory.length - 1];
-        const lastDate = new Date(lastDateStr);
-        const now = new Date();
-        const diffTime = now - lastDate;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-        let timeStr = "";
-        if (diffDays <= 0) {
-            timeStr = "今日";
-        } else if (diffDays <= 10) {
-            timeStr = `${diffDays}日前`;
-        } else if (diffDays < 30) {
-            const weeks = Math.floor(diffDays / 7);
-            timeStr = `${weeks > 0 ? weeks : 1}週間前`;
-        } else {
-            const months = Math.floor(diffDays / 30);
-            timeStr = `${months > 0 ? months : 1}ヶ月前`;
-        }
-
-        return `直近1年の実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
-    }
-
-    function renderManagementList() {
-        const container = document.getElementById('managementListContainer');
-        const rawKeyword = document.getElementById('manage-search-input').value.trim();
-        const selectedTourney = document.getElementById('filter-tournament').value;
-        const selectedYear = document.getElementById('filter-year').value;
-        const selectedStatus = document.getElementById('filter-status').value;
-
-        if (!container) return;
-
-        if (motionsCache.length === 0) {
-            container.innerHTML = `<p style="font-size: 0.9rem; color: #64748b;">登録されている論題はありません。</p>`;
-            return;
-        }
-
-        const keywords = rawKeyword ? rawKeyword.split(/\s+/) : [];
-
-        const filtered = motionsCache.filter((m, originalIndex) => {
-            const text = m.motion || '';
-            const normTourney = getNormalizedTournament(m.tournament);
-            const year = m.year || '';
-            const targetString = `${text} ${normTourney} ${year}`;
-            m._originalIndex = originalIndex;
-
-            const matchKeyword = keywords.every(kw => matchesKeyword(targetString, kw));
-            const matchTourney = !selectedTourney || normTourney === selectedTourney;
-            const matchYear = !selectedYear || year === selectedYear;
-
-            const validHistory = getValidHistory(m.history);
-            const hasDone = validHistory.length > 0;
-            let matchStatus = true;
-            if (selectedStatus === 'done') matchStatus = hasDone;
-            else if (selectedStatus === 'not_done') matchStatus = !hasDone;
-
-            return matchKeyword && matchTourney && matchYear && matchStatus;
-        });
-
-        if (filtered.length === 0) {
-            container.innerHTML = `<p style="font-size: 0.9rem; color: #dc2626; padding: 8px;">条件に一致する論題が見つかりませんでした。</p>`;
-            return;
-        }
-
-        let html = `<p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px; padding-left: 2px;">${filtered.length}件ヒットしました</p>`;
-        filtered.forEach((m) => {
-            const originalIndex = m._originalIndex;
-            const safeMotion = (m.motion || '').replace(/'/g, "\\'");
-            const safeTourney = (m.tournament || '').replace(/'/g, "\\'");
-            const safeYear = (m.year || '').replace(/'/g, "\\'");
-            const normTourney = getNormalizedTournament(m.tournament);
-            const historyInfo = formatHistory(m.history);
-
-            html += `
-                <div class="management-item">
-                    <div>
-                        <strong>${m.motion}</strong><br>
-                        <span style="font-size:0.85rem; color:#64748b;">大会: ${normTourney} (登録名: ${m.tournament || '-'}) / 年度: ${m.year || '-'}</span><br>
-                        <span style="font-size:0.8rem; color:#0284c7;">${historyInfo}</span>
-                    </div>
-                    <div class="management-actions">
-                        <button class="btn-secondary" onclick="startEdit(${originalIndex}, '${safeMotion}', '${safeTourney}', '${safeYear}')">編集</button>
-                        <button class="btn-danger" onclick="deleteMotion(${originalIndex})">削除</button>
-                    </div>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    }
-
-    function startEdit(index, motion, tournament, year) {
-        document.getElementById('editIndex').value = index;
-        document.getElementById('newMotion').value = motion;
-        document.getElementById('newTournament').value = tournament === '-' ? '' : tournament;
-        document.getElementById('newYear').value = year === '-' ? '' : year;
-
-        const target = motionsCache[index];
-        const isDoneCheckbox = document.getElementById('newIsDone');
-        const doneDateInput = document.getElementById('newDoneDate');
-
-        if (target.history && target.history.length > 0) {
-            isDoneCheckbox.checked = true;
-            document.getElementById('doneDateArea').classList.remove('hidden');
-            const lastDate = new Date(target.history[target.history.length - 1]);
-            if (!isNaN(lastDate)) {
-                const yyyy = lastDate.getFullYear();
-                const mm = String(lastDate.getMonth() + 1).padStart(2, '0');
-                const dd = String(lastDate.getDate()).padStart(2, '0');
-                doneDateInput.value = `${yyyy}-${mm}-${dd}`;
-            } else {
-                doneDateInput.value = '2024-01-01';
-            }
-        } else {
-            isDoneCheckbox.checked = false;
-            document.getElementById('doneDateArea').classList.add('hidden');
-            doneDateInput.value = '';
-        }
-
-        document.getElementById('formTitle').innerText = '論題の編集';
-        document.getElementById('editCancelContainer').classList.remove('hidden');
-        clearStatus();
-        clearFormWarning();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function cancelEdit() {
-        document.getElementById('editIndex').value = -1;
-        document.getElementById('newMotion').value = '';
-        document.getElementById('newTournament').value = '';
-        document.getElementById('newYear').value = '';
-        document.getElementById('newIsDone').checked = false;
-        document.getElementById('doneDateArea').classList.add('hidden');
-        document.getElementById('newDoneDate').value = '';
-
-        document.getElementById('formTitle').innerText = '新規論題の追加';
-        document.getElementById('editCancelContainer').classList.add('hidden');
-        clearFormWarning();
-        hidePreview();
-    }
-
-    function showPreview() {
-        const motion = document.getElementById('newMotion').value.trim();
-        const tournament = document.getElementById('newTournament').value.trim();
-        const year = document.getElementById('newYear').value.trim();
-        const isDone = document.getElementById('newIsDone').checked;
-        const rawDate = document.getElementById('newDoneDate').value.trim();
-        const editIndex = parseInt(document.getElementById('editIndex').value);
-
-        if (!motion) {
-            alert('論題を入力してください。');
-            return;
-        }
-
-        const duplicate = motionsCache.find((m, idx) => {
-            if (editIndex >= 0 && idx === editIndex) return false;
-            
-            const isMotionMatch = (m.motion || '').trim().toLowerCase() === motion.toLowerCase();
-            const isTournamentMatch = (m.tournament || '').trim().toLowerCase() === tournament.toLowerCase();
-            const isYearMatch = (m.year || '').trim().toLowerCase() === year.toLowerCase();
-
-            return isMotionMatch && isTournamentMatch && isYearMatch;
-        });
-
-        if (duplicate) {
-            setFormWarning(`すでに同一の論題データが存在します。\n【論題】${duplicate.motion}\n【大会名(登録名)】${duplicate.tournament || '未入力'}\n【年度】${duplicate.year || '未入力'}`);
-            return;
-        } else {
-            clearFormWarning();
-        }
-
-        document.getElementById('prevMotion').innerText = motion;
-        document.getElementById('prevTournament').innerText = tournament || '（未入力）';
-        document.getElementById('prevYear').innerText = year || '（未入力）';
-        
-        let statusStr = "実施したことなし（未実施）";
-        if (isDone) {
-            const dateUsed = rawDate ? rawDate : '2024/01/01';
-            statusStr = `実施したことあり（実施日: ${dateUsed}）`;
-        }
-        document.getElementById('prevStatus').innerText = statusStr;
-
-        const previewTitle = document.getElementById('previewTitle');
-        if (editIndex >= 0) {
-            previewTitle.innerText = '以下の内容で論題を更新します。よろしいですか？';
-        } else {
-            previewTitle.innerText = '以下の内容でデータベースに追加します。よろしいですか？';
-        }
-
-        document.getElementById('motionFormArea').classList.add('hidden');
-        document.getElementById('motionPreviewArea').classList.remove('hidden');
-    }
-
-    function hidePreview() {
-        document.getElementById('motionPreviewArea').classList.add('hidden');
-        document.getElementById('motionFormArea').classList.remove('hidden');
-    }
-
-    // データの追加または更新（Supabaseへ保存）
-    async function addNewMotion() {
-        if (!supabase) {
-            alert('Supabaseに接続されていません。');
-            return;
-        }
-        const motion = document.getElementById('newMotion').value.trim();
-        const tournament = document.getElementById('newTournament').value.trim();
-        const year = document.getElementById('newYear').value.trim();
-        const isDone = document.getElementById('newIsDone').checked;
-        const rawDate = document.getElementById('newDoneDate').value.trim();
-        const editIndex = parseInt(document.getElementById('editIndex').value);
-
-        setStatus(editIndex >= 0 ? '更新中...' : '追加中...', 'loading');
-
-        let historyArr = [];
-        if (isDone) {
-            const dateStr = rawDate ? rawDate : '2024-01-01';
-            const d = new Date(dateStr);
-            const isoStr = !isNaN(d) ? d.toISOString() : '2024-01-01T00:00:00.000Z';
-            historyArr = [isoStr];
-        }
-
-        try {
-            if (editIndex >= 0 && motionsCache[editIndex]) {
-                const targetId = motionsCache[editIndex].id;
-                const { error } = await supabase
-                    .from('motions')
-                    .update({ motion, tournament, year, history: isDone ? historyArr : [] })
-                    .eq('id', targetId);
-
-                if (error) throw error;
-                setStatus('✅ 論題が正常に更新されました！', 'success', true);
-            } else {
-                const { error } = await supabase
-                    .from('motions')
-                    .insert([{ motion, tournament, year, history: historyArr }]);
-
-                if (error) throw error;
-                setStatus('✅ 論題は正常に追加されました！', 'success', true);
-            }
-
-            cancelEdit();
-            await fetchMotions();
-        } catch (err) {
-            setStatus(`❌ エラー: ${err.message}`, 'error');
-        }
-    }
-
-    // データの削除（Supabaseから削除）
-    async function deleteMotion(index) {
-        if (!supabase) return;
-        const target = motionsCache[index];
-        if (!confirm(`“${target.motion}”を削除してもよろしいですか？`)) {
-            return;
-        }
-
-        setStatus('削除中...', 'loading');
-
-        try {
-            const { error } = await supabase
-                .from('motions')
-                .delete()
-                .eq('id', target.id);
-
-            if (error) throw error;
-
-            setStatus('論題を削除しました。', 'success', true);
-            await fetchMotions();
-        } catch (err) {
-            setStatus(`❌ エラー: ${err.message}`, 'error');
-        }
-    }
-
-    // JSONダウンロード機能（中身の確認・バックアップ用）
-    function downloadMotionsJSON() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(motionsCache, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "motions.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    }
-</script>
-<script>
-    document.getElementById('debug-console').textContent
-        += '\n診断3：メインスクリプトの後まで到達';
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    fetchMotions();
+
+  } catch (error) {
+    $("connection").textContent = "接続エラー：" + error.message;
+    console.error(error);
+  }
+})();
 </script>
 </body>
 </html>
