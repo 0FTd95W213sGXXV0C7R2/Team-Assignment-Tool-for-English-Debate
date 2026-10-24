@@ -596,6 +596,19 @@
         }
     }
 
+    // 1年以内の履歴のみを抽出するヘルパー関数
+    function getValidHistory(historyArr) {
+        if (!Array.isArray(historyArr) || historyArr.length === 0) return [];
+        const now = new Date();
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+
+        return historyArr.filter(dateStr => {
+            const d = new Date(dateStr);
+            return !isNaN(d) && d >= oneYearAgo;
+        });
+    }
+
     // 大会名の正規化・グループ化ルール関数
     function getNormalizedTournament(rawT) {
         if (!rawT || rawT === '-') return 'その他の大会';
@@ -707,7 +720,6 @@
         
         statusEl.classList.remove('hidden');
 
-        // 成功時などは指定により3秒後に自動消去する
         if (autoDismiss) {
             statusTimer = setTimeout(() => {
                 clearStatus();
@@ -759,11 +771,9 @@
         let tournaments = new Set();
         let years = new Set();
 
-        // 常に「その他の大会」および「PDA首都圏公立大会」を選択肢として追加する
         tournaments.add('PDA首都圏公立大会');
         tournaments.add('その他の大会');
         
-        // ユーザーが手動追加した選択肢を追加
         customTournaments.forEach(ct => tournaments.add(ct));
 
         motionsCache.forEach(m => {
@@ -801,11 +811,9 @@
         let tournaments = new Set();
         let years = new Set();
 
-        // 常に「その他の大会」および「PDA首都圏公立大会」を選択肢として追加する
         tournaments.add('PDA首都圏公立大会');
         tournaments.add('その他の大会');
 
-        // ユーザーが手動追加した選択肢を追加
         customTournaments.forEach(ct => tournaments.add(ct));
 
         motionsCache.forEach(m => {
@@ -837,7 +845,6 @@
 
         let sampleMotions = [];
         if (motionsCache.length > 0) {
-            // 単純に全論題をランダムにシャッフルして上から4件抽出
             const shuffleArray = (arr) => {
                 let a = [...arr];
                 for (let i = a.length - 1; i > 0; i--) {
@@ -894,7 +901,8 @@
             const matchTourney = !selectedTourney || normTourney === selectedTourney;
             const matchYear = !selectedYear || year === selectedYear;
 
-            const hasDone = Array.isArray(m.history) && m.history.length > 0 && m.history[0] !== "-";
+            const validHistory = getValidHistory(m.history);
+            const hasDone = validHistory.length > 0;
             let matchStatus = true;
             if (selectedStatus === 'done') matchStatus = hasDone;
             else if (selectedStatus === 'not_done') matchStatus = !hasDone;
@@ -955,6 +963,7 @@
             if (target) {
                 if (!Array.isArray(target.history)) target.history = [];
                 target.history.push(new Date().toISOString());
+                target.history = getValidHistory(target.history); // 1年以内の履歴のみに整理
             }
         } catch (e) {
             console.error('使用履歴の記録に失敗しました', e);
@@ -1051,12 +1060,13 @@
     }
 
     function formatHistory(historyArr) {
-        if (!Array.isArray(historyArr) || historyArr.length === 0) {
-            return '<span style="color:#64748b;">実施履歴なし</span>';
+        const validHistory = getValidHistory(historyArr);
+        if (validHistory.length === 0) {
+            return '<span style="color:#64748b;">実施履歴なし (過去1年間)</span>';
         }
 
-        const count = historyArr.length;
-        const lastDateStr = historyArr[historyArr.length - 1];
+        const count = validHistory.length;
+        const lastDateStr = validHistory[validHistory.length - 1];
         const lastDate = new Date(lastDateStr);
         const now = new Date();
         const diffTime = now - lastDate;
@@ -1075,10 +1085,10 @@
             timeStr = `${months > 0 ? months : 1}ヶ月前`;
         }
 
-        return `実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
+        return `直近1年の実施回数: <strong>${count}回</strong> (直近: ${timeStr})`;
     }
 
-    // 管理ページの論題リスト表示（「登録名」表記に変更）
+    // 管理ページの論題リスト表示
     function renderManagementList() {
         const container = document.getElementById('managementListContainer');
         const rawKeyword = document.getElementById('manage-search-input').value.trim();
@@ -1106,7 +1116,8 @@
             const matchTourney = !selectedTourney || normTourney === selectedTourney;
             const matchYear = !selectedYear || year === selectedYear;
 
-            const hasDone = Array.isArray(m.history) && m.history.length > 0 && m.history[0] !== "-";
+            const validHistory = getValidHistory(m.history);
+            const hasDone = validHistory.length > 0;
             let matchStatus = true;
             if (selectedStatus === 'done') matchStatus = hasDone;
             else if (selectedStatus === 'not_done') matchStatus = !hasDone;
@@ -1181,7 +1192,6 @@
             return;
         }
 
-        // 論題・大会名(登録名)・年度がすべて完全に一致する場合のみ重複判定
         const duplicate = motionsCache.find((m, idx) => {
             if (editIndex >= 0 && idx === editIndex) return false;
             
@@ -1231,7 +1241,7 @@
         if (editIndex >= 0) {
             updatedList[editIndex] = { ...updatedList[editIndex], motion, tournament, year };
         } else {
-            const initialHistory = (tournament.includes('部活内') || tournament.includes('部活')) ? [new Date().toISOString()] : [];
+            const initialHistory = (tournament.includes('部活内') || tournament.includes('部活')) ? getValidHistory([new Date().toISOString()]) : [];
             updatedList.push({ motion, tournament, year, history: initialHistory });
         }
 
