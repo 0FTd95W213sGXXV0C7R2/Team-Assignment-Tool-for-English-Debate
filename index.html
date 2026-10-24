@@ -29,7 +29,7 @@
         h1 {
             text-align: center;
             color: var(--primary-color);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             font-size: 1.6rem;
         }
         .card {
@@ -126,11 +126,15 @@
             font-size: 1.1rem;
             padding: 18px;
         }
-        /* 被り防止のため通常配置に戻した「メニューに戻る」ボタン */
+
+        /* タイトルと並べる「メニューに戻る」ボタン */
+        .header-area {
+            margin-bottom: 16px;
+        }
         .back-btn {
             background-color: #e2e8f0;
             color: #475569;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             width: auto;
             padding: 8px 14px;
             font-size: 0.85rem;
@@ -140,6 +144,7 @@
         .back-btn:hover {
             background-color: #cbd5e1;
         }
+
         .result-box {
             background: #f1f5f9;
             border-left: 4px solid var(--primary-color);
@@ -338,7 +343,10 @@
 <body>
 
 <div class="container">
-    <h1>チーム分け＆論題管理ツール</h1>
+    <div class="header-area">
+        <button id="navBackBtn" class="back-btn hidden" onclick="switchView('homeView')">← メニューに戻る</button>
+        <h1>チーム分け＆論題管理ツール</h1>
+    </div>
 
     <!-- ホーム画面 -->
     <div class="card" id="homeView">
@@ -352,7 +360,6 @@
 
     <!-- 1. チーム分け＆論題選択セクション -->
     <div class="card hidden" id="assignView">
-        <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2>チーム分け ＆ 論題記録ツール</h2>
         
         <!-- 【事前記録】論題記録セクション（最大4個表示 & 絞り込み対応） -->
@@ -460,7 +467,6 @@
 
     <!-- 2. 新規論題追加・管理セクション -->
     <div class="card hidden" id="motionView">
-        <button class="back-btn" onclick="switchView('homeView')">← メニューに戻る</button>
         <h2 id="formTitle">新規論題の追加</h2>
         
         <div id="motionFormArea">
@@ -683,6 +689,14 @@
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('assignView').classList.add('hidden');
         document.getElementById('motionView').classList.add('hidden');
+
+        const navBackBtn = document.getElementById('navBackBtn');
+
+        if (viewId === 'homeView') {
+            navBackBtn.classList.add('hidden');
+        } else {
+            navBackBtn.classList.remove('hidden');
+        }
 
         if (viewId === 'assignView') {
             updatePreFilterOptions();
