@@ -1,9 +1,9 @@
 name: Tests
 
-on:
-push:
-pull_request:
-workflow_dispatch:
+‘on’:
+push: {}
+pull_request: {}
+workflow_dispatch: {}
 
 permissions:
 contents: read
@@ -12,10 +12,10 @@ jobs:
 test:
 name: Run Node.js tests
 runs-on: ubuntu-latest
-
 steps:
-  - name: Check out repository
-    uses: actions/checkout@v4
+- name: Check out repository
+uses: actions/checkout@v4
+
   - name: Set up Node.js
     uses: actions/setup-node@v4
     with:
