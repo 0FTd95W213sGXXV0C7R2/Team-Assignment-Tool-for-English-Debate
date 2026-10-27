@@ -1,39 +1,57 @@
-# Motion History and Restore
+# Motion history and restore
 
-## 1. History
+## Transactional writes
 
-The development database records previous motion rows
-before UPDATE and DELETE operations.
+All motion insert, update, logical delete, usage-record, and restore operations
+must use the server-side API and the `motion_apply` or
+`motion_restore_revision_checked` PostgreSQL RPC. The RPC locks the selected
+motion, compares its revision, and writes the audit entry in the same database
+transaction as the row change. Audit failure aborts the transaction. Insert
+records have a null `before_data` and the created row in `after_data`.
 
-Administrators can inspect the history with:
+The RPC uses an existing `motions` trigger that writes to `motion_audit` when
+one is installed for the relevant event. Otherwise, it writes the same
+before/after snapshot directly, within the transaction. A logical deletion is
+an UPDATE (`is_deleted = true`), so the audit event is an UPDATE with the
+soft-deleted state in `after_data`.
 
-    SELECT id, motion_id, operation, backed_up_at, previous_row
-    FROM public.motion_change_backups
-    ORDER BY id DESC
-    LIMIT 100;
+The audit table is in the same database as the motions. It protects against
+application mistakes and provides change history; it is not an independent
+backup and cannot protect against loss of the database itself.
+The migration disables the older `motion_change_backups` trigger to avoid
+duplicate captures, but does not drop that table or delete its existing rows.
 
-## 2. Restore
+## Restore
 
-Automatic restoration is not implemented yet.
+The development-only `admin.html` loads active and deleted motions and their
+history through authenticated server APIs. It shows the current row and the
+selected snapshot before confirming a restore. A restore checks the current
+revision under a row lock, restores the selected audit row's `before_data`,
+increments the revision, and records the before/after restore as an UPDATE
+audit event.
 
-Before restoring:
+## Security
 
-1. Verify the backup record.
-2. Verify the current motion data.
-3. Check for concurrent edits.
-4. Perform restoration in a transaction.
-5. Verify the restored result.
+- The browser receives only the admin API token entered by the operator; it
+  never receives `SUPABASE_SERVICE_ROLE_KEY`.
+- Admin API endpoints require the server-side `ADMIN_API_TOKEN`.
+- The service-role key and Supabase URL are read only from server environment
+  variables.
+- Public and authenticated roles have no write privileges on `motion_audit`.
+- The migration does not change RLS policies.
+- The legacy GitHub contents API write endpoint is disabled.
 
-## 3. Security
+## Development setup and validation
 
-History data must not be publicly accessible.
+Review the existing development `motions` and `motion_audit` schemas and audit
+trigger definitions before applying
+`migrations/20261027_motion_transactional_audit_rpc.sql` to the development
+database. The migration is not authorized for production.
 
-Do not execute migrations against production
-before development testing is complete.
+Run local API tests with:
 
-## 4. Limitations
+    npm test
 
-- INSERT history is not implemented.
-- Automatic restoration is not implemented.
-- The history management UI is not implemented.
-- Database schema compatibility must be verified.
+Run SQL integration checks only against a disposable PostgreSQL instance or
+the approved development database, inside a transaction that is rolled back.
+Never use production credentials or print credentials to logs.

@@ -16,6 +16,9 @@ AS $$
 BEGIN
   INSERT INTO public.motion_change_backups(motion_id, operation, previous_row)
   VALUES (OLD.id::text, TG_OP, to_jsonb(OLD));
+  IF TG_OP = 'UPDATE' THEN
+    RETURN NEW;
+  END IF;
   RETURN OLD;
 END;
 $$;

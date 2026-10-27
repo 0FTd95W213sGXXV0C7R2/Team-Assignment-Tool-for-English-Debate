@@ -14,27 +14,45 @@ export default async function handler(req, res) {
     row,
     expectedRevision
   } = req.body || {};
+  const targetId = typeof id === 'number' && Number.isSafeInteger(id)
+    ? String(id)
+    : id;
+  const allowedFields = new Set(['motion', 'tournament', 'year', 'history']);
 
   if (!['insert', 'update', 'delete', 'record'].includes(action)) {
     return res.status(400).json({ error: 'Invalid action' });
   }
 
+  if (action === 'insert' &&
+      ((id !== undefined && id !== null) ||
+       (expectedRevision !== undefined && expectedRevision !== null))) {
+    return res.status(400).json({ error: 'Invalid target' });
+  }
+
   if (action !== 'insert' && (
-    typeof id !== 'string' ||
-    id.length < 1 ||
-    id.length > 100 ||
+    typeof targetId !== 'string' ||
+    targetId.length < 1 ||
+    targetId.length > 100 ||
     !Number.isSafeInteger(expectedRevision) ||
     expectedRevision < 0
   )) {
     return res.status(400).json({ error: 'Invalid target' });
   }
 
-  if (['insert', 'update'].includes(action) && (
-    !row ||
-    typeof row !== 'object' ||
-    Array.isArray(row)
-  )) {
-    return res.status(400).json({ error: 'Invalid row' });
+  if (['insert', 'update'].includes(action)) {
+    const invalidHistory = row?.history !== undefined &&
+      (!Array.isArray(row.history) || row.history.length > 1000 ||
+        row.history.some(value => typeof value !== 'string' ||
+          Number.isNaN(Date.parse(value))));
+    if (!row || typeof row !== 'object' || Array.isArray(row) ||
+        Object.keys(row).some(key => !allowedFields.has(key)) ||
+        typeof row.motion !== 'string' || !row.motion.trim() ||
+        row.motion.length > 2000 ||
+        typeof row.tournament !== 'string' || row.tournament.length > 300 ||
+        typeof row.year !== 'string' || row.year.length > 20 ||
+        invalidHistory || !Array.isArray(row.history)) {
+      return res.status(400).json({ error: 'Invalid row' });
+    }
   }
 
   try {
@@ -47,7 +65,7 @@ export default async function handler(req, res) {
       method: 'POST',
       body: JSON.stringify({
         p_action: action,
-        p_id: id ?? null,
+        p_id: targetId ?? null,
         p_row: row ?? null,
         p_expected_revision: expectedRevision ?? null,
         p_client_hash: clientHash
@@ -71,7 +89,7 @@ export default async function handler(req, res) {
       return res.status(429).json({ error: 'Rate limit exceeded' });
     }
 
-    console.error('Motion write failed:', message);
+    console.error('Motion write failed');
     return res.status(500).json({ error: 'Write failed' });
   }
 }

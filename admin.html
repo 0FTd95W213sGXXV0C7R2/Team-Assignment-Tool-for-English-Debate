@@ -1,5 +1,167 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>論題履歴・復元（開発版）</title><style>body{font:16px system-ui;max-width:780px;margin:30px auto;padding:0 15px;background:#f7f9fc;color:#172033}input,button{padding:12px;margin:5px 0;border-radius:7px;border:1px solid #bac5d5}input{width:100%;box-sizing:border-box}button{cursor:pointer;background:#235ad5;color:white}article{background:white;border:1px solid #d5dce7;padding:14px;margin:10px 0;border-radius:10px}pre{white-space:pre-wrap;overflow-wrap:anywhere}#status{white-space:pre-wrap}</style></head><body><h1>論題の変更履歴・復元</h1><p>開発版。管理者トークンはこの画面のメモリ内だけで保持し、保存しません。</p><label>管理者APIトークン<input id="token" type="password" autocomplete="off"></label><label>論題ID<input id="id" placeholder="UUID"></label><button id="load">履歴を取得</button><p id="status" role="status"></p><div id="results"></div><script>
-const $=id=>document.getElementById(id);let token='';
-async function api(url,options={}){token=$('token').value;const r=await fetch(url,{...options,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...options.headers},cache:'no-store'});const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed');return data;}
-$('load').onclick=async()=>{const id=$('id').value.trim();$('results').replaceChildren();$('status').textContent='取得中…';try{const data=await api('/api/motion-history?id='+encodeURIComponent(id));$('status').textContent=data.rows.length+'件';for(const row of data.rows){const article=document.createElement('article');const title=document.createElement('h3');title.textContent='#'+row.audit_id+' '+row.action+' '+row.changed_at;article.append(title);const pre=document.createElement('pre');pre.textContent=JSON.stringify({before:row.before_data,after:row.after_data},null,2);article.append(pre);if(row.before_data){const button=document.createElement('button');button.textContent='この変更の直前へ復元';button.onclick=async()=>{let revision;try{const current=await api('/api/motion-current?id='+encodeURIComponent(id));revision=current.revision;if(!Number.isSafeInteger(revision)||revision<0)throw Error('revisionが不正です');}catch(e){alert('現在の状態を取得できません: '+e.message);return;}if(!confirm('論題ID: '+id+'\\n現在のrevision: '+revision+'\\n変更履歴 #'+row.audit_id+' の直前に復元します。よろしいですか？'))return;try{const result=await api('/api/motion-restore',{method:'POST',body:JSON.stringify({id,auditId:row.audit_id,expectedRevision:revision})});alert('復元完了。新revision: '+result.restored.revision);$('load').click();}catch(e){alert(e.message);}};article.append(button);} $('results').append(article);}}catch(e){$('status').textContent=e.message;}};
-</script></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>論題履歴・復元（開発版）</title>
+  <style>
+    body{font:16px system-ui;max-width:900px;margin:30px auto;padding:0 15px;background:#f7f9fc;color:#172033}
+    input,select,button{padding:10px;margin:5px 0;border-radius:7px;border:1px solid #bac5d5}
+    input,select{width:100%;box-sizing:border-box}
+    button{cursor:pointer;background:#235ad5;color:white}
+    article{background:white;border:1px solid #d5dce7;padding:14px;margin:10px 0;border-radius:10px}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere}
+    #status{white-space:pre-wrap}
+    .deleted{color:#a11}
+  </style>
+</head>
+<body>
+  <h1>論題の変更履歴・復元</h1>
+  <p>管理者トークンは通信時のみ使用し、この画面には保存しません。</p>
+  <label>管理者APIトークン<input id="token" type="password" autocomplete="off"></label>
+  <button id="loadMotions">論題一覧を取得</button>
+  <label>論題（削除済みを含む）<select id="motion" disabled><option value="">先に一覧を取得してください</option></select></label>
+  <button id="loadHistory" disabled>変更履歴を取得</button>
+  <p id="status" role="status"></p>
+  <div id="results"></div>
+  <button id="loadOlder" hidden>さらに古い履歴を取得</button>
+  <script>
+    const $ = id => document.getElementById(id);
+    let motions = [];
+    let historyOffset = 0;
+
+    async function api(url, options = {}) {
+      const token = $('token').value;
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        cache: 'no-store'
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(data.error || 'Request failed');
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    }
+
+    function showError(error) {
+      $('status').textContent = error.status === 409
+        ? '他の操作で更新されました。最新状態を再読み込みしてください。'
+        : error.message;
+    }
+
+    async function loadMotions() {
+      const selectedId = $('motion').value;
+      $('status').textContent = '論題一覧を取得中…';
+      $('motion').disabled = true;
+      $('loadHistory').disabled = true;
+      $('results').replaceChildren();
+      $('loadOlder').hidden = true;
+      try {
+        motions = [];
+        for (let offset = 0; ; offset += 1000) {
+          const page = await api('/api/motion-admin-list?offset=' + offset);
+          motions.push(...page);
+          if (page.length < 1000) break;
+          if (offset >= 49000) throw new Error('論題一覧が取得上限を超えました。');
+        }
+        const select = $('motion');
+        select.replaceChildren(new Option('論題を選択してください', ''));
+        for (const motion of motions) {
+          const label = `${motion.is_deleted ? '[削除済み] ' : ''}${motion.motion} (ID: ${motion.id}, revision: ${motion.revision})`;
+          select.add(new Option(label, motion.id));
+        }
+        if (motions.some(item => String(item.id) === selectedId)) {
+          select.value = selectedId;
+        }
+        $('motion').disabled = motions.length === 0;
+        $('loadHistory').disabled = motions.length === 0;
+        $('status').textContent = `${motions.length}件`;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    async function loadHistory(reset = true) {
+      const id = $('motion').value;
+      if (!id) {
+        $('status').textContent = '論題を選択してください。';
+        return;
+      }
+      if (reset) {
+        historyOffset = 0;
+        $('results').replaceChildren();
+        $('loadOlder').hidden = true;
+      }
+      $('status').textContent = '履歴を取得中…';
+      try {
+        const data = await api('/api/motion-history?id=' + encodeURIComponent(id) + '&offset=' + historyOffset);
+        const selected = motions.find(item => String(item.id) === id);
+        $('status').textContent = `履歴 ${historyOffset + data.rows.length}件を表示中。現在: ${selected?.is_deleted ? '削除済み' : '有効'} / revision ${selected?.revision}`;
+        for (const row of data.rows) {
+          const article = document.createElement('article');
+          const heading = document.createElement('h3');
+          heading.textContent = `#${row.audit_id} ${row.action} ${row.changed_at}`;
+          const contents = document.createElement('pre');
+          contents.textContent = JSON.stringify({
+            before: row.before_data,
+            after: row.after_data
+          }, null, 2);
+          article.append(heading, contents);
+          if (row.before_data) {
+            const restore = document.createElement('button');
+            restore.textContent = 'この変更の直前の内容へ復元';
+            restore.addEventListener('click', async () => {
+              restore.disabled = true;
+              try {
+                const current = await api('/api/motion-current?id=' + encodeURIComponent(id));
+                const confirmation = [
+                  `論題ID: ${id}`,
+                  `現在のrevision: ${current.revision}`,
+                  `現在の論題: ${current.motion || '(取得できません)'}`,
+                  `現在の大会・年度: ${current.tournament || 'なし'} / ${current.year || 'なし'}`,
+                  `復元対象: ${row.before_data.motion}`,
+                  `復元対象の大会・年度: ${row.before_data.tournament || 'なし'} / ${row.before_data.year || 'なし'}`,
+                  `履歴 #${row.audit_id} の直前へ復元します。`
+                ].join('\n');
+                if (!confirm(confirmation)) return;
+                await api('/api/motion-restore', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    id,
+                    auditId: row.audit_id,
+                    expectedRevision: current.revision
+                  })
+                });
+                await loadMotions();
+                await loadHistory();
+                $('status').textContent = '復元しました。復元操作も履歴に記録されています。';
+              } catch (error) {
+                showError(error);
+              } finally {
+                restore.disabled = false;
+              }
+            });
+            article.append(restore);
+          }
+          $('results').append(article);
+        }
+        historyOffset += data.rows.length;
+        $('loadOlder').hidden = data.rows.length < 100;
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    $('loadMotions').addEventListener('click', loadMotions);
+    $('loadHistory').addEventListener('click', loadHistory);
+    $('loadOlder').addEventListener('click', () => loadHistory(false));
+  </script>
+</body>
+</html>

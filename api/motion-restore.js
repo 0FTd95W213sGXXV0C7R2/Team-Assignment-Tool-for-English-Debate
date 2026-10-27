@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       return res.status(422).json({ error: 'Invalid restore request' });
     }
 
-    console.error('Restore RPC failed:', message);
+    console.error('Restore RPC failed');
     return res.status(500).json({ error: 'Restore failed' });
   }
 }

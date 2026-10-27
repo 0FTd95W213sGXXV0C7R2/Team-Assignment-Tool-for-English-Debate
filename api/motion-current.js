@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   try {
     const rows = await supabase(
-      'motions?select=id,revision,is_deleted&id=eq.' +
+      'motions?select=id,motion,tournament,year,history,revision,is_deleted&id=eq.' +
       encodeURIComponent(id) +
       '&limit=1'
     );

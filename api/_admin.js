@@ -23,6 +23,7 @@ export async function supabase(path, options = {}) {
       'REVISION_CONFLICT',
       'DUPLICATE_MOTION',
       'NOT_FOUND',
+      'DELETED',
       'SNAPSHOT_NOT_FOUND',
       'INVALID_REQUEST',
       'INVALID_SNAPSHOT'
