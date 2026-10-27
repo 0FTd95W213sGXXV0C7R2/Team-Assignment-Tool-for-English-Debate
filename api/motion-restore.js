@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const restored = await supabase('rpc/motion_restore_revision', {
+    const restored = await supabase('rpc/motion_restore_revision_checked', {
       method: 'POST',
       body: JSON.stringify({
         p_id: id,
@@ -34,6 +34,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ restored });
   } catch (error) {
     const message = error.message || '';
+
+    if (message.includes('DUPLICATE_MOTION')) {
+      return res.status(409).json({
+        error: 'Duplicate motion'
+      });
+    }
 
     if (message.includes('REVISION_CONFLICT')) {
       return res.status(409).json({ error: 'Revision conflict' });

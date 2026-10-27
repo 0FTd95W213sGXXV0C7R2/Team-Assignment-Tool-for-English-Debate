@@ -21,6 +21,7 @@ export async function supabase(path, options = {}) {
     const body = await response.json().catch(() => ({}));
     const allowed = [
       'REVISION_CONFLICT',
+      'DUPLICATE_MOTION',
       'NOT_FOUND',
       'SNAPSHOT_NOT_FOUND',
       'INVALID_REQUEST',
