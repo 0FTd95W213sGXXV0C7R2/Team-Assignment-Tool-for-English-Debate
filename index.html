@@ -298,8 +298,39 @@ header {
 "use strict";
 
 (() => {
-  const SUPABASE_URL = "https://kiewlmqxsqcysswcruiw.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0";
+
+
+  let adminToken = '';
+
+  async function motionApi(action, id = null, row = null, revision = null) {
+    if (!adminToken) {
+      adminToken = prompt("開発版の管理者APIトークンを入力してください") || '';
+    }
+    if (!adminToken) throw new Error("管理者認証が必要です");
+
+    const response = await fetch('/api/motion-write', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + adminToken
+      },
+      body: JSON.stringify({
+        action,
+        id,
+        row,
+        expectedRevision: revision
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 401) adminToken = '';
+      throw new Error(result.error || '書き込みに失敗しました');
+    }
+
+    return result;
+  }
 
   const $ = id => document.getElementById(id);
 
@@ -569,13 +600,12 @@ header {
       let offset = 0;
 
       while (true) {
-        const { data, error } = await db
-          .from("motions")
-          .select("*")
-          .order("id", { ascending: true })
-          .range(offset, offset + 999);
-
-        if (error) throw error;
+        const response = await fetch(
+          '/api/motion-list?offset=' + offset,
+          { cache: 'no-store' }
+        );
+        if (!response.ok) throw new Error("論題の取得に失敗しました");
+        const data = await response.json();
 
         all.push(...(data || []));
 
@@ -587,7 +617,7 @@ header {
         }
       }
 
-      motions = all;
+      motions = all.filter(m => !m.is_deleted);
       $("connection").textContent =
         `データベース接続済み・${motions.length}件`;
 
@@ -632,14 +662,7 @@ header {
     $("record").disabled = true;
 
     try {
-      const history = [...historyOf(m), new Date().toISOString()];
-
-      const { error } = await db
-        .from("motions")
-        .update({ history })
-        .eq("id", m.id);
-
-      if (error) throw error;
+      await motionApi("record", m.id, null, m.revision);
 
       selectedMotion = m.motion;
       $("chosenText").textContent = "記録済み：" + selectedMotion;
@@ -809,20 +832,12 @@ header {
     $("save").disabled = true;
 
     try {
-      let result;
-
       if (editingId !== null) {
-        result = await db
-          .from("motions")
-          .update(payload)
-          .eq("id", editingId);
+        if (!current) throw new Error("編集対象が見つかりません");
+        await motionApi("update", editingId, payload, current.revision);
       } else {
-        result = await db
-          .from("motions")
-          .insert([payload]);
+        await motionApi("insert", null, payload, null);
       }
-
-      if (result.error) throw result.error;
 
       resetForm();
       setMessage("formStatus", "保存しました。", "ok");
@@ -850,12 +865,7 @@ header {
     busy = true;
 
     try {
-      const { error } = await db
-        .from("motions")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
+      await motionApi("delete", id, null, m.revision);
 
       setMessage("formStatus", "削除しました。", "ok");
       await fetchMotions();
@@ -1079,12 +1089,7 @@ header {
   bindEvents();
 
   try {
-    if (!window.supabase ||
-        typeof window.supabase.createClient !== "function") {
-      throw new Error("Supabase SDKを読み込めませんでした。");
-    }
-
-    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    db = { mode: "protected-api" };
     fetchMotions();
 
   } catch (error) {
