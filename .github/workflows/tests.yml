@@ -1,1 +1,28 @@
+name: Tests
 
+on:
+push:
+pull_request:
+workflow_dispatch:
+
+permissions:
+contents: read
+
+jobs:
+test:
+name: Run Node.js tests
+runs-on: ubuntu-latest
+
+steps:
+  - name: Check out repository
+    uses: actions/checkout@v4
+  - name: Set up Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 22
+  - name: Run API tests
+    run: node --test tests/api.test.mjs
+  - name: Run dev-server tests
+    run: node --test tests/dev-server.test.mjs
+  - name: Run smoke tests
+    run: node --test tests/smoke.test.mjs
