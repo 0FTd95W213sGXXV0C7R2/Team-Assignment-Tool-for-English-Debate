@@ -17,7 +17,19 @@ export async function supabase(path, options = {}) {
     ...options,
     headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...options.headers }
   });
-  if (!response.ok) throw new Error(`Database request failed (${response.status})`);
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const allowed = [
+      'REVISION_CONFLICT',
+      'NOT_FOUND',
+      'SNAPSHOT_NOT_FOUND',
+      'INVALID_REQUEST',
+      'INVALID_SNAPSHOT'
+    ];
+    const message = String(body.message || '');
+    const code = allowed.find(value => message === value);
+    throw new Error(code || `Database request failed (${response.status})`);
+  }
   return response.status === 204 ? null : response.json();
 }
 
