@@ -18,15 +18,11 @@ export default async function handler(req, res) {
   const query = req.query || {};
   const rawMotionId = query.motionId;
 
-  if (Array.isArray(rawMotionId)) {
-    return send(res, 400, { error: "Invalid motionId" });
-  }
-
   if (
-    rawMotionId !== undefined &&
-    (typeof rawMotionId !== "string" ||
-      !rawMotionId.trim() ||
-      rawMotionId.length > 100)
+    Array.isArray(rawMotionId) ||
+    (rawMotionId !== undefined &&
+      (typeof rawMotionId !== "string" ||
+        !/^[a-zA-Z0-9_-]{1,100}$/.test(rawMotionId)))
   ) {
     return send(res, 400, { error: "Invalid motionId" });
   }
@@ -61,7 +57,7 @@ export default async function handler(req, res) {
   params.set("offset", String(offset));
 
   if (rawMotionId !== undefined) {
-    params.set("motion_id", `eq.${rawMotionId.trim()}`);
+    params.set("motion_id", `eq.${rawMotionId}`);
   }
 
   try {
@@ -71,7 +67,7 @@ export default async function handler(req, res) {
     );
 
     return send(res, 200, {
-      data: Array.isArray(result) ? result : [],
+      history: Array.isArray(result) ? result : [],
       limit,
       offset
     });
