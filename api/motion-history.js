@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
   const params = new URLSearchParams();
   params.set("select", "*");
-  params.set("order", "created_at.desc");
+  params.set("order", "changed_at.desc");
   params.set("limit", String(limit));
   params.set("offset", String(offset));
 
