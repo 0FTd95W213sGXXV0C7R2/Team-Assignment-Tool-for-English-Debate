@@ -332,6 +332,22 @@ header {
     return result;
   }
 
+  async function recordMotionApi(id, revision) {
+    const response = await fetch('/api/motion-record', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, expectedRevision: revision })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || '記録に失敗しました');
+    }
+
+    return result;
+  }
+
   const $ = id => document.getElementById(id);
 
   const show = (id, visible) => {
@@ -662,7 +678,7 @@ header {
     $("record").disabled = true;
 
     try {
-      await motionApi("record", m.id, null, m.revision);
+      await recordMotionApi(m.id, m.revision);
 
       selectedMotion = m.motion;
       $("chosenText").textContent = "記録済み：" + selectedMotion;

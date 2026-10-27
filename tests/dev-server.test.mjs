@@ -99,6 +99,59 @@ test('dispatches API handlers with their existing method and auth responses', as
   });
 });
 
+test('motion-record is available without an admin token and rejects update fields', async () => {
+  await withEnvironment({
+    ADMIN_API_TOKEN: undefined,
+    SUPABASE_URL: 'https://development-project.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'server-only-test-key'
+  }, async () => {
+    const originalFetch = globalThis.fetch;
+    let rpcCall;
+    globalThis.fetch = async (input, options) => {
+      if (String(input).startsWith('https://development-project.supabase.co/')) {
+        rpcCall = { url: String(input), body: JSON.parse(options.body) };
+        return new Response('{"id":"42","revision":"11"}', { status: 200 });
+      }
+      return originalFetch(input, options);
+    };
+    try {
+      await withServer(async baseUrl => {
+        const recorded = await fetch(baseUrl + '/api/motion-record.js', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ id: 42, expectedRevision: '10' })
+        });
+        assert.equal(recorded.status, 200);
+        assert.deepEqual(await recorded.json(), { id: '42', revision: '11' });
+        assert.equal(rpcCall.url, 'https://development-project.supabase.co/rest/v1/rpc/motion_apply');
+        assert.equal(rpcCall.body.p_action, 'record');
+
+        const forbiddenUpdate = await fetch(baseUrl + '/api/motion-record', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            id: '42',
+            expectedRevision: '10',
+            motion: 'must not be changed'
+          })
+        });
+        assert.equal(forbiddenUpdate.status, 400);
+        assert.deepEqual(await forbiddenUpdate.json(), { error: 'Invalid request' });
+        assert.equal(rpcCall.body.p_action, 'record');
+
+        const adminWrite = await fetch(baseUrl + '/api/motion-write', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id: '42', expectedRevision: '10' })
+        });
+        assert.equal(adminWrite.status, 401);
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+
 test('reports missing server configuration without exposing values', async () => {
   await withEnvironment({
     ADMIN_API_TOKEN: undefined,

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import motionRecord from '../api/motion-record.js';
 import motionWrite from '../api/motion-write.js';
 import motionRestore from '../api/motion-restore.js';
 import motionHistory from '../api/motion-history.js';
@@ -63,6 +64,111 @@ test('motion write rejects anonymous requests before contacting Supabase', async
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('motion record accepts anonymous requests and sends only the fixed record action', async () => {
+  delete process.env.ADMIN_API_TOKEN;
+  process.env.SUPABASE_URL = 'https://development-project.supabase.co';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key-not-a-credential';
+  const originalFetch = globalThis.fetch;
+  let sent;
+  globalThis.fetch = async (url, options) => {
+    sent = { url, body: JSON.parse(options.body) };
+    return apiResponse(200, { id: '42', revision: '11' });
+  };
+  try {
+    const res = responseRecorder();
+    await motionRecord(request({
+      token: '',
+      body: { id: 42, expectedRevision: '10' }
+    }), res);
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body, { id: '42', revision: '11' });
+    assert.match(sent.url, /\/rpc\/motion_apply$/);
+    assert.deepEqual(Object.keys(sent.body).sort(), [
+      'p_action',
+      'p_client_hash',
+      'p_expected_revision',
+      'p_id',
+      'p_row'
+    ]);
+    assert.equal(sent.body.p_action, 'record');
+    assert.equal(sent.body.p_id, '42');
+    assert.equal(sent.body.p_row, null);
+    assert.equal(sent.body.p_expected_revision, '10');
+    assert.match(sent.body.p_client_hash, /^[a-f0-9]{64}$/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('motion record rejects extra fields and invalid targets without contacting Supabase', async () => {
+  const originalFetch = globalThis.fetch;
+  let called = false;
+  globalThis.fetch = async () => {
+    called = true;
+    throw new Error('unexpected network call');
+  };
+  try {
+    for (const body of [
+      { id: '42', expectedRevision: '10', motion: 'not allowed' },
+      { id: '42', expectedRevision: '10', tournament: 'not allowed' },
+      { id: '42', expectedRevision: '10', row: {} },
+      { id: '', expectedRevision: '10' },
+      { id: '42', expectedRevision: '-1' },
+      { id: '42', expectedRevision: '9223372036854775808' },
+      { id: '42' },
+      ['42', '10']
+    ]) {
+      const res = responseRecorder();
+      await motionRecord(request({ token: '', body }), res);
+      assert.equal(res.statusCode, 400);
+      assert.deepEqual(res.body, { error: 'Invalid request' });
+    }
+    assert.equal(called, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('motion record maps conflicts, missing motions, throttling, and unexpected failures', async () => {
+  process.env.SUPABASE_URL = 'https://development-project.supabase.co';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key-not-a-credential';
+  const originalFetch = globalThis.fetch;
+  const originalConsoleError = console.error;
+  let loggedFailures = 0;
+  console.error = () => {
+    loggedFailures++;
+  };
+  try {
+    for (const [message, status, error] of [
+      ['REVISION_CONFLICT', 409, 'REVISION_CONFLICT'],
+      ['NOT_FOUND', 404, 'NOT_FOUND'],
+      ['DELETED', 404, 'DELETED'],
+      ['RATE_LIMIT_EXCEEDED', 429, 'Rate limit exceeded'],
+      ['DATABASE_FAILURE', 500, 'Record failed']
+    ]) {
+      globalThis.fetch = async () => apiResponse(400, { message });
+      const res = responseRecorder();
+      await motionRecord(request({
+        token: '',
+        body: { id: '42', expectedRevision: '10' }
+      }), res);
+      assert.equal(res.statusCode, status);
+      assert.deepEqual(res.body, { error });
+    }
+    assert.equal(loggedFailures, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
+  }
+});
+
+test('motion record only accepts POST', async () => {
+  const res = responseRecorder();
+  await motionRecord(request({ method: 'GET', token: '' }), res);
+  assert.equal(res.statusCode, 405);
+  assert.deepEqual(res.body, { error: 'Method not allowed' });
 });
 
 test('motion write preserves bigint revision values in Supabase JSON', async () => {

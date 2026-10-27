@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import motionWrite from './api/motion-write.js';
+import motionRecord from './api/motion-record.js';
 import motionRestore from './api/motion-restore.js';
 import motionHistory from './api/motion-history.js';
 import motionAdminList from './api/motion-admin-list.js';
@@ -21,6 +22,7 @@ const STATIC_PAGES = new Map([
 ]);
 const API_ROUTES = new Map([
   ['motion-write', { handler: motionWrite, method: 'POST', admin: true }],
+  ['motion-record', { handler: motionRecord, method: 'POST', admin: false }],
   ['motion-restore', { handler: motionRestore, method: 'POST', admin: true }],
   ['motion-history', { handler: motionHistory, method: 'GET', admin: true }],
   ['motion-admin-list', { handler: motionAdminList, method: 'GET', admin: true }],

@@ -33,7 +33,9 @@ audit event.
 
 - The browser receives only the admin API token entered by the operator; it
   never receives `SUPABASE_SERVICE_ROLE_KEY`.
-- Admin API endpoints require the server-side `ADMIN_API_TOKEN`.
+- Admin API endpoints require the server-side `ADMIN_API_TOKEN`. The dedicated
+  `POST /api/motion-record` endpoint is unauthenticated and accepts only a
+  motion ID and expected revision; it cannot update motion content.
 - The service-role key and Supabase URL are read only from server environment
   variables.
 - Public and authenticated roles have no write privileges on `motion_audit`.

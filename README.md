@@ -18,6 +18,11 @@ admin APIs additionally require the admin token. Missing configuration is
 reported by variable name only and API requests receive HTTP 503 where
 applicable.
 
+The `POST /api/motion-record` endpoint is the sole unauthenticated write API.
+It accepts only a motion `id` and `expectedRevision` and records usage through
+the existing `motion_apply` RPC; all motion content changes, deletion, and
+restore operations continue to require the admin token.
+
 Run the automated checks with:
 
 ```sh
