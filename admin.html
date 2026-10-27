@@ -21,13 +21,17 @@
     }
     input, textarea { width: 100%; margin: 4px 0 12px; }
     button { cursor: pointer; margin: 4px 4px 4px 0; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
     .panel { border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin: 16px 0; }
-    .muted { color: #666; font-size: .9rem; }
+    .muted { color: #666; font-size: .9rem; overflow-wrap: anywhere; }
     .status { white-space: pre-wrap; overflow-wrap: anywhere; }
     .motion { border-top: 1px solid #ddd; padding: 12px 0; }
     .motion h3 { margin-bottom: 4px; }
     .actions { display: flex; flex-wrap: wrap; gap: 6px; }
     .danger { color: #a00; }
+    .history-entry { border-left: 3px solid #aaa; padding: 8px 12px; margin: 12px 0; background: #f7f7f7; overflow-wrap: anywhere; }
+    .hidden { display: none; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   </style>
 </head>
 <body>
@@ -37,8 +41,8 @@
   <section class="panel">
     <h2>管理者認証</h2>
     <p class="muted">
-      管理者用APIトークンを入力します。トークンはこのページ内でのみ使用し、
-      URLやソースコードには埋め込まないでください。
+      管理者APIトークンを入力してください。URLやソースコードには保存しません。
+      このページを閉じるときはトークンを消去してください。
     </p>
     <label for="token">管理者APIトークン</label>
     <input id="token" type="password" autocomplete="current-password">
@@ -48,152 +52,435 @@
   </section>
 
   <section class="panel">
-    <h2>論題を追加・更新</h2>
+    <h2 id="formTitle">論題を追加</h2>
+    <form id="motionForm">
+      <label for="motion">論題（Motion）</label>
+      <textarea id="motion" rows="3" maxlength="1500" required placeholder="THW ..."></textarea>
+
+      <label for="tournament">大会名</label>
+      <input id="tournament" maxlength="180" required placeholder="大会名">
+
+      <label for="year">年</label>
+      <input id="year" type="number" min="2000" max="2099" required placeholder="2026">
+
+      <button id="save" type="submit">論題を追加</button>
+      <button id="cancelEdit" type="button" class="hidden">編集をキャンセル</button>
+    </form>
     <p class="muted">
-      この画面ではAPI経由で保存します。更新・削除APIの仕様は、
-      実際のデータベース構成と照合してから利用してください。
+      編集・削除には revision による競合チェックを使用します。
+      同じ論題が別の操作で更新されていた場合は、再読み込みして確認してください。
     </p>
-    <label for="motion">論題（Motion）</label>
-    <textarea id="motion" rows="3" placeholder="THW ..."></textarea>
-    <label for="tournament">大会名</label>
-    <input id="tournament" placeholder="大会名">
-    <label for="year">年</label>
-    <input id="year" type="number" min="2000" max="2099" placeholder="2026">
-    <button id="add">論題を追加</button>
   </section>
 
   <section class="panel">
     <h2>登録済み論題</h2>
     <button id="reload">再読み込み</button>
+    <label for="filter">論題・大会名で検索</label>
+    <input id="filter" type="search" placeholder="検索語">
     <div id="motions"><p>接続後に一覧を表示します。</p></div>
+  </section>
+
+  <section class="panel">
+    <h2>変更履歴</h2>
+    <p id="historyTitle" class="muted">論題の「履歴」を選択してください。</p>
+    <div id="history"></div>
   </section>
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const status = $("status");
     const list = $("motions");
+    const historyBox = $("history");
+
+    let currentMotions = [];
+    let editingId = null;
+    let historyMotion = null;
+    let busy = false;
 
     function token() {
       return $("token").value.trim();
     }
 
     function setStatus(message) {
-      status.textContent = message;
+      $("status").textContent = message;
+    }
+
+    function setBusy(value) {
+      busy = value;
+      document.querySelectorAll("button").forEach((button) => {
+        button.disabled = value;
+      });
     }
 
     async function api(url, options = {}) {
+      if (!token()) throw new Error("先に管理者APIトークンを入力してください");
+
       const headers = new Headers(options.headers || {});
       headers.set("Authorization", "Bearer " + token());
-      if (options.body) headers.set("Content-Type", "application/json");
 
-      const response = await fetch(url, {
-        ...options,
-        headers
-      });
+      if (options.body !== undefined) {
+        headers.set("Content-Type", "application/json");
+      }
 
+      const response = await fetch(url, { ...options, headers });
       const text = await response.text();
-      let data;
+      let data = null;
+
       try {
         data = text ? JSON.parse(text) : null;
       } catch {
-        throw new Error("APIからJSON以外の応答が返されました（HTTP " + response.status + "）");
+        throw new Error("API応答を解析できません（HTTP " + response.status + "）");
       }
 
       if (!response.ok) {
-        throw new Error(data?.error || ("HTTP " + response.status));
+        const messages = {
+          REVISION_CONFLICT: "別の操作で論題が更新されています。再読み込みしてください。",
+          "Revision conflict": "別の操作で論題が更新されています。再読み込みしてください。",
+          DUPLICATE_MOTION: "同じ論題がすでに登録されています。",
+          "Duplicate motion": "同じ論題がすでに登録されています。",
+          MOTION_DELETED: "この論題は削除済みです。再読み込みしてください。",
+          NOT_FOUND: "対象の論題が見つかりません。",
+          "Not found": "対象の論題が見つかりません。",
+          RATE_LIMITED: "操作回数の上限に達しました。時間をおいてください。",
+          Unauthorized: "認証に失敗しました。トークンを確認してください。"
+        };
+        throw new Error(messages[data?.error] || data?.error || ("HTTP " + response.status));
       }
+
       return data;
     }
 
-    function makeElement(tag, text, className) {
-      const element = document.createElement(tag);
-      element.textContent = text ?? "";
-      if (className) element.className = className;
-      return element;
+    function el(tag, text, className) {
+      const node = document.createElement(tag);
+      node.textContent = text == null ? "" : String(text);
+      if (className) node.className = className;
+      return node;
+    }
+
+    function formatDate(value) {
+      if (!value) return "日時不明";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("ja-JP");
+    }
+
+    function resetForm() {
+      editingId = null;
+      $("motionForm").reset();
+      $("formTitle").textContent = "論題を追加";
+      $("save").textContent = "論題を追加";
+      $("cancelEdit").classList.add("hidden");
+    }
+
+    function startEdit(item) {
+      if (item.is_deleted) {
+        setStatus("削除済みの論題は直接編集できません。履歴から復元してください。");
+        return;
+      }
+
+      editingId = item.id;
+      $("motion").value = item.motion || "";
+      $("tournament").value = item.tournament || "";
+      $("year").value = item.year || "";
+      $("formTitle").textContent = "論題を編集";
+      $("save").textContent = "変更を保存";
+      $("cancelEdit").classList.remove("hidden");
+      $("motion").focus();
+      setStatus("編集中: " + item.id);
     }
 
     async function loadMotions() {
-      list.replaceChildren(makeElement("p", "読み込み中…"));
+      list.replaceChildren(el("p", "読み込み中…"));
+
       try {
         const data = await api("/api/motion-admin-list");
-        const motions = Array.isArray(data) ? data : data.motions;
+        const motions = Array.isArray(data) ? data : data?.motions;
 
         if (!Array.isArray(motions)) {
           throw new Error("論題一覧の応答形式が不正です");
         }
 
-        list.replaceChildren();
-        if (motions.length === 0) {
-          list.append(makeElement("p", "登録済み論題はありません。"));
-          return;
-        }
-
-        for (const item of motions) {
-          const card = document.createElement("article");
-          card.className = "motion";
-          card.append(makeElement("h3", item.motion || "(論題なし)"));
-          card.append(makeElement("p",
-            [item.tournament, item.year].filter(Boolean).join(" / ")
-          ));
-          card.append(makeElement("p",
-            "ID: " + (item.id ?? "不明") +
-            " / revision: " + (item.revision ?? "不明") +
-            " / 削除済み: " + (item.is_deleted ? "はい" : "いいえ"),
-            "muted"
-          ));
-          list.append(card);
-        }
-
+        currentMotions = motions;
+        renderMotions();
         setStatus("論題一覧を取得しました（" + motions.length + "件）");
       } catch (error) {
-        list.replaceChildren(makeElement("p", error.message, "danger"));
+        list.replaceChildren(el("p", error.message, "danger"));
         setStatus("取得失敗: " + error.message);
       }
     }
 
-    $("connect").addEventListener("click", loadMotions);
-    $("reload").addEventListener("click", loadMotions);
+    function renderMotions() {
+      const query = $("filter").value.trim().toLowerCase();
+      const filtered = currentMotions.filter((item) => {
+        const text = [item.motion, item.tournament, item.year, item.id]
+          .filter(Boolean).join(" ").toLowerCase();
+        return text.includes(query);
+      });
 
-    $("logout").addEventListener("click", () => {
-      $("token").value = "";
-      list.replaceChildren(makeElement("p", "接続後に一覧を表示します。"));
-      setStatus("トークンを消去しました");
-    });
+      list.replaceChildren();
 
-    $("add").addEventListener("click", async () => {
-      const motion = $("motion").value.trim();
-      const tournament = $("tournament").value.trim();
-      const year = Number($("year").value);
-
-      if (!token()) {
-        setStatus("先に管理者APIトークンを入力してください");
-        return;
-      }
-      if (!motion || !tournament || !Number.isInteger(year) || year < 2000 || year > 2099) {
-        setStatus("論題・大会名・2000〜2099の年を入力してください");
+      if (!filtered.length) {
+        list.append(el("p", "該当する論題はありません。"));
         return;
       }
 
-      if (!confirm("この論題を追加しますか？")) return;
+      for (const item of filtered) {
+        const card = document.createElement("article");
+        card.className = "motion";
 
+        card.append(el("h3", item.motion || "(論題なし)"));
+        card.append(el("p", [item.tournament, item.year].filter(Boolean).join(" / ")));
+        card.append(el("p",
+          "ID: " + item.id +
+          " / revision: " + (item.revision ?? "不明") +
+          " / 状態: " + (item.is_deleted ? "削除済み" : "有効"),
+          "muted"
+        ));
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const historyButton = el("button", "履歴");
+        historyButton.type = "button";
+        historyButton.addEventListener("click", () => loadHistory(item));
+
+        actions.append(historyButton);
+
+        if (!item.is_deleted) {
+          const editButton = el("button", "編集");
+          editButton.type = "button";
+          editButton.addEventListener("click", () => startEdit(item));
+          actions.append(editButton);
+
+          const deleteButton = el("button", "論題を削除", "danger");
+          deleteButton.type = "button";
+          deleteButton.addEventListener("click", () => deleteMotion(item));
+          actions.append(deleteButton);
+        }
+
+        card.append(actions);
+        list.append(card);
+      }
+    }
+
+    async function loadHistory(item) {
+      historyMotion = item;
+      $("historyTitle").textContent = "対象: " + (item.motion || item.id);
+      historyBox.replaceChildren(el("p", "履歴を取得中…"));
+
+      try {
+        const data = await api(
+          "/api/motion-history?motionId=" + encodeURIComponent(item.id)
+        );
+        const entries = data?.history;
+
+        if (!Array.isArray(entries)) {
+          throw new Error("変更履歴の応答形式が不正です");
+        }
+
+        historyBox.replaceChildren();
+
+        if (!entries.length) {
+          historyBox.append(el("p", "変更履歴はありません。"));
+          return;
+        }
+
+        for (const entry of entries) {
+          const block = document.createElement("article");
+          block.className = "history-entry";
+
+          block.append(el("strong", (entry.action || "変更") + " / " + formatDate(entry.changed_at)));
+          block.append(el("p", "履歴ID: " + entry.audit_id + " / 論題ID: " + entry.motion_id, "muted"));
+
+          const before = entry.before_data;
+          const after = entry.after_data;
+
+          if (before) {
+            block.append(el("p", "変更前"));
+            const pre = document.createElement("pre");
+            pre.textContent = JSON.stringify(before, null, 2);
+            block.append(pre);
+          }
+
+          if (after) {
+            block.append(el("p", "変更後"));
+            const pre = document.createElement("pre");
+            pre.textContent = JSON.stringify(after, null, 2);
+            block.append(pre);
+          }
+
+          const snapshot = entry.before_data;
+          const isRestorable =
+            snapshot &&
+            ["UPDATE", "DELETE"].includes(String(entry.action || "").toUpperCase());
+
+          if (isRestorable) {
+            const restoreButton = el("button", "この履歴の状態に復元");
+            restoreButton.type = "button";
+            restoreButton.addEventListener("click", () => restoreHistory(item, entry));
+            block.append(restoreButton);
+          }
+
+          historyBox.append(block);
+        }
+      } catch (error) {
+        historyBox.replaceChildren(el("p", error.message, "danger"));
+        setStatus("履歴取得失敗: " + error.message);
+      }
+    }
+
+    async function deleteMotion(item) {
+      if (item.revision === undefined || item.revision === null) {
+        setStatus("revision がないため削除できません。");
+        return;
+      }
+
+      if (!confirm(
+        "この論題を論理削除します。\n\n" + item.motion +
+        "\n\nデータベースから物理削除はしません。続行しますか？"
+      )) return;
+
+      setBusy(true);
       try {
         await api("/api/motion-write", {
           method: "POST",
           body: JSON.stringify({
-            action: "insert",
-            motion,
-            tournament,
-            year
+            action: "delete",
+            id: String(item.id),
+            expectedRevision: item.revision
           })
         });
-        setStatus("追加リクエストが完了しました");
-        $("motion").value = "";
+
+        if (editingId === item.id) resetForm();
+        setStatus("論題を論理削除しました。");
         await loadMotions();
       } catch (error) {
-        setStatus("追加失敗: " + error.message);
+        setStatus("削除失敗: " + error.message);
+      } finally {
+        setBusy(false);
       }
+    }
+
+    async function restoreHistory(item, entry) {
+      if (!confirm(
+        "履歴ID " + entry.audit_id + " の変更前データに復元します。\n" +
+        "現在の内容は変更履歴に残ります。続行しますか？"
+      )) return;
+
+      setBusy(true);
+      try {
+        await api("/api/motion-restore", {
+          method: "POST",
+          body: JSON.stringify({
+            id: String(item.id),
+            auditId: entry.audit_id,
+            expectedRevision: item.revision
+          })
+        });
+
+        setStatus("復元リクエストが完了しました。");
+        await loadMotions();
+
+        const updated = currentMotions.find((motion) => String(motion.id) === String(item.id));
+        if (updated) await loadHistory(updated);
+      } catch (error) {
+        setStatus("復元失敗: " + error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    $("motionForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const motion = $("motion").value.trim();
+      const tournament = $("tournament").value.trim();
+      const yearText = $("year").value.trim();
+      const year = Number(yearText);
+
+      if (!token()) {
+        setStatus("先に管理者APIトークンを入力してください。");
+        return;
+      }
+
+      if (
+        !motion ||
+        motion.length > 1500 ||
+        !tournament ||
+        tournament.length > 180 ||
+        !/^\d{4}$/.test(yearText) ||
+        !Number.isInteger(year) ||
+        year < 2000 ||
+        year > 2099
+      ) {
+        setStatus("論題・大会名・2000〜2099の年を正しく入力してください。");
+        return;
+      }
+
+      const existing = editingId === null
+        ? null
+        : currentMotions.find((item) => String(item.id) === String(editingId));
+
+      if (editingId !== null && (!existing || existing.is_deleted)) {
+        setStatus("編集対象が見つからないか、削除済みです。再読み込みしてください。");
+        return;
+      }
+
+      const isEdit = editingId !== null;
+
+      if (!confirm(
+        isEdit ? "この論題の変更を保存しますか？" : "この論題を追加しますか？"
+      )) return;
+
+      setBusy(true);
+      try {
+        const payload = {
+          action: isEdit ? "update" : "insert",
+          motion,
+          tournament,
+          year
+        };
+
+        if (isEdit) {
+          payload.id = String(existing.id);
+          payload.expectedRevision = existing.revision;
+          payload.history = Array.isArray(existing.history) ? existing.history : [];
+        }
+
+        await api("/api/motion-write", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        resetForm();
+        setStatus(isEdit ? "変更を保存しました。" : "論題を追加しました。");
+        await loadMotions();
+      } catch (error) {
+        setStatus("保存失敗: " + error.message);
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    $("connect").addEventListener("click", loadMotions);
+    $("reload").addEventListener("click", loadMotions);
+    $("filter").addEventListener("input", renderMotions);
+    $("cancelEdit").addEventListener("click", () => {
+      resetForm();
+      setStatus("編集をキャンセルしました。");
+    });
+
+    $("logout").addEventListener("click", () => {
+      $("token").value = "";
+      currentMotions = [];
+      historyMotion = null;
+      resetForm();
+      list.replaceChildren(el("p", "接続後に一覧を表示します。"));
+      historyBox.replaceChildren();
+      $("historyTitle").textContent = "論題の「履歴」を選択してください。";
+      setStatus("トークンを消去しました。");
     });
   </script>
 </body>
 </html>
 
+
+  
