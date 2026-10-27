@@ -1,116 +1,151 @@
-
-import { createHash } from "node:crypto";
-import { requireAdmin, supabase } from "./_admin.js";
+import { createHash } from “node:crypto”;
+import { requireAdmin, supabase } from “./_admin.js”;
 
 function send(res, status, body) {
-  return res.status(status).json(body);
+return res.status(status).json(body);
 }
 
 function normalizeRevision(value) {
-  if (value === undefined || value === null || value === "") return null;
-  if (!/^\d+$/.test(String(value))) return undefined;
+if (value === undefined || value === null || value === “”) {
+return null;
+}
 
-  try {
-    const n = BigInt(value);
-    if (n < 0n || n > 9223372036854775807n) return undefined;
-    return n.toString();
-  } catch {
-    return undefined;
-  }
+if (!/^\d+$/.test(String(value))) {
+return undefined;
+}
+
+try {
+const revision = BigInt(value);
+if (revision < 0n || revision > 9223372036854775807n) {
+return undefined;
+}
+return revision.toString();
+} catch {
+return undefined;
+}
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return send(res, 405, { error: "Method not allowed" });
-  }
+if (req.method !== “POST”) {
+res.setHeader(“Allow”, “POST”);
+return send(res, 405, { error: “Method not allowed” });
+}
 
-  if (!requireAdmin(req)) {
-    return send(res, 401, { error: "Unauthorized" });
-  }
+if (!requireAdmin(req)) {
+return send(res, 401, { error: “Unauthorized” });
+}
 
-  const body = req.body;
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return send(res, 400, { error: "Invalid request" });
-  }
+const body = req.body;
+if (!body || typeof body !== “object” || Array.isArray(body)) {
+return send(res, 400, { error: “Invalid request” });
+}
 
-  const { action } = body;
-  if (!["insert", "update", "delete", "record"].includes(action)) {
-    return send(res, 400, { error: "Invalid action" });
-  }
+const { action } = body;
+if (![“insert”, “update”, “delete”, “record”].includes(action)) {
+return send(res, 400, { error: “Invalid action” });
+}
 
-  const id = body.id === undefined ? null : String(body.id);
-  if (action !== "insert" && (!id || !/^\d+$/.test(id))) {
-    return send(res, 400, { error: "Invalid id" });
-  }
+const id = body.id == null ? null : String(body.id);
 
-  const expectedRevision = normalizeRevision(body.expectedRevision);
-  if (expectedRevision === undefined) {
-    return send(res, 400, { error: "Invalid revision" });
-  }
+if (
+action !== “insert” &&
+(!id || id.length > 100)
+) {
+return send(res, 400, { error: “Invalid id” });
+}
 
-  const row = body.row && typeof body.row === "object" &&
-    !Array.isArray(body.row) ? body.row : {};
+const expectedRevision = normalizeRevision(body.expectedRevision);
 
-  const motion = body.motion ?? row.motion;
-  const tournament = body.tournament ?? row.tournament ?? "";
-  const year = body.year ?? row.year;
-  const history = body.history ?? row.history ?? [];
+if (
+expectedRevision === undefined ||
+(action !== “insert” && expectedRevision === null)
+) {
+return send(res, 400, { error: “Invalid revision” });
+}
 
-  if (action !== "delete" && action !== "record") {
-    if (
-      typeof motion !== "string" ||
-      !motion.trim() ||
-      motion.length > 2000 ||
-      typeof tournament !== "string" ||
-      tournament.length > 200 ||
-      !/^\d{4}$/.test(String(year))
-    ) {
-      return send(res, 400, { error: "Invalid motion data" });
-    }
-  }
+const row =
+body.row &&
+typeof body.row === “object” &&
+!Array.isArray(body.row)
+? body.row
+: {};
 
-  const tokenHash = createHash("sha256")
-    .update(process.env.ADMIN_API_TOKEN || "")
-    .digest("hex");
+const motion = body.motion ?? row.motion;
+const tournament = body.tournament ?? row.tournament ?? “”;
+const year = body.year ?? row.year;
+const history = body.history ?? row.history ?? [];
 
-  try {
-    const result = await supabase("rpc/motion_apply", {
-      method: "POST",
-      body: {
-        p_action: action,
-        p_id: id,
-        p_row: action === "delete" || action === "record"
-          ? null
-          : {
-              motion: motion.trim(),
-              tournament: tournament.trim(),
-              year: Number(year),
-              history
-            },
-        p_expected_revision: expectedRevision,
-        p_client_hash: tokenHash
-      }
-    });
+if (action === “insert” || action === “update”) {
+if (
+typeof motion !== “string” ||
+!motion.trim() ||
+motion.trim().length > 1500 ||
+typeof tournament !== “string” ||
+!tournament.trim() ||
+tournament.trim().length > 180 ||
+!/^\d{4}$/.test(String(year)) ||
+!Array.isArray(history) ||
+history.length > 500 ||
+history.some(
+(item) => typeof item !== “string” || item.length > 40
+)
+) {
+return send(res, 400, { error: “Invalid motion data” });
+}
+}
 
-    return send(res, 200, result);
-  } catch (error) {
-    const message = error.data?.message || error.message || "";
+const token = process.env.ADMIN_API_TOKEN;
+if (!token) {
+return send(res, 500, { error: “Server configuration missing” });
+}
 
-    if (/conflict|revision/i.test(message)) {
-      return send(res, 409, { error: "REVISION_CONFLICT" });
-    }
-    if (/duplicate|unique/i.test(message)) {
-      return send(res, 409, { error: "DUPLICATE_MOTION" });
-    }
-    if (/not found/i.test(message)) {
-      return send(res, 404, { error: "NOT_FOUND" });
-    }
-    if (/rate.limit/i.test(message)) {
-      return send(res, 429, { error: "Rate limit exceeded" });
-    }
+const tokenHash = createHash(“sha256”).update(token).digest(“hex”);
 
-    console.error("motion-write failed:", error.status || "unknown");
-    return send(res, 500, { error: "Failed to update motion" });
-  }
+try {
+const result = await supabase(“rpc/motion_apply”, {
+method: “POST”,
+body: {
+p_action: action,
+p_id: id,
+p_row:
+action === “insert” || action === “update”
+? {
+motion: motion.trim(),
+tournament: tournament.trim(),
+year: String(year),
+history
+}
+: null,
+p_expected_revision: expectedRevision,
+p_client_hash: tokenHash
+}
+});
+
+return send(res, 200, result);
+
+} catch (error) {
+const message = error.data?.message || error.message || “”;
+
+if (/REVISION_CONFLICT|revision/i.test(message)) {
+  return send(res, 409, { error: "REVISION_CONFLICT" });
+}
+if (/DUPLICATE_MOTION|duplicate|unique/i.test(message)) {
+  return send(res, 409, { error: "DUPLICATE_MOTION" });
+}
+if (/NOT_FOUND/i.test(message)) {
+  return send(res, 404, { error: "NOT_FOUND" });
+}
+if (/DELETED/i.test(message)) {
+  return send(res, 409, { error: "MOTION_DELETED" });
+}
+if (/RATE_LIMIT/i.test(message)) {
+  return send(res, 429, { error: "RATE_LIMITED" });
+}
+if (/INVALID_/i.test(message)) {
+  return send(res, 400, { error: "INVALID_REQUEST" });
+}
+console.error("motion-write failed:", error.status || "unknown");
+return send(res, 500, { error: "Failed to update motion" });
+
+}
 }
