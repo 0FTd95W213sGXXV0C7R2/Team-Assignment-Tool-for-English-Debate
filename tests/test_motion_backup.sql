@@ -35,24 +35,24 @@ BEGIN
     END IF;
 
     IF to_regprocedure(
-        'public.motion_apply(text,text,jsonb,integer,text)'
+        'public.motion_apply(text,text,jsonb,bigint,text)'
     ) IS NULL THEN
         RAISE EXCEPTION 'Transactional motion RPC is missing';
     END IF;
 
     IF to_regprocedure(
-        'public.motion_restore_revision_checked(text,bigint,integer)'
+        'public.motion_restore_revision_checked(text,bigint,bigint)'
     ) IS NULL THEN
         RAISE EXCEPTION 'Transactional restore RPC is missing';
     END IF;
 
     IF has_function_privilege(
         'anon',
-        'public.motion_apply(text,text,jsonb,integer,text)',
+        'public.motion_apply(text,text,jsonb,bigint,text)',
         'EXECUTE'
     ) OR has_function_privilege(
         'authenticated',
-        'public.motion_apply(text,text,jsonb,integer,text)',
+        'public.motion_apply(text,text,jsonb,bigint,text)',
         'EXECUTE'
     ) THEN
         RAISE EXCEPTION 'Unprivileged roles can execute the write RPC';

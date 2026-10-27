@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { reject, supabase } from './_admin.js';
+import { normalizeNonNegativeBigint, reject, supabase } from './_admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -17,6 +17,7 @@ export default async function handler(req, res) {
   const targetId = typeof id === 'number' && Number.isSafeInteger(id)
     ? String(id)
     : id;
+  const revision = normalizeNonNegativeBigint(expectedRevision);
   const allowedFields = new Set(['motion', 'tournament', 'year', 'history']);
 
   if (!['insert', 'update', 'delete', 'record'].includes(action)) {
@@ -33,8 +34,7 @@ export default async function handler(req, res) {
     typeof targetId !== 'string' ||
     targetId.length < 1 ||
     targetId.length > 100 ||
-    !Number.isSafeInteger(expectedRevision) ||
-    expectedRevision < 0
+    revision === null
   )) {
     return res.status(400).json({ error: 'Invalid target' });
   }
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
         p_action: action,
         p_id: targetId ?? null,
         p_row: row ?? null,
-        p_expected_revision: expectedRevision ?? null,
+        p_expected_revision: revision,
         p_client_hash: clientHash
       })
     });

@@ -1,4 +1,4 @@
-import { reject, supabase } from './_admin.js';
+import { normalizeNonNegativeBigint, reject, supabase } from './_admin.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -8,15 +8,16 @@ export default async function handler(req, res) {
   if (reject(req, res)) return;
 
   const { id, auditId, expectedRevision } = req.body || {};
+  const auditKey = normalizeNonNegativeBigint(auditId);
+  const revision = normalizeNonNegativeBigint(expectedRevision);
 
   if (
-    typeof id !== 'string' ||
-    id.length < 1 ||
-    id.length > 100 ||
-    !Number.isSafeInteger(auditId) ||
-    auditId <= 0 ||
-    !Number.isSafeInteger(expectedRevision) ||
-    expectedRevision < 0
+    !(typeof id === 'string' || (typeof id === 'number' && Number.isSafeInteger(id))) ||
+    String(id).length < 1 ||
+    String(id).length > 100 ||
+    auditKey === null ||
+    auditKey === '0' ||
+    revision === null
   ) {
     return res.status(400).json({ error: 'Invalid request' });
   }
@@ -25,9 +26,9 @@ export default async function handler(req, res) {
     const restored = await supabase('rpc/motion_restore_revision_checked', {
       method: 'POST',
       body: JSON.stringify({
-        p_id: id,
-        p_audit_id: auditId,
-        p_expected_revision: expectedRevision
+        p_id: String(id),
+        p_audit_id: auditKey,
+        p_expected_revision: revision
       })
     });
 

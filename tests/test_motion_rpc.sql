@@ -1,5 +1,6 @@
 -- DEVELOPMENT DATABASE ONLY.
--- Run after reviewing/applying the development migration; all test data rolls back.
+-- Run only against an isolated fixture implementing the existing bigint RPC
+-- contract; all test data rolls back. Never apply the disabled migration.
 BEGIN;
 
 DO $$
@@ -9,7 +10,7 @@ DECLARE
   deleted jsonb;
   restored jsonb;
   motion_key text;
-  revision_before_failure integer;
+  revision_before_failure bigint;
   delete_audit_id bigint;
   audit_count bigint;
 BEGIN
@@ -44,7 +45,7 @@ BEGIN
       'year', '2099',
       'history', '[]'::jsonb
     ),
-    (inserted ->> 'revision')::integer,
+    (inserted ->> 'revision')::bigint,
     'local-test'
   );
 
@@ -57,7 +58,7 @@ BEGIN
         'year', '2099',
         'history', '[]'::jsonb
       ),
-      (inserted ->> 'revision')::integer,
+      (inserted ->> 'revision')::bigint,
       'local-test'
     );
     RAISE EXCEPTION 'Stale revision was accepted';
@@ -69,7 +70,7 @@ BEGIN
 
   deleted := public.motion_apply(
     'delete', motion_key, NULL,
-    (updated ->> 'revision')::integer,
+    (updated ->> 'revision')::bigint,
     'local-test'
   );
   IF (deleted ->> 'is_deleted')::boolean IS NOT TRUE THEN
@@ -87,7 +88,7 @@ BEGIN
   END IF;
 
   restored := public.motion_restore_revision_checked(
-    motion_key, delete_audit_id, (deleted ->> 'revision')::integer
+    motion_key, delete_audit_id, (deleted ->> 'revision')::bigint
   );
   IF (restored ->> 'is_deleted')::boolean IS NOT FALSE
      OR restored ->> 'motion' <> updated ->> 'motion' THEN
@@ -100,7 +101,7 @@ BEGIN
     WHERE motion_id::text = motion_key
       AND before_data ->> 'is_deleted' = 'true'
       AND after_data ->> 'is_deleted' = 'false'
-      AND (after_data ->> 'revision')::integer = (restored ->> 'revision')::integer
+      AND (after_data ->> 'revision')::bigint = (restored ->> 'revision')::bigint
   ) THEN
     RAISE EXCEPTION 'Restore operation was not audited';
   END IF;
@@ -151,11 +152,11 @@ BEGIN
 
   IF has_function_privilege(
     'anon',
-    'public.motion_restore_revision_checked(text,bigint,integer)',
+    'public.motion_restore_revision_checked(text,bigint,bigint)',
     'EXECUTE'
   ) OR has_function_privilege(
     'authenticated',
-    'public.motion_restore_revision_checked(text,bigint,integer)',
+    'public.motion_restore_revision_checked(text,bigint,bigint)',
     'EXECUTE'
   ) THEN
     RAISE EXCEPTION 'Unauthenticated roles can execute restore RPC';

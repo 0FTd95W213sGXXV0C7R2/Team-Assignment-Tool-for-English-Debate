@@ -9,17 +9,16 @@ motion, compares its revision, and writes the audit entry in the same database
 transaction as the row change. Audit failure aborts the transaction. Insert
 records have a null `before_data` and the created row in `after_data`.
 
-The RPC uses an existing `motions` trigger that writes to `motion_audit` when
-one is installed for the relevant event. Otherwise, it writes the same
-before/after snapshot directly, within the transaction. A logical deletion is
-an UPDATE (`is_deleted = true`), so the audit event is an UPDATE with the
-soft-deleted state in `after_data`.
+The development database's existing `motions_audit_trigger` writes the
+before/after snapshot to `motion_audit` in the same transaction. A logical
+deletion is an UPDATE (`is_deleted = true`), so the audit event is an UPDATE
+with the soft-deleted state in `after_data`.
 
 The audit table is in the same database as the motions. It protects against
 application mistakes and provides change history; it is not an independent
 backup and cannot protect against loss of the database itself.
-The migration disables the older `motion_change_backups` trigger to avoid
-duplicate captures, but does not drop that table or delete its existing rows.
+Do not disable or replace existing audit triggers or delete existing audit
+rows as part of the API compatibility work.
 
 ## Restore
 
@@ -43,15 +42,24 @@ audit event.
 
 ## Development setup and validation
 
-Review the existing development `motions` and `motion_audit` schemas and audit
-trigger definitions before applying
-`migrations/20261027_motion_transactional_audit_rpc.sql` to the development
-database. The migration is not authorized for production.
+The development database already provides bigint `motion_apply` and
+`motion_restore_revision_checked` RPCs plus the `motions_audit_trigger`.
+`migrations/20261027_motion_transactional_audit_rpc.sql` is intentionally
+disabled and raises an exception before making changes. Do not apply it.
+Preserve the existing RPC definitions, audit trigger, write limits, and
+duplicate handling. Any future schema change requires review against the live
+development schema first.
+
+The API accepts bigint revisions as decimal strings to avoid JavaScript
+precision loss and forwards them to the existing RPC signatures. Supabase
+integer fields named `id`, `revision`, and `audit_id` are returned as strings
+when their values exceed JavaScript's safe integer range.
 
 Run local API tests with:
 
     npm test
 
-Run SQL integration checks only against a disposable PostgreSQL instance or
-the approved development database, inside a transaction that is rolled back.
+Run SQL integration checks only against a disposable PostgreSQL instance with
+an explicit fixture for the existing bigint RPC contract. Run them against
+development only after confirming the statements cannot affect persisted data.
 Never use production credentials or print credentials to logs.
