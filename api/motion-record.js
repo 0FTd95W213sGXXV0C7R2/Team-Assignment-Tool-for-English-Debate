@@ -1,13 +1,14 @@
-import { supabase } from "./_admin.js";
 
-function send(res, status, body) {
-  return res.status(status).json(body);
-}
+import { requireAdmin, supabase } from "./_admin.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return send(res, 405, { error: "Method not allowed" });
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  if (!requireAdmin(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   const { motion, tournament, year, history } = req.body || {};
@@ -17,11 +18,10 @@ export default async function handler(req, res) {
     !motion.trim() ||
     motion.length > 2000 ||
     typeof tournament !== "string" ||
-    !tournament.trim() ||
     tournament.length > 200 ||
     !/^\d{4}$/.test(String(year))
   ) {
-    return send(res, 400, { error: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 
   try {
@@ -34,13 +34,18 @@ export default async function handler(req, res) {
         p_year: Number(year),
         p_history: history ?? {},
         p_expected_revision: null,
-        p_client_hash: "public-record",
-      },
+        p_client_hash: "admin-record"
+      }
     });
 
-    return send(res, 200, { ok: true, result });
+    return res.status(200).json({ ok: true, result });
   } catch (error) {
-    console.error("motion-record failed:", error.status || "unknown");
-    return send(res, 500, { error: "Failed to record motion" });
+    console.error(
+      "motion-record failed:",
+      error.status || "unknown"
+    );
+    return res.status(500).json({
+      error: "Failed to record motion"
+    });
   }
 }
