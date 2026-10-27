@@ -1,1 +1,199 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>論題管理 | 英語ディベート</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #222;
+    }
+    input, textarea, button {
+      box-sizing: border-box;
+      font: inherit;
+      padding: 8px;
+    }
+    input, textarea { width: 100%; margin: 4px 0 12px; }
+    button { cursor: pointer; margin: 4px 4px 4px 0; }
+    .panel { border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .muted { color: #666; font-size: .9rem; }
+    .status { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .motion { border-top: 1px solid #ddd; padding: 12px 0; }
+    .motion h3 { margin-bottom: 4px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .danger { color: #a00; }
+  </style>
+</head>
+<body>
+  <h1>論題管理</h1>
+  <p><a href="./index.html">チーム分け画面へ戻る</a></p>
+
+  <section class="panel">
+    <h2>管理者認証</h2>
+    <p class="muted">
+      管理者用APIトークンを入力します。トークンはこのページ内でのみ使用し、
+      URLやソースコードには埋め込まないでください。
+    </p>
+    <label for="token">管理者APIトークン</label>
+    <input id="token" type="password" autocomplete="current-password">
+    <button id="connect">接続・一覧を取得</button>
+    <button id="logout">トークンを消去</button>
+    <p id="status" class="status" role="status">未接続</p>
+  </section>
+
+  <section class="panel">
+    <h2>論題を追加・更新</h2>
+    <p class="muted">
+      この画面ではAPI経由で保存します。更新・削除APIの仕様は、
+      実際のデータベース構成と照合してから利用してください。
+    </p>
+    <label for="motion">論題（Motion）</label>
+    <textarea id="motion" rows="3" placeholder="THW ..."></textarea>
+    <label for="tournament">大会名</label>
+    <input id="tournament" placeholder="大会名">
+    <label for="year">年</label>
+    <input id="year" type="number" min="2000" max="2099" placeholder="2026">
+    <button id="add">論題を追加</button>
+  </section>
+
+  <section class="panel">
+    <h2>登録済み論題</h2>
+    <button id="reload">再読み込み</button>
+    <div id="motions"><p>接続後に一覧を表示します。</p></div>
+  </section>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const status = $("status");
+    const list = $("motions");
+
+    function token() {
+      return $("token").value.trim();
+    }
+
+    function setStatus(message) {
+      status.textContent = message;
+    }
+
+    async function api(url, options = {}) {
+      const headers = new Headers(options.headers || {});
+      headers.set("Authorization", "Bearer " + token());
+      if (options.body) headers.set("Content-Type", "application/json");
+
+      const response = await fetch(url, {
+        ...options,
+        headers
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        throw new Error("APIからJSON以外の応答が返されました（HTTP " + response.status + "）");
+      }
+
+      if (!response.ok) {
+        throw new Error(data?.error || ("HTTP " + response.status));
+      }
+      return data;
+    }
+
+    function makeElement(tag, text, className) {
+      const element = document.createElement(tag);
+      element.textContent = text ?? "";
+      if (className) element.className = className;
+      return element;
+    }
+
+    async function loadMotions() {
+      list.replaceChildren(makeElement("p", "読み込み中…"));
+      try {
+        const data = await api("/api/motion-admin-list");
+        const motions = Array.isArray(data) ? data : data.motions;
+
+        if (!Array.isArray(motions)) {
+          throw new Error("論題一覧の応答形式が不正です");
+        }
+
+        list.replaceChildren();
+        if (motions.length === 0) {
+          list.append(makeElement("p", "登録済み論題はありません。"));
+          return;
+        }
+
+        for (const item of motions) {
+          const card = document.createElement("article");
+          card.className = "motion";
+          card.append(makeElement("h3", item.motion || "(論題なし)"));
+          card.append(makeElement("p",
+            [item.tournament, item.year].filter(Boolean).join(" / ")
+          ));
+          card.append(makeElement("p",
+            "ID: " + (item.id ?? "不明") +
+            " / revision: " + (item.revision ?? "不明") +
+            " / 削除済み: " + (item.is_deleted ? "はい" : "いいえ"),
+            "muted"
+          ));
+          list.append(card);
+        }
+
+        setStatus("論題一覧を取得しました（" + motions.length + "件）");
+      } catch (error) {
+        list.replaceChildren(makeElement("p", error.message, "danger"));
+        setStatus("取得失敗: " + error.message);
+      }
+    }
+
+    $("connect").addEventListener("click", loadMotions);
+    $("reload").addEventListener("click", loadMotions);
+
+    $("logout").addEventListener("click", () => {
+      $("token").value = "";
+      list.replaceChildren(makeElement("p", "接続後に一覧を表示します。"));
+      setStatus("トークンを消去しました");
+    });
+
+    $("add").addEventListener("click", async () => {
+      const motion = $("motion").value.trim();
+      const tournament = $("tournament").value.trim();
+      const year = Number($("year").value);
+
+      if (!token()) {
+        setStatus("先に管理者APIトークンを入力してください");
+        return;
+      }
+      if (!motion || !tournament || !Number.isInteger(year) || year < 2000 || year > 2099) {
+        setStatus("論題・大会名・2000〜2099の年を入力してください");
+        return;
+      }
+
+      if (!confirm("この論題を追加しますか？")) return;
+
+      try {
+        await api("/api/motion-write", {
+          method: "POST",
+          body: JSON.stringify({
+            action: "insert",
+            motion,
+            tournament,
+            year
+          })
+        });
+        setStatus("追加リクエストが完了しました");
+        $("motion").value = "";
+        await loadMotions();
+      } catch (error) {
+        setStatus("追加失敗: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
+
