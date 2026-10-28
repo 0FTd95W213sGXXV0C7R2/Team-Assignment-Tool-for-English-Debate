@@ -22,17 +22,11 @@ function getErrorMessage(error) {
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-
-    return send(res, 405, {
-      error: "Method not allowed",
-    });
+    return send(res, 405, { error: "Method not allowed" });
   }
 
   const session = await authorizeAdmin(req, res);
-
-  if (!session) {
-    return;
-  }
+  if (!session) return;
 
   const query = req.query || {};
   const rawMotionId = query.motionId;
@@ -42,9 +36,7 @@ export default async function handler(req, res) {
     (rawMotionId !== undefined &&
       typeof rawMotionId !== "string")
   ) {
-    return send(res, 400, {
-      error: "Invalid motionId",
-    });
+    return send(res, 400, { error: "Invalid motionId" });
   }
 
   const motionId =
@@ -56,9 +48,7 @@ export default async function handler(req, res) {
     motionId !== undefined &&
     !/^[a-zA-Z0-9_-]{1,100}$/.test(motionId)
   ) {
-    return send(res, 400, {
-      error: "Invalid motionId",
-    });
+    return send(res, 400, { error: "Invalid motionId" });
   }
 
   const rawLimit = query.limit ?? "100";
@@ -71,9 +61,7 @@ export default async function handler(req, res) {
     limit < 1 ||
     limit > 500
   ) {
-    return send(res, 400, {
-      error: "Invalid limit",
-    });
+    return send(res, 400, { error: "Invalid limit" });
   }
 
   const rawOffset = query.offset ?? "0";
@@ -85,15 +73,15 @@ export default async function handler(req, res) {
     !Number.isSafeInteger(offset) ||
     offset < 0
   ) {
-    return send(res, 400, {
-      error: "Invalid offset",
-    });
+    return send(res, 400, { error: "Invalid offset" });
   }
 
   const params = new URLSearchParams();
-
-  params.set("select", "*");
-  params.set("order", "changed_at.desc");
+  params.set(
+    "select",
+    "audit_id,motion_id,action,before_data,after_data,actor,changed_at"
+  );
+  params.set("order", "changed_at.desc,audit_id.desc");
   params.set("limit", String(limit));
   params.set("offset", String(offset));
 
@@ -145,4 +133,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
