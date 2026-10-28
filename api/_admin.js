@@ -1,10 +1,11 @@
 
 import { timingSafeEqual } from "node:crypto";
 
+const MAX_BIGINT = 9223372036854775807n;
+
 /**
  * 旧APIとの互換性を維持するためのトークン検証。
- * Supabase Authへの移行後も、内部処理などで使用される
- * 可能性があるため、使用箇所の監査が終わるまでは残す。
+ * 使用箇所の監査が終わるまでは残す。
  */
 export function requireAdmin(req) {
   const secret = process.env.ADMIN_API_TOKEN;
@@ -13,7 +14,9 @@ export function requireAdmin(req) {
     ? header.slice(7)
     : "";
 
-  if (!secret || !supplied) return false;
+  if (!secret || !supplied) {
+    return false;
+  }
 
   const expectedBuffer = Buffer.from(secret);
   const suppliedBuffer = Buffer.from(supplied);
@@ -33,19 +36,37 @@ export function normalizeNonNegativeBigint(value) {
     return null;
   }
 
+  // 数値型では安全整数を超えた値の精度が保証されない。
+  if (
+    typeof value === "number" &&
+    !Number.isSafeInteger(value)
+  ) {
+    return null;
+  }
+
   const text = String(value);
 
-  if (!/^(0|[1-9]\d*)$/.test(text)) return null;
+  if (!/^(0|[1-9]\d*)$/.test(text)) {
+    return null;
+  }
 
   try {
-    return BigInt(text).toString();
+    const parsed = BigInt(text);
+
+    if (parsed < 0n || parsed > MAX_BIGINT) {
+      return null;
+    }
+
+    return parsed.toString();
   } catch {
     return null;
   }
 }
 
 function parseSupabaseJson(text) {
-  if (!text) return null;
+  if (!text) {
+    return null;
+  }
 
   try {
     return JSON.parse(text);
@@ -55,9 +76,8 @@ function parseSupabaseJson(text) {
 }
 
 /**
- * SupabaseのREST APIをサーバー側から呼び出す。
- * サービスロールキーはサーバー環境変数からのみ取得する。
- * ブラウザーへこのキーを返してはならない。
+ * Supabase REST APIをサーバー側から呼び出す。
+ * SUPABASE_SERVICE_ROLE_KEYはサーバー環境変数からのみ取得する。
  */
 export async function supabase(path, options = {}) {
   const url = process.env.SUPABASE_URL;
@@ -71,14 +91,28 @@ export async function supabase(path, options = {}) {
     throw new Error("Server configuration missing");
   }
 
+  if (
+    typeof path !== "string" ||
+    !path ||
+    path.startsWith("/") ||
+    path.includes("://") ||
+    path.split("/").some((part) => part === "..")
+  ) {
+    throw new Error("Invalid Supabase REST path");
+  }
+
+  const headers = new Headers(options.headers || {});
+
+  headers.set("apikey", key);
+  headers.set("Authorization", `Bearer ${key}`);
+
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const requestOptions = {
     ...options,
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
+    headers,
   };
 
   if (
@@ -90,7 +124,7 @@ export async function supabase(path, options = {}) {
 
   const response = await fetch(
     `${url}/rest/v1/${path}`,
-    requestOptions,
+    requestOptions
   );
 
   const text = await response.text();
@@ -99,7 +133,7 @@ export async function supabase(path, options = {}) {
   if (!response.ok) {
     const error = new Error(
       data?.message ||
-        `Supabase request failed: ${response.status}`,
+        `Supabase request failed: ${response.status}`
     );
 
     error.status = response.status;
@@ -113,12 +147,7 @@ export async function supabase(path, options = {}) {
 
 /**
  * 認証済みユーザーの管理APIアクセスを検証する。
- *
- * 認証そのものは _session.js の getSession() に委譲する。
- * 新しい仕様では、認証に成功したユーザー全員を管理者とする。
- * debate_admin_roles テーブルの個別登録・停止状態には依存しない。
- *
- * API側では必ず await authorizeAdmin(req, res) を使うこと。
+ * 認証済みユーザー全員を管理者とする現行仕様。
  */
 export async function authorizeAdmin(req, res) {
   const {
@@ -133,7 +162,7 @@ export async function authorizeAdmin(req, res) {
   } catch (error) {
     console.error(
       "Admin authentication failed:",
-      error?.status || "unknown",
+      error?.status || "unknown"
     );
 
     sendSessionJson(res, 503, {
@@ -151,18 +180,17 @@ export async function authorizeAdmin(req, res) {
     return null;
   }
 
-  // 管理者ロールの個別登録は要求しない。
-  // getSession() が認証済みユーザーのみを返すことが前提。
   return session;
 }
 
 /**
  * 旧API用の互換関数。
- * 移行完了後、全使用箇所を確認してから扱いを決める。
+ * 使用箇所の監査が完了するまで残す。
  */
 export function reject(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
+
     res.status(405).json({
       error: "Method not allowed",
     });
@@ -180,4 +208,3 @@ export function reject(req, res) {
 
   return false;
 }
-
