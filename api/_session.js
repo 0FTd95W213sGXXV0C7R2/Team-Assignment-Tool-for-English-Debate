@@ -1,53 +1,66 @@
-import { createHash, randomBytes } from "node:crypto";
+
 import { supabase } from "./_admin.js";
 
 export const SESSION_COOKIE = "debate_session";
-
-// ログイン状態を180日間維持する
 export const SESSION_TTL_SECONDS = 180 * 24 * 60 * 60;
 
-function sha256(value) {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
+function getBearerToken(req) {
+  const header = req.headers?.authorization || "";
 
-function parseCookies(header) {
-  const cookies = {};
-
-  for (const part of (header || "").split(";")) {
-    const index = part.indexOf("=");
-    if (index < 1) continue;
-
-    const name = part.slice(0, index).trim();
-    const value = part.slice(index + 1).trim();
-
-    try {
-      cookies[name] = decodeURIComponent(value);
-    } catch {
-      // 不正なCookie値は無視する
-    }
+  if (!header.startsWith("Bearer ")) {
+    return null;
   }
 
-  return cookies;
+  const token = header.slice(7).trim();
+
+  if (
+    !token ||
+    token.length > 8192 ||
+    /\s/.test(token)
+  ) {
+    return null;
+  }
+
+  return token;
 }
 
-function cookieOptions() {
-  const secure =
-    process.env.NODE_ENV === "production" ? "; Secure" : "";
+function getSupabasePublicConfig() {
+  const url = process.env.SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY;
 
-  return `Path=/; HttpOnly; SameSite=Lax${secure}`;
+  if (
+    !url ||
+    !key ||
+    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)
+  ) {
+    throw new Error("Supabase Auth configuration missing");
+  }
+
+  return { url, key };
 }
 
 export function sessionCookie(token) {
+  const secure =
+    process.env.NODE_ENV === "production" ? "; Secure" : "";
+
   return (
     `${SESSION_COOKIE}=${encodeURIComponent(token)}; ` +
-    `Max-Age=${SESSION_TTL_SECONDS}; ${cookieOptions()}`
+    `Max-Age=${SESSION_TTL_SECONDS}; ` +
+    `Path=/; HttpOnly; SameSite=Lax${secure}`
   );
 }
 
 export function clearSessionCookie() {
+  const secure =
+    process.env.NODE_ENV === "production" ? "; Secure" : "";
+
   return (
     `${SESSION_COOKIE}=; Max-Age=0; ` +
-    `Expires=Thu, 01 Jan 1970 00:00:00 GMT; ${cookieOptions()}`
+    `Expires=Thu, 01 Jan 1970 00:00:00 GMT; ` +
+    `Path=/; HttpOnly; SameSite=Lax${secure}`
   );
 }
 
@@ -62,99 +75,117 @@ export function sendSessionJson(res, status, data, headers = {}) {
   res.end(JSON.stringify(data));
 }
 
-export async function createSession(userId) {
-  if (typeof userId !== "string" || !userId) {
-    throw new Error("INVALID_SESSION_USER");
+/**
+ * Supabase Authのアクセストークンを検証する。
+ *
+ * トークンの署名や有効性を自前で推測せず、
+ * Supabase Authの /auth/v1/user エンドポイントで検証する。
+ *
+ * Google IDを持つユーザーは、確認済みメールアドレスが
+ * 許可ドメインに属している場合に限ってアクセスできる。
+ *
+ * メール・パスワード登録ユーザーにはドメイン制限を設けない。
+ */
+export async function getSession(req) {
+  const token = getBearerToken(req);
+
+  if (!token) {
+    return null;
   }
 
-  // Cookieにはランダムな秘密トークンを保存し、
-  // データベースにはそのSHA-256ハッシュだけを保存する。
-  const token = randomBytes(32).toString("base64url");
-  const tokenHash = sha256(token);
-  const expiresAt = new Date(
-    Date.now() + SESSION_TTL_SECONDS * 1000
-  ).toISOString();
+  const { url, key } = getSupabasePublicConfig();
 
-  await supabase("debate_sessions", {
-    method: "POST",
+  const response = await fetch(`${url}/auth/v1/user`, {
+    method: "GET",
     headers: {
-      Prefer: "return=minimal",
+      apikey: key,
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
     },
-    body: {
-      token_hash: tokenHash,
-      user_id: userId,
-      expires_at: expiresAt,
-    },
+    signal: AbortSignal.timeout(10000),
   });
 
-  return { token, expiresAt };
-}
+  if (response.status === 401 || response.status === 403) {
+    return null;
+  }
 
-export async function getSession(req) {
-  const cookies = parseCookies(req.headers?.cookie);
-  const token = cookies[SESSION_COOKIE];
+  if (!response.ok) {
+    const error = new Error(
+      `Supabase Auth verification failed: ${response.status}`
+    );
+
+    error.status = response.status;
+    throw error;
+  }
+
+  const user = await response.json();
 
   if (
-    typeof token !== "string" ||
-    !/^[A-Za-z0-9_-]{40,50}$/.test(token)
+    !user ||
+    typeof user.id !== "string" ||
+    !user.id ||
+    typeof user.email !== "string" ||
+    !user.email
   ) {
     return null;
   }
 
-  const tokenHash = sha256(token);
-
-  const sessions = await supabase(
-    "debate_sessions?select=token_hash,user_id,expires_at,revoked_at" +
-      `&token_hash=eq.${encodeURIComponent(tokenHash)}&limit=1`
-  );
-
-  if (!Array.isArray(sessions) || sessions.length !== 1) {
+  // メールアドレスの確認が完了していないユーザーは拒否する。
+  if (!user.email_confirmed_at) {
     return null;
   }
 
-  const session = sessions[0];
-  const expiry = Date.parse(session.expires_at);
+  const email = user.email.trim().toLowerCase();
+  const identities = Array.isArray(user.identities)
+    ? user.identities
+    : [];
 
-  if (
-    session.revoked_at !== null ||
-    !Number.isFinite(expiry) ||
-    expiry <= Date.now()
-  ) {
-    return null;
-  }
+  const hasGoogleIdentity =
+    user.app_metadata?.provider === "google" ||
+    identities.some(
+      (identity) => identity?.provider === "google"
+    );
 
-  // アカウント自体が停止されていないことも確認する。
-  const members = await supabase(
-    "debate_members?select=user_id,revoked_at" +
-      `&user_id=eq.${encodeURIComponent(session.user_id)}&limit=1`
-  );
+  if (hasGoogleIdentity) {
+    const allowedDomains = new Set([
+      "st.spec.ed.jp",
+      "spec.ed.jp",
+    ]);
 
-  if (
-    !Array.isArray(members) ||
-    members.length !== 1 ||
-    members[0].revoked_at !== null
-  ) {
-    return null;
+    const separator = email.lastIndexOf("@");
+
+    if (separator < 1) {
+      return null;
+    }
+
+    const domain = email.slice(separator + 1);
+
+    if (!allowedDomains.has(domain)) {
+      return null;
+    }
   }
 
   return {
-    userId: session.user_id,
-    expiresAt: session.expires_at,
-    tokenHash,
+    userId: user.id,
+    email,
+    expiresAt: null,
+    tokenHash: null,
+    provider: user.app_metadata?.provider || null,
+    isAdmin: true,
   };
 }
 
+/**
+ * ログイン必須API用の共通ガード。
+ */
 export async function requireSession(req, res) {
   try {
     const session = await getSession(req);
 
     if (!session) {
-      sendSessionJson(
-        res,
-        401,
-        { error: "ログインが必要です。" },
-        { "Set-Cookie": clearSessionCookie() }
-      );
+      sendSessionJson(res, 401, {
+        error: "ログインが必要です。",
+      });
 
       return null;
     }
@@ -174,30 +205,25 @@ export async function requireSession(req, res) {
   }
 }
 
-export async function revokeSession(req) {
-  const cookies = parseCookies(req.headers?.cookie);
-  const token = cookies[SESSION_COOKIE];
-
-  if (
-    typeof token !== "string" ||
-    !/^[A-Za-z0-9_-]{40,50}$/.test(token)
-  ) {
-    return;
-  }
-
-  const tokenHash = sha256(token);
-
-  await supabase(
-    "debate_sessions?token_hash=eq." +
-      encodeURIComponent(tokenHash),
-    {
-      method: "PATCH",
-      headers: {
-        Prefer: "return=minimal",
-      },
-      body: {
-        revoked_at: new Date().toISOString(),
-      },
-    }
+/**
+ * 旧APIとの互換性を維持するための移行用関数。
+ *
+ * 新しい認証方式ではSupabase Authがセッションを管理するため、
+ * この関数で独自セッションを新規作成しない。
+ * 古い auth-login.js から呼び出された場合は明示的に失敗させる。
+ */
+export async function createSession() {
+  throw new Error(
+    "Legacy session creation is disabled. Use Supabase Auth."
   );
 }
+
+/**
+ * Supabase Authのサインアウトは、クライアントが
+ * supabase.auth.signOut() を呼び出して実行する。
+ * この関数は旧APIとの互換性のために残す。
+ */
+export async function revokeSession() {
+  return;
+}
+
