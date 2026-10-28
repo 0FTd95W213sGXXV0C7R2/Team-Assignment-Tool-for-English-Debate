@@ -38,6 +38,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 .dialog{background:white;border-radius:12px;padding:20px;width:min(100%,500px);max-height:90vh;overflow-y:auto}
 .auth-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#64748b;font-size:.85rem}
 .auth-divider:before,.auth-divider:after{content:"";height:1px;background:#cbd5e1;flex:1}
+.audit-option{border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin:8px 0}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:15px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -59,31 +60,17 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 <section id="auth" class="card hidden">
   <h2>ログイン・新規登録</h2>
   <p class="muted">Google アカウント、またはメールアドレスとパスワードでログインできます。</p>
-
   <button id="googleLogin" class="full" type="button">Google でログイン</button>
-
   <div class="auth-divider">またはメールアドレスでログイン</div>
-
   <form id="loginForm">
     <label for="authEmail">メールアドレス</label>
-    <input id="authEmail" type="email" autocomplete="email"
-      required maxlength="320" autocapitalize="none" spellcheck="false">
-
+    <input id="authEmail" type="email" autocomplete="email" required maxlength="320" autocapitalize="none" spellcheck="false">
     <label for="authPassword">パスワード</label>
-    <input id="authPassword" type="password" autocomplete="current-password"
-      required minlength="8" maxlength="128">
-
+    <input id="authPassword" type="password" autocomplete="current-password" required minlength="8" maxlength="128">
     <button id="loginButton" class="full" type="submit" style="margin-top:14px">ログイン</button>
   </form>
-
-  <button id="signupButton" class="secondary full" type="button" style="margin-top:10px">
-    新規アカウントを登録
-  </button>
-
-  <p class="muted">
-    新規登録後は、登録したメールアドレスに届く確認メールの案内に従ってください。
-    Google ログインは指定された学校ドメインのメールアドレスに限られます。
-  </p>
+  <button id="signupButton" class="secondary full" type="button" style="margin-top:10px">新規アカウントを登録</button>
+  <p class="muted">新規登録後は確認メールのリンクを開いてください。Googleログインは学校の許可ドメインに限られます。</p>
   <div id="authStatus" class="notice hidden" role="status" aria-live="polite"></div>
 </section>
 
@@ -136,10 +123,10 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   <div class="card">
     <h2 id="formHeading">新規論題の追加</h2>
     <div id="motionForm">
-      <label for="motion">論題 *</label><input id="motion" placeholder="THW ...">
+      <label for="motion">論題 *</label><input id="motion" maxlength="1500" placeholder="THW ...">
       <div class="grid">
-        <div><label for="tournament">大会名</label><input id="tournament" placeholder="HPDU推奨"></div>
-        <div><label for="year">年度</label><input id="year" placeholder="2026"></div>
+        <div><label for="tournament">大会名 *</label><input id="tournament" maxlength="180" placeholder="HPDU推奨"></div>
+        <div><label for="year">年度（4桁）*</label><input id="year" inputmode="numeric" maxlength="4" placeholder="2026"></div>
       </div>
       <label><input id="done" type="checkbox"> 過去に実施したことがある</label>
       <div id="doneDateBox" class="hidden">
@@ -159,6 +146,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     </div>
     <div id="formStatus" class="notice hidden" role="status"></div>
   </div>
+
   <div class="card">
     <h2>登録済み論題一覧</h2>
     <input id="manageSearch" type="search" placeholder="キーワード検索">
@@ -178,7 +166,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     </div>
     <div id="manageList" class="scroll"></div>
     <h3>削除済み論題</h3>
-    <p class="muted">復元機能がAPI側で有効な場合、ここから復元できます。</p>
+    <p class="muted">復元する場合は、監査履歴から復元元を選択します。</p>
     <div id="deletedList" class="scroll"></div>
   </div>
 </section>
@@ -193,6 +181,25 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     <div class="row" style="margin-top:15px">
       <button id="closeModal" class="secondary" type="button">キャンセル</button>
       <button id="record" class="success" type="button">記録を確定する</button>
+    </div>
+  </div>
+</div>
+
+<div id="historyModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <h2>論題の変更履歴</h2>
+    <div id="historyContent"></div>
+    <button id="closeHistory" class="secondary" type="button" style="margin-top:12px">閉じる</button>
+  </div>
+</div>
+
+<div id="restoreModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <h2>復元元の選択</h2>
+    <p class="muted">復元するスナップショットを選択してください。削除操作より前の履歴を選ぶ必要があります。</p>
+    <div id="restoreContent"></div>
+    <div class="row" style="margin-top:12px">
+      <button id="closeRestore" class="secondary" type="button">キャンセル</button>
     </div>
   </div>
 </div>
@@ -230,37 +237,35 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   let selectedMotion = null;
   let pendingId = null;
   let editingId = null;
+  let editingRevision = null;
   let busy = false;
   let customTournaments = [];
   let authInitialized = false;
+  let authCheckInProgress = false;
+  let restoreMotionId = null;
+  let restoreRevision = null;
 
-  function apiErrorMessage(body, fallback) {
-    return body?.error || body?.message || fallback;
+  function displayUser(user) {
+    return user?.email || user?.user_metadata?.full_name ||
+      user?.user_metadata?.name || user?.id || "ログイン中";
+  }
+
+  function errorMessage(body, fallback) {
+    return body?.message || body?.error || fallback;
   }
 
   function getAuthErrorMessage(error) {
     const message = error?.message || "認証処理に失敗しました。";
-
-    if (/invalid login credentials/i.test(message)) {
-      return "メールアドレスまたはパスワードが正しくありません。";
-    }
-    if (/email not confirmed/i.test(message)) {
-      return "メールアドレスの確認が完了していません。確認メールをご確認ください。";
-    }
-    if (/user already registered/i.test(message)) {
-      return "このメールアドレスは既に登録されています。ログインしてください。";
-    }
-    if (/password should be at least/i.test(message)) {
-      return "パスワードが短すぎます。";
-    }
+    if (/invalid login credentials/i.test(message)) return "メールアドレスまたはパスワードが正しくありません。";
+    if (/email not confirmed/i.test(message)) return "メールアドレスの確認が完了していません。確認メールをご確認ください。";
+    if (/user already registered/i.test(message)) return "このメールアドレスは既に登録されています。ログインしてください。";
+    if (/password should be at least/i.test(message)) return "パスワードが短すぎます。";
     return message;
   }
 
   async function getAccessToken() {
     if (!supabaseClient) return null;
-
     const { data, error } = await supabaseClient.auth.getSession();
-
     if (error) throw error;
     return data.session?.access_token || null;
   }
@@ -268,10 +273,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   async function api(path, options = {}) {
     const headers = { ...(options.headers || {}) };
     const token = await getAccessToken();
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) headers.Authorization = `Bearer ${token}`;
 
     const response = await fetch(path, {
       credentials: "same-origin",
@@ -286,30 +288,39 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     if (response.status === 401 && !path.startsWith("/api/auth-")) {
       currentUser = null;
-      showAuth("認証状態を確認できません。再度ログインしてください。");
+      showAuth("ログイン状態が無効です。再度ログインしてください。");
     }
 
     if (!response.ok) {
-      throw new Error(apiErrorMessage(body, `APIエラー（${response.status}）`));
+      const error = new Error(errorMessage(body, `APIエラー（${response.status}）`));
+      error.status = response.status;
+      error.code = body?.error;
+      throw error;
     }
-
     return body;
   }
 
+  function idKey(value) {
+    return String(value);
+  }
+
+  function revisionOf(motion) {
+    if (motion?.revision === undefined || motion?.revision === null) return null;
+    const value = String(motion.revision);
+    return /^(0|[1-9]\d*)$/.test(value) ? value : null;
+  }
+
   function historyOf(motion) {
-    if (Array.isArray(motion.history)) {
-      return motion.history.filter(v =>
-        typeof v === "string" && !Number.isNaN(Date.parse(v))
-      );
-    }
-    return [];
+    if (!Array.isArray(motion?.history)) return [];
+    return motion.history.filter(v =>
+      typeof v === "string" && !Number.isNaN(Date.parse(v))
+    );
   }
 
   function recentHistory(motion) {
     const cutoff = new Date();
     cutoff.setFullYear(cutoff.getFullYear() - 1);
     const now = new Date();
-
     return historyOf(motion).filter(v => {
       const date = new Date(v);
       return date >= cutoff && date <= now;
@@ -336,14 +347,12 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function changeView(view) {
     ["home", "assign", "manage"].forEach(id => show(id, id === view));
     show("back", view !== "home");
-
     if (view === "assign") renderCandidates();
     if (view === "manage") renderManagement();
-
     window.scrollTo(0, 0);
   }
 
-  function showAuth(message = "", type = "error") {
+  function showAuth(message = "", type = "") {
     currentUser = null;
     show("auth", true);
     show("home", false);
@@ -351,15 +360,9 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     show("manage", false);
     show("back", false);
     show("logout", false);
-
     $("userLabel").textContent = "";
     $("connection").textContent = "ログインが必要です。";
-    setMessage("authStatus", message, message ? type : "");
-  }
-
-  function displayUser(user) {
-    return user?.email || user?.user_metadata?.full_name ||
-      user?.user_metadata?.name || user?.id || "ログイン中";
+    setMessage("authStatus", message, type);
   }
 
   function showApp(user) {
@@ -370,116 +373,85 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     show("manage", false);
     show("back", false);
     show("logout", true);
-
     $("userLabel").textContent = displayUser(user);
-    $("connection").textContent = "論題データを読み込み中…";
-
     changeView("home");
     fetchMotions();
   }
 
   async function validateCurrentSession(session) {
     if (!session?.access_token) return false;
-
     const result = await api("/api/auth-me");
-
     if (!result.authenticated || !result.isAdmin) {
       await supabaseClient.auth.signOut();
-      showAuth("認証状態を確認できませんでした。再度ログインしてください。");
+      showAuth("認証状態を確認できませんでした。再度ログインしてください。", "error");
       return false;
     }
-
     return true;
   }
 
   async function checkSession() {
+    if (authCheckInProgress) return;
+    authCheckInProgress = true;
     try {
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) throw error;
-
-      const session = data.session;
-
-      if (!session) {
+      if (!data.session) {
         showAuth();
         return;
       }
-
-      const valid = await validateCurrentSession(session);
-
-      if (valid) {
-        showApp(session.user);
-      }
+      if (await validateCurrentSession(data.session)) showApp(data.session.user);
     } catch (error) {
       console.error("Session check failed:", error);
-      showAuth("ログイン状態を確認できませんでした。設定と通信状態を確認してください。");
+      showAuth("ログイン状態を確認できませんでした。設定と通信状態を確認してください。", "error");
+    } finally {
+      authCheckInProgress = false;
     }
   }
 
   async function login(event) {
     event.preventDefault();
     if (busy || !supabaseClient) return;
-
     const email = $("authEmail").value.trim();
     const password = $("authPassword").value;
-
-    busy = true;
-    $("loginButton").disabled = true;
-    $("signupButton").disabled = true;
-    $("googleLogin").disabled = true;
+    setAuthBusy(true);
     setMessage("authStatus", "ログイン中…");
-
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      if (!data.session || !data.user) {
-        throw new Error("ログインセッションを作成できませんでした。");
-      }
-
-      const valid = await validateCurrentSession(data.session);
-
-      if (!valid) return;
-
+      if (!data.session || !data.user) throw new Error("ログインセッションを作成できませんでした。");
+      if (!(await validateCurrentSession(data.session))) return;
       $("authPassword").value = "";
       setMessage("authStatus", "");
       showApp(data.user);
     } catch (error) {
       setMessage("authStatus", getAuthErrorMessage(error), "error");
     } finally {
-      busy = false;
-      $("loginButton").disabled = false;
-      $("signupButton").disabled = false;
-      $("googleLogin").disabled = false;
+      setAuthBusy(false);
     }
+  }
+
+  function setAuthBusy(value) {
+    busy = value;
+    ["loginButton", "signupButton", "googleLogin"].forEach(id => $(id).disabled = value);
   }
 
   async function signup() {
     if (busy || !supabaseClient) return;
-
     const email = $("authEmail").value.trim();
     const password = $("authPassword").value;
-
     if (!email) {
       setMessage("authStatus", "メールアドレスを入力してください。", "error");
       $("authEmail").focus();
       return;
     }
-
     if (password.length < 8) {
       setMessage("authStatus", "パスワードは8文字以上で入力してください。", "error");
       $("authPassword").focus();
       return;
     }
 
-    busy = true;
-    $("loginButton").disabled = true;
-    $("signupButton").disabled = true;
-    $("googleLogin").disabled = true;
+    setAuthBusy(true);
     setMessage("authStatus", "アカウントを登録しています…");
-
     try {
       const { data, error } = await supabaseClient.auth.signUp({
         email,
@@ -488,13 +460,11 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
           emailRedirectTo: window.location.origin + window.location.pathname
         }
       });
-
       if (error) throw error;
 
       if (data.session && data.user) {
-        const valid = await validateCurrentSession(data.session);
-
-        if (valid) {
+        if (await validateCurrentSession(data.session)) {
+          $("authPassword").value = "";
           showApp(data.user);
           return;
         }
@@ -503,60 +473,42 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       $("authPassword").value = "";
       setMessage(
         "authStatus",
-        "登録処理を受け付けました。メールボックスを確認し、確認メールのリンクを開いてください。確認が完了したらログインできます。",
+        "登録処理を受け付けました。確認メールのリンクを開いてからログインしてください。",
         "ok"
       );
     } catch (error) {
       setMessage("authStatus", getAuthErrorMessage(error), "error");
     } finally {
-      busy = false;
-      $("loginButton").disabled = false;
-      $("signupButton").disabled = false;
-      $("googleLogin").disabled = false;
+      setAuthBusy(false);
     }
   }
 
   async function loginWithGoogle() {
     if (busy || !supabaseClient) return;
-
-    busy = true;
-    $("loginButton").disabled = true;
-    $("signupButton").disabled = true;
-    $("googleLogin").disabled = true;
+    setAuthBusy(true);
     setMessage("authStatus", "Google のログイン画面へ移動しています…");
-
     try {
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: window.location.origin + window.location.pathname,
-          queryParams: {
-            hd: "st.spec.ed.jp"
-          }
+          queryParams: { hd: "st.spec.ed.jp" }
         }
       });
-
       if (error) throw error;
     } catch (error) {
       setMessage("authStatus", getAuthErrorMessage(error), "error");
-      busy = false;
-      $("loginButton").disabled = false;
-      $("signupButton").disabled = false;
-      $("googleLogin").disabled = false;
+      setAuthBusy(false);
     }
   }
 
   async function logout() {
     if (busy || !supabaseClient) return;
-
     busy = true;
     $("logout").disabled = true;
-
     try {
       const { error } = await supabaseClient.auth.signOut();
       if (error) throw error;
-
-      currentUser = null;
       motions = [];
       selectedMotion = null;
       closeRecordModal();
@@ -572,22 +524,20 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function updateSelect(id, values, firstLabel) {
     const select = $(id);
     const previous = select.value;
-
     select.replaceChildren(new Option(firstLabel, ""));
     values.forEach(value => select.add(new Option(value, value)));
     select.value = values.includes(previous) ? previous : "";
   }
 
   function updateFilters() {
+    const active = motions.filter(m => !m.is_deleted);
     const tournaments = [...new Set([
-      ...motions.map(m => normalizeTournament(m.tournament)),
+      ...active.map(m => normalizeTournament(m.tournament)),
       ...customTournaments,
       "その他の大会"
     ])].sort((a, b) => a.localeCompare(b, "ja"));
-
-    const years = [...new Set(motions.map(m => String(m.year || ""))
-      .filter(y => y && y !== "-"))].sort((a, b) => b.localeCompare(a, "ja"));
-
+    const years = [...new Set(active.map(m => String(m.year || ""))
+      .filter(y => /^\d{4}$/.test(y)))].sort((a, b) => b.localeCompare(a, "ja"));
     updateSelect("preTournament", tournaments, "すべての大会");
     updateSelect("manageTournament", tournaments, "すべての大会");
     updateSelect("preYear", years, "すべての年度");
@@ -608,25 +558,20 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     return motions.filter(m => {
       if (m.is_deleted) return false;
-
       const norm = normalizeTournament(m.tournament);
       const y = String(m.year || "");
-
       if (!matchesKeywords([m.motion || "", norm, m.tournament || "", y].join(" "), search)) return false;
       if (tournament && norm !== tournament) return false;
       if (year && y !== year) return false;
-
       const done = recentHistory(m).length > 0;
       if (status === "done" && !done) return false;
       if (status === "not_done" && done) return false;
-
       return true;
     });
   }
 
   function motionItem(m, management = false) {
     const item = element("div", undefined, "item");
-
     item.append(
       element("strong", m.motion || "論題名なし"),
       element("div", `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`, "muted")
@@ -634,19 +579,16 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     if (management) {
       item.append(element("div", `直近1年の実施回数：${recentHistory(m).length}回`, "muted"));
-
       const actions = element("div", undefined, "item-actions");
       actions.append(
         makeButton("編集", () => startEdit(m.id)),
         makeButton("履歴", () => showHistory(m.id)),
         makeButton("削除", () => deleteMotion(m.id), "danger small")
       );
-
       item.append(actions);
     } else {
       item.append(makeButton("記録する", () => openRecordModal(m.id)));
     }
-
     return item;
   }
 
@@ -655,20 +597,14 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
-
     return array;
   }
 
   function renderCandidates() {
     const container = $("candidates");
     container.replaceChildren();
-
     const candidates = shuffleArray(motions.filter(m => !m.is_deleted).slice()).slice(0, 4);
-
-    if (!candidates.length) {
-      container.append(element("p", "論題がありません。", "muted"));
-    }
-
+    if (!candidates.length) container.append(element("p", "論題がありません。", "muted"));
     candidates.forEach(m => container.append(motionItem(m)));
     renderPreSearch();
   }
@@ -676,88 +612,66 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function renderPreSearch() {
     const container = $("preResults");
     container.replaceChildren();
-
     const active = $("preSearch").value.trim() ||
-      $("preTournament").value ||
-      $("preYear").value ||
+      $("preTournament").value || $("preYear").value ||
       $("preStatus").value !== "all";
-
     if (!active) return;
-
     const results = filteredMotions("pre");
     container.append(element("p", `${results.length}件ヒット`, "muted"));
-
     results.slice(0, 200).forEach(m => container.append(motionItem(m)));
-
-    if (results.length > 200) {
-      container.append(element("p", "先頭200件を表示しています。", "muted"));
-    }
+    if (results.length > 200) container.append(element("p", "先頭200件を表示しています。", "muted"));
   }
 
   function renderManagement() {
     const container = $("manageList");
     const deletedContainer = $("deletedList");
-
     container.replaceChildren();
     deletedContainer.replaceChildren();
 
     const results = filteredMotions("manage");
-
     container.append(element(
       "p",
       `${results.length}件 / 全${motions.filter(m => !m.is_deleted).length}件`,
       "muted"
     ));
-
     results.slice(0, 300).forEach(m => container.append(motionItem(m, true)));
-
-    if (results.length > 300) {
-      container.append(element("p", "先頭300件を表示しています。", "muted"));
-    }
+    if (results.length > 300) container.append(element("p", "先頭300件を表示しています。", "muted"));
 
     const deleted = motions.filter(m => m.is_deleted);
-
     deletedContainer.append(element("p", `${deleted.length}件`, "muted"));
-
     deleted.slice(0, 200).forEach(m => {
       const item = element("div", undefined, "item");
-
       item.append(
         element("strong", m.motion || "論題名なし"),
         element("div", `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`, "muted"),
-        makeButton("復元", () => restoreMotion(m.id), "success small")
+        makeButton("履歴から復元", () => openRestorePicker(m.id), "success small")
       );
-
       deletedContainer.append(item);
     });
   }
 
   async function fetchMotions() {
     if (!currentUser) return;
-
     $("connection").textContent = "論題データを読み込み中…";
-
     try {
       const result = await api("/api/motion-list");
-
-      motions = Array.isArray(result.motions) ? result.motions : [];
-
-      $("connection").textContent =
-        `ログイン中：${displayUser(currentUser)} ・ 論題${motions.length}件`;
-
+      if (!Array.isArray(result.motions)) {
+        throw new Error("論題データの形式が正しくありません。");
+      }
+      motions = result.motions;
+      $("connection").textContent = `ログイン中：${displayUser(currentUser)} ・ 論題${motions.filter(m => !m.is_deleted).length}件`;
       updateFilters();
       renderCandidates();
       renderManagement();
     } catch (error) {
       $("connection").textContent = "データ取得エラー：" + error.message;
-      console.error(error);
+      console.error("Motion list failed:", error);
     }
   }
 
   function openRecordModal(id) {
-    const m = motions.find(x => String(x.id) === String(id));
+    const m = motions.find(x => idKey(x.id) === idKey(id) && !x.is_deleted);
     if (!m) return;
-
     pendingId = m.id;
     $("confirmMotion").textContent = m.motion;
     setMessage("confirmError", "");
@@ -771,29 +685,33 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
   async function recordMotion() {
     if (busy || pendingId === null) return;
-
     const id = pendingId;
+    const m = motions.find(x => idKey(x.id) === idKey(id));
+    if (!m) return;
+    const expectedRevision = revisionOf(m);
+    if (expectedRevision === null) {
+      setMessage("confirmError", "論題のリビジョンが取得できません。再読み込みしてください。", "error");
+      return;
+    }
+
     busy = true;
     $("record").disabled = true;
-
     try {
       await api("/api/motion-record", {
         method: "POST",
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id: String(id), expectedRevision })
       });
-
-      const m = motions.find(x => String(x.id) === String(id));
-
-      if (m) {
-        selectedMotion = m.motion;
-        $("chosenText").textContent = "記録済み：" + selectedMotion;
-        show("chosen", true);
-      }
-
+      selectedMotion = m.motion;
+      $("chosenText").textContent = "記録済み：" + selectedMotion;
+      show("chosen", true);
       closeRecordModal();
       await fetchMotions();
     } catch (error) {
-      setMessage("confirmError", "記録に失敗しました：" + error.message, "error");
+      const message = error.status === 409
+        ? "データが他の操作で変更されたか、削除されています。再読み込みして確認してください。"
+        : error.message;
+      setMessage("confirmError", "記録に失敗しました：" + message, "error");
+      if (error.status === 409) await fetchMotions();
     } finally {
       busy = false;
       $("record").disabled = false;
@@ -801,32 +719,36 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   }
 
   async function showHistory(id) {
+    const content = $("historyContent");
+    content.replaceChildren(element("p", "履歴を読み込み中…", "muted"));
+    show("historyModal", true);
     try {
-      const result = await api(`/api/motion-history?id=${encodeURIComponent(id)}`);
+      const result = await api(`/api/motion-history?motionId=${encodeURIComponent(id)}`);
+      content.replaceChildren();
       const history = Array.isArray(result.history) ? result.history : [];
-
-      const lines = history.map(h => {
-        if (typeof h === "string") return h;
-
-        const date = h.changed_at || h.created_at || h.date || "";
+      if (!history.length) {
+        content.append(element("p", "履歴はありません。", "muted"));
+        return;
+      }
+      history.forEach(h => {
+        const box = element("div", undefined, "audit-option");
+        const date = h.changed_at || h.created_at || h.date || "日時不明";
         const action = h.action || h.operation || "変更";
-
-        return `${date} — ${action}`;
+        box.append(
+          element("strong", `${date} — ${action}`),
+          element("div", `履歴ID：${h.id ?? "不明"} / リビジョン：${h.revision ?? "不明"}`, "muted")
+        );
+        content.append(box);
       });
-
-      alert(lines.length ? lines.join("\n") : "履歴はありません。");
     } catch (error) {
-      alert("履歴取得エラー：" + error.message);
+      content.replaceChildren(element("p", "履歴取得エラー：" + error.message, "error"));
     }
   }
 
   function resetForm() {
     editingId = null;
-
-    ["motion", "tournament", "year", "doneDate"].forEach(id => {
-      $(id).value = "";
-    });
-
+    editingRevision = null;
+    ["motion", "tournament", "year", "doneDate"].forEach(id => $(id).value = "");
     $("done").checked = false;
     show("doneDateBox", false);
     show("cancelEdit", false);
@@ -836,115 +758,144 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   }
 
   function startEdit(id) {
-    const m = motions.find(x => String(x.id) === String(id));
+    const m = motions.find(x => idKey(x.id) === idKey(id) && !x.is_deleted);
     if (!m) return;
-
+    const revision = revisionOf(m);
+    if (revision === null) {
+      setMessage("formStatus", "リビジョンが取得できません。再読み込みしてください。", "error");
+      return;
+    }
     editingId = m.id;
+    editingRevision = revision;
     $("motion").value = m.motion || "";
     $("tournament").value = m.tournament === "-" ? "" : m.tournament || "";
     $("year").value = m.year === "-" ? "" : m.year || "";
 
     const history = historyOf(m).sort((a, b) => Date.parse(b) - Date.parse(a));
-
     $("done").checked = history.length > 0;
     show("doneDateBox", history.length > 0);
-
-    $("doneDate").value = history.length
-      ? new Date(history[0]).toISOString().slice(0, 10)
-      : "";
+    $("doneDate").value = history.length ? new Date(history[0]).toISOString().slice(0, 10) : "";
 
     $("formHeading").textContent = "論題の編集";
     show("cancelEdit", true);
     show("motionForm", true);
     show("previewBox", false);
     setMessage("formStatus", "");
-
     window.scrollTo(0, 0);
   }
 
   function formData() {
     return {
       motion: $("motion").value.trim(),
-      tournament: $("tournament").value.trim(),
+      tournament: $("tournament").value.trim() || "-",
       year: $("year").value.trim(),
       done: $("done").checked,
       date: $("doneDate").value || "2024-01-01"
     };
   }
 
+  function buildHistory(data) {
+    if (!data.done) return [];
+    const date = data.date || "2024-01-01";
+    const normalized = `${date}T00:00:00.000Z`;
+    const existing = editingId === null
+      ? []
+      : historyOf(motions.find(m => idKey(m.id) === idKey(editingId)));
+    const dates = existing.filter(value => value.slice(0, 10) !== date);
+    dates.push(normalized);
+    return dates;
+  }
+
   function previewMotion() {
     const v = formData();
-
     if (!v.motion) {
       setMessage("formStatus", "論題を入力してください。", "error");
+      return;
+    }
+    if (!v.tournament || v.tournament.length > 180) {
+      setMessage("formStatus", "大会名を180文字以内で入力してください。", "error");
+      return;
+    }
+    if (!/^\d{4}$/.test(v.year)) {
+      setMessage("formStatus", "年度は4桁の西暦で入力してください。", "error");
+      return;
+    }
+    if (v.done && !/^\d{4}-\d{2}-\d{2}$/.test(v.date)) {
+      setMessage("formStatus", "実施日を正しく指定してください。", "error");
       return;
     }
 
     const duplicate = motions.find(m =>
       !m.is_deleted &&
-      String(m.id) !== String(editingId) &&
+      idKey(m.id) !== idKey(editingId) &&
       (m.motion || "").trim().toLowerCase() === v.motion.toLowerCase() &&
       (m.tournament || "").trim().toLowerCase() === v.tournament.toLowerCase() &&
-      String(m.year || "").trim().toLowerCase() === v.year.toLowerCase()
+      String(m.year || "").trim() === v.year
     );
-
     if (duplicate) {
       setMessage("formStatus", "同一の論題・大会名・年度のデータが存在します。", "error");
       return;
     }
 
     setMessage("formStatus", "");
-
     const container = $("previewText");
     container.replaceChildren();
-
     [
       ["論題", v.motion],
-      ["大会名", v.tournament || "未入力"],
-      ["年度", v.year || "未入力"],
+      ["大会名", v.tournament],
+      ["年度", v.year],
       ["実施状況", v.done ? `実施済み（${v.date}）` : "未実施"]
     ].forEach(([label, value]) => {
       const p = element("p");
       p.append(element("strong", label + "："), element("span", value));
       container.append(p);
     });
-
     show("motionForm", false);
     show("previewBox", true);
   }
 
   async function saveMotion() {
     if (busy) return;
-
     const v = formData();
-
-    if (!v.motion) {
-      setMessage("formStatus", "論題を入力してください。", "error");
+    if (!v.motion || !v.tournament || !/^\d{4}$/.test(v.year)) {
+      setMessage("formStatus", "論題・大会名・4桁の年度を正しく入力してください。", "error");
       return;
+    }
+
+    const history = buildHistory(v);
+    const payload = {
+      action: editingId === null ? "insert" : "update",
+      motion: v.motion,
+      tournament: v.tournament,
+      year: v.year,
+      history
+    };
+
+    if (editingId !== null) {
+      if (editingRevision === null) {
+        setMessage("formStatus", "リビジョンがありません。再読み込みしてください。", "error");
+        return;
+      }
+      payload.id = String(editingId);
+      payload.expectedRevision = editingRevision;
     }
 
     busy = true;
     $("save").disabled = true;
-
     try {
       await api("/api/motion-write", {
         method: "POST",
-        body: JSON.stringify({
-          action: editingId === null ? "create" : "update",
-          id: editingId,
-          motion: v.motion,
-          tournament: v.tournament || "-",
-          year: v.year || "-",
-          done: v.done,
-          date: v.done ? v.date : null
-        })
+        body: JSON.stringify(payload)
       });
-
       resetForm();
       setMessage("formStatus", "保存しました。", "ok");
       await fetchMotions();
     } catch (error) {
-      setMessage("formStatus", "保存に失敗しました：" + error.message, "error");
+      const message = error.status === 409
+        ? "他の操作でデータが変更されています。再読み込みして確認してください。"
+        : error.message;
+      setMessage("formStatus", "保存に失敗しました：" + message, "error");
+      if (error.status === 409) await fetchMotions();
     } finally {
       busy = false;
       $("save").disabled = false;
@@ -952,65 +903,132 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   }
 
   async function deleteMotion(id) {
-    const m = motions.find(x => String(x.id) === String(id));
-
+    const m = motions.find(x => idKey(x.id) === idKey(id) && !x.is_deleted);
     if (!m || busy || !confirm(`「${m.motion}」を削除しますか？`)) return;
+    const expectedRevision = revisionOf(m);
+    if (expectedRevision === null) {
+      setMessage("formStatus", "リビジョンが取得できません。再読み込みしてください。", "error");
+      return;
+    }
 
     busy = true;
-
     try {
       await api("/api/motion-write", {
         method: "POST",
-        body: JSON.stringify({ action: "delete", id })
+        body: JSON.stringify({
+          action: "delete",
+          id: String(id),
+          expectedRevision
+        })
       });
-
       setMessage("formStatus", "削除しました。", "ok");
       await fetchMotions();
     } catch (error) {
-      setMessage("formStatus", "削除に失敗しました：" + error.message, "error");
+      const message = error.status === 409
+        ? "他の操作でデータが変更されています。再読み込みしてください。"
+        : error.message;
+      setMessage("formStatus", "削除に失敗しました：" + message, "error");
+      if (error.status === 409) await fetchMotions();
     } finally {
       busy = false;
     }
   }
 
-  async function restoreMotion(id) {
-    if (busy || !confirm("この論題を復元しますか？")) return;
+  async function openRestorePicker(id) {
+    const motion = motions.find(m => idKey(m.id) === idKey(id) && m.is_deleted);
+    if (!motion) return;
+    const revision = revisionOf(motion);
+    if (revision === null) {
+      setMessage("formStatus", "現在のリビジョンが取得できません。再読み込みしてください。", "error");
+      return;
+    }
+
+    restoreMotionId = motion.id;
+    restoreRevision = revision;
+    const content = $("restoreContent");
+    content.replaceChildren(element("p", "監査履歴を読み込み中…", "muted"));
+    show("restoreModal", true);
+
+    try {
+      const result = await api(`/api/motion-history?motionId=${encodeURIComponent(id)}`);
+      content.replaceChildren();
+      const history = Array.isArray(result.history) ? result.history : [];
+
+      if (!history.length) {
+        content.append(element("p", "復元に使える履歴が見つかりません。", "error"));
+        return;
+      }
+
+      history.forEach(h => {
+        const auditId = h.id;
+        const action = String(h.action || h.operation || "変更");
+        const date = h.changed_at || h.created_at || h.date || "日時不明";
+        const box = element("div", undefined, "audit-option");
+        box.append(
+          element("strong", `${date} — ${action}`),
+          element("div", `監査履歴ID：${auditId ?? "不明"} / リビジョン：${h.revision ?? "不明"}`, "muted")
+        );
+
+        const validId = auditId !== undefined && auditId !== null &&
+          /^(0|[1-9]\d*)$/.test(String(auditId)) && String(auditId) !== "0";
+
+        const button = makeButton(
+          "この履歴から復元",
+          () => restoreMotion(restoreMotionId, auditId, restoreRevision),
+          "success small"
+        );
+        button.disabled = !validId;
+        box.append(button);
+        content.append(box);
+      });
+    } catch (error) {
+      content.replaceChildren(element("p", "履歴取得エラー：" + error.message, "error"));
+    }
+  }
+
+  async function restoreMotion(id, auditId, expectedRevision) {
+    if (busy || !confirm("選択した監査履歴から論題を復元しますか？")) return;
+    if (auditId === undefined || auditId === null || expectedRevision === null) {
+      alert("復元に必要な情報が不足しています。再読み込みしてください。");
+      return;
+    }
 
     busy = true;
-
     try {
       await api("/api/motion-restore", {
         method: "POST",
-        body: JSON.stringify({ id })
+        body: JSON.stringify({
+          id: String(id),
+          auditId: String(auditId),
+          expectedRevision: String(expectedRevision)
+        })
       });
-
-      setMessage("formStatus", "復元しました。", "ok");
+      show("restoreModal", false);
+      setMessage("formStatus", "復元処理を受け付けました。", "ok");
       await fetchMotions();
     } catch (error) {
-      setMessage("formStatus", "復元に失敗しました：" + error.message, "error");
+      const message = error.status === 409
+        ? "リビジョン競合または重複が発生しました。再読み込みして確認してください。"
+        : error.message;
+      alert("復元に失敗しました：" + message);
+      if (error.status === 409) await fetchMotions();
     } finally {
       busy = false;
     }
   }
 
   function generateAssignments() {
-    const participants = $("participants").value
-      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-
-    const judges = $("judges").value
-      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-
+    const participants = $("participants").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const judges = $("judges").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
     const pairs = Number($("pairs").value);
     const size = Number($("teamSize").value);
     const result = $("assignResult");
-
     result.replaceChildren();
 
     if (!Number.isInteger(size) || size < 1 || size > 30) {
       result.append(element("div", "チーム人数は1～30で指定してください。", "notice error"));
       return;
     }
-
     if (!participants.length) {
       result.append(element("div", "参加者を入力してください。", "notice error"));
       return;
@@ -1025,34 +1043,23 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     shuffleArray(participants);
     shuffleArray(judges);
-
     const capacity = pairs * 2 * size;
     const overflow = participants.splice(capacity);
-
     judges.push(...overflow);
 
-    if (overflow.length) {
-      result.append(element("p", `定員超過の${overflow.length}人をジャッジ候補にしました。`, "notice"));
-    }
-
+    if (overflow.length) result.append(element("p", `定員超過の${overflow.length}人をジャッジ候補にしました。`, "notice"));
     const completePairs = Math.min(pairs, Math.floor(participants.length / (size * 2)));
-
     if (!completePairs) {
       result.append(element("div", `最低${size * 2}人必要です。`, "notice error"));
       return;
     }
 
     const teams = [];
-
-    for (let i = 0; i < completePairs * 2; i++) {
-      teams.push(participants.splice(0, size));
-    }
+    for (let i = 0; i < completePairs * 2; i++) teams.push(participants.splice(0, size));
 
     for (let i = 0; i < completePairs; i++) {
       const match = element("div", undefined, "match");
-
       match.append(element("strong", `Match ${i + 1}`));
-
       [
         ["Government", teams[i * 2].join("、")],
         ["Opposition", teams[i * 2 + 1].join("、")],
@@ -1063,35 +1070,24 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
         p.append(element("strong", label + "："), element("span", value));
         match.append(p);
       });
-
       result.append(match);
     }
 
-    if (participants.length) {
-      result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
-    }
-
-    if (judges.length) {
-      result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
-    }
+    if (participants.length) result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
+    if (judges.length) result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
   }
 
   function downloadJSON() {
-    const blob = new Blob(
-      [JSON.stringify(motions, null, 2)],
-      { type: "application/json;charset=utf-8" }
-    );
-
+    const blob = new Blob([JSON.stringify(motions, null, 2)], {
+      type: "application/json;charset=utf-8"
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-
     a.href = url;
     a.download = "motions.json";
-
     document.body.appendChild(a);
     a.click();
     a.remove();
-
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
@@ -1106,49 +1102,48 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
         cache: "no-store",
         headers: { Accept: "application/json" }
       });
-
       const config = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(config.error || "Supabase Authの設定を取得できませんでした。");
 
-      if (!response.ok) {
-        throw new Error(config.error || "Supabase Authの設定を取得できませんでした。");
-      }
-
-      if (!config.supabaseUrl || !config.supabaseAnonKey) {
+      // 旧版・新版の両方の設定キーに対応する。
+      const supabaseUrl = config.supabaseUrl || config.url;
+      const supabaseAnonKey = config.supabaseAnonKey || config.anonKey;
+      if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error("Supabase Authの公開設定が不完全です。");
       }
 
-      supabaseClient = window.supabase.createClient(
-        config.supabaseUrl,
-        config.supabaseAnonKey,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
+      supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
         }
-      );
+      });
 
       supabaseClient.auth.onAuthStateChange((event, session) => {
         if (!authInitialized) return;
 
-        if (event === "SIGNED_OUT" || !session) {
+        if (event === "SIGNED_OUT") {
           currentUser = null;
+          motions = [];
           showAuth();
           return;
         }
 
-        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-          // 認証状態の切り替え後にサーバー側でも検証する。
-          queueMicrotask(async () => {
+        if (
+          session &&
+          ["SIGNED_IN", "TOKEN_REFRESHED", "USER_UPDATED", "PASSWORD_RECOVERY"].includes(event)
+        ) {
+          // Supabaseの認証コールバック内でAPI通信を直接行わない。
+          setTimeout(async () => {
             try {
               const valid = await validateCurrentSession(session);
               if (valid) showApp(session.user);
             } catch (error) {
               console.error("Auth state verification failed:", error);
-              showAuth("認証状態を確認できませんでした。再度ログインしてください。");
+              showAuth("認証状態を確認できませんでした。再度ログインしてください。", "error");
             }
-          });
+          }, 0);
         }
       });
 
@@ -1183,18 +1178,15 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     $("closeModal").addEventListener("click", closeRecordModal);
     $("record").addEventListener("click", recordMotion);
+    $("closeHistory").addEventListener("click", () => show("historyModal", false));
+    $("closeRestore").addEventListener("click", () => show("restoreModal", false));
 
-    $("done").addEventListener("change", () => {
-      show("doneDateBox", $("done").checked);
-    });
-
+    $("done").addEventListener("change", () => show("doneDateBox", $("done").checked));
     $("preview").addEventListener("click", previewMotion);
-
     $("revise").addEventListener("click", () => {
       show("previewBox", false);
       show("motionForm", true);
     });
-
     $("save").addEventListener("click", saveMotion);
 
     $("cancelEdit").addEventListener("click", () => {
@@ -1207,7 +1199,6 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     $("addTournament").addEventListener("click", () => {
       const name = prompt("追加する大会名を入力してください。");
-
       if (name && name.trim()) {
         customTournaments.push(name.trim());
         updateFilters();
