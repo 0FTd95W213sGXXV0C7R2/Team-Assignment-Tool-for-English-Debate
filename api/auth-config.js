@@ -18,16 +18,17 @@ export default async function handler(req, res) {
     });
   }
 
-  const url = process.env.SUPABASE_URL;
-  const anonKey =
+  const supabaseUrl = process.env.SUPABASE_URL;
+
+  const supabaseAnonKey =
     process.env.SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY;
 
   if (
-    !url ||
-    !anonKey ||
-    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)
+    !supabaseUrl ||
+    !supabaseAnonKey ||
+    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(supabaseUrl)
   ) {
     return sendJson(res, 503, {
       error: "Supabase Auth configuration missing",
@@ -35,7 +36,13 @@ export default async function handler(req, res) {
   }
 
   return sendJson(res, 200, {
-    url,
-    anonKey,
+    // 現在の index.html が参照するプロパティ
+    supabaseUrl,
+    supabaseAnonKey,
+
+    // 旧クライアントとの互換性を維持
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   });
 }
+
