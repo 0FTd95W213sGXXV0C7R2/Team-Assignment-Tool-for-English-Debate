@@ -1,83 +1,28 @@
 
-import {
-  createHash,
-  randomBytes,
-  timingSafeEqual,
-} from "node:crypto";
-
+import { createHash } from "node:crypto";
 import { supabase } from "./_admin.js";
+import {
+  createSession,
+  sessionCookie,
+  sendSessionJson,
+} from "./_session.js";
 
-const SESSION_COOKIE = "debate_session";
-const SESSION_TTL_SECONDS = 12 * 60 * 60;
 const MAX_LOGIN_ATTEMPTS = 20;
 
 function sha256(value) {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
-function safeEqualHex(a, b) {
-  if (
-    typeof a !== "string" ||
-    typeof b !== "string" ||
-    !/^[0-9a-f]{64}$/.test(a) ||
-    !/^[0-9a-f]{64}$/.test(b)
-  ) {
-    return false;
-  }
-
-  return timingSafeEqual(
-    Buffer.from(a, "hex"),
-    Buffer.from(b, "hex"),
-  );
-}
-
-function parseCookies(header) {
-  const cookies = {};
-
-  for (const part of (header || "").split(";")) {
-    const separator = part.indexOf("=");
-
-    if (separator < 1) continue;
-
-    const name = part.slice(0, separator).trim();
-    const value = part.slice(separator + 1).trim();
-
-    try {
-      cookies[name] = decodeURIComponent(value);
-    } catch {
-      // Ignore malformed cookie values.
-    }
-  }
-
-  return cookies;
-}
-
-function sendJson(res, status, body, extraHeaders = {}) {
-  res.writeHead(status, {
-    "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": "no-store",
-    "X-Content-Type-Options": "nosniff",
-    ...extraHeaders,
+function sendError(res, status, message) {
+  return sendSessionJson(res, status, {
+    ok: false,
+    error: message,
   });
-
-  res.end(JSON.stringify(body));
-}
-
-function setSessionCookie(token) {
-  const secure =
-    process.env.NODE_ENV === "production" ? "; Secure" : "";
-
-  return (
-    `${SESSION_COOKIE}=${encodeURIComponent(token)}` +
-    `; Path=/; HttpOnly; SameSite=Lax` +
-    `; Max-Age=${SESSION_TTL_SECONDS}` +
-    secure
-  );
 }
 
 function getClientAddressKey(req) {
-  // Do not trust arbitrary X-Forwarded-For headers.
-  // Configure a trusted proxy explicitly before using forwarded addresses.
+  // 任意の X-Forwarded-For は信用しない。
+  // 信頼できるプロキシを設定する場合は別途対応する。
   const address =
     typeof req.socket?.remoteAddress === "string"
       ? req.socket.remoteAddress
@@ -87,13 +32,16 @@ function getClientAddressKey(req) {
 }
 
 async function consumeLoginAttempt(bucketHash) {
-  const result = await supabase("rpc/debate_consume_login_attempt", {
-    method: "POST",
-    body: {
-      p_bucket_hash: bucketHash,
-      p_max_attempts: MAX_LOGIN_ATTEMPTS,
+  const result = await supabase(
+    "rpc/debate_consume_login_attempt",
+    {
+      method: "POST",
+      body: {
+        p_bucket_hash: bucketHash,
+        p_max_attempts: MAX_LOGIN_ATTEMPTS,
+      },
     },
-  });
+  );
 
   return result === true;
 }
@@ -110,8 +58,6 @@ function readCode(body) {
 
   const code = body.code.trim();
 
-  // Login codes must be 32–128 characters.
-  // The issuance API must generate codes compatible with this rule.
   if (!/^[A-Za-z0-9_-]{32,128}$/.test(code)) {
     return null;
   }
@@ -122,59 +68,80 @@ function readCode(body) {
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return sendJson(res, 405, { error: "method_not_allowed" });
+
+    return sendError(
+      res,
+      405,
+      "この操作は許可されていません。",
+    );
   }
 
   let body;
 
   try {
-    if (typeof req.body === "object" && req.body !== null) {
+    if (
+      req.body &&
+      typeof req.body === "object" &&
+      !Buffer.isBuffer(req.body)
+    ) {
       body = req.body;
     } else {
       let raw = "";
 
       for await (const chunk of req) {
-        raw += chunk;
+        raw += chunk.toString("utf8");
 
-        if (raw.length > 8192) {
-          return sendJson(res, 413, {
-            error: "request_too_large",
-          });
+        if (Buffer.byteLength(raw, "utf8") > 8192) {
+          return sendError(
+            res,
+            413,
+            "送信データの量が上限を超えています。",
+          );
         }
       }
 
       body = JSON.parse(raw);
     }
   } catch {
-    return sendJson(res, 400, { error: "invalid_json" });
+    return sendError(
+      res,
+      400,
+      "送信データの形式が正しくありません。",
+    );
   }
-
-  const addressBucket = getClientAddressKey(req);
 
   let allowed;
 
   try {
-    allowed = await consumeLoginAttempt(addressBucket);
+    allowed = await consumeLoginAttempt(
+      getClientAddressKey(req),
+    );
   } catch (error) {
     console.error("Login rate-limit check failed:", error);
 
-    return sendJson(res, 503, {
-      error: "authentication_temporarily_unavailable",
-    });
+    return sendError(
+      res,
+      503,
+      "認証サービスを一時的に利用できません。時間をおいて再度お試しください。",
+    );
   }
 
   if (!allowed) {
-    return sendJson(res, 429, {
-      error: "too_many_attempts",
-    });
+    return sendError(
+      res,
+      429,
+      "ログイン試行回数が上限に達しました。しばらくしてから再度お試しください。",
+    );
   }
 
   const code = readCode(body);
 
   if (!code) {
-    return sendJson(res, 401, {
-      error: "invalid_login_code",
-    });
+    return sendError(
+      res,
+      401,
+      "ログインコードが正しくありません。",
+    );
   }
 
   const codeHash = sha256(code);
@@ -182,29 +149,36 @@ export default async function handler(req, res) {
   try {
     const codeRows = await supabase(
       "debate_login_codes" +
-        `?select=user_id,code_hash,revoked_at` +
+        "?select=user_id,code_hash,revoked_at" +
         `&code_hash=eq.${encodeURIComponent(codeHash)}` +
         "&limit=1",
     );
 
-    if (!Array.isArray(codeRows) || codeRows.length !== 1) {
-      return sendJson(res, 401, {
-        error: "invalid_login_code",
-      });
+    if (
+      !Array.isArray(codeRows) ||
+      codeRows.length !== 1
+    ) {
+      return sendError(
+        res,
+        401,
+        "ログインコードが正しくありません。",
+      );
     }
 
     const loginCode = codeRows[0];
 
     if (
       loginCode.revoked_at !== null ||
-      !safeEqualHex(loginCode.code_hash, codeHash)
+      loginCode.code_hash !== codeHash
     ) {
-      return sendJson(res, 401, {
-        error: "invalid_login_code",
-      });
+      return sendError(
+        res,
+        401,
+        "ログインコードが正しくありません。",
+      );
     }
 
-    const memberRows = await supabase(
+    const members = await supabase(
       "debate_members" +
         "?select=user_id,revoked_at" +
         `&user_id=eq.${encodeURIComponent(loginCode.user_id)}` +
@@ -212,49 +186,39 @@ export default async function handler(req, res) {
     );
 
     if (
-      !Array.isArray(memberRows) ||
-      memberRows.length !== 1 ||
-      memberRows[0].revoked_at !== null
+      !Array.isArray(members) ||
+      members.length !== 1 ||
+      members[0].revoked_at !== null
     ) {
-      return sendJson(res, 401, {
-        error: "invalid_login_code",
-      });
+      return sendError(
+        res,
+        401,
+        "このアカウントは利用できません。管理者にお問い合わせください。",
+      );
     }
 
-    const token = randomBytes(32).toString("base64url");
-    const tokenHash = sha256(token);
-    const expiresAt = new Date(
-      Date.now() + SESSION_TTL_SECONDS * 1000,
-    ).toISOString();
+    const session = await createSession(loginCode.user_id);
 
-    await supabase("debate_sessions", {
-      method: "POST",
-      headers: {
-        Prefer: "return=minimal",
-      },
-      body: {
-        token_hash: tokenHash,
-        user_id: loginCode.user_id,
-        expires_at: expiresAt,
-      },
-    });
-
-    return sendJson(
+    return sendSessionJson(
       res,
       200,
       {
         ok: true,
-        expiresAt,
+        message: "ログインしました。",
+        expiresAt: session.expiresAt,
       },
       {
-        "Set-Cookie": setSessionCookie(token),
+        "Set-Cookie": sessionCookie(session.token),
       },
     );
   } catch (error) {
     console.error("Login request failed:", error);
 
-    return sendJson(res, 503, {
-      error: "authentication_temporarily_unavailable",
-    });
+    return sendError(
+      res,
+      503,
+      "ログイン処理に失敗しました。時間をおいて再度お試しください。",
+    );
   }
 }
+
