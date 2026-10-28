@@ -718,32 +718,75 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     }
   }
 
+
   async function showHistory(id) {
     const content = $("historyContent");
-    content.replaceChildren(element("p", "履歴を読み込み中…", "muted"));
+    content.replaceChildren(
+      element("p", "履歴を読み込み中…", "muted")
+    );
     show("historyModal", true);
+
     try {
-      const result = await api(`/api/motion-history?motionId=${encodeURIComponent(id)}`);
+      const result = await api(
+        `/api/motion-history?motionId=${encodeURIComponent(id)}`
+      );
       content.replaceChildren();
-      const history = Array.isArray(result.history) ? result.history : [];
+
+      const history = Array.isArray(result.history)
+        ? result.history
+        : [];
+
       if (!history.length) {
-        content.append(element("p", "履歴はありません。", "muted"));
+        content.append(
+          element("p", "履歴はありません。", "muted")
+        );
         return;
       }
+
       history.forEach(h => {
         const box = element("div", undefined, "audit-option");
-        const date = h.changed_at || h.created_at || h.date || "日時不明";
-        const action = h.action || h.operation || "変更";
+        const date = h.changed_at || "日時不明";
+        const action = h.action || "変更";
+        const auditId = h.audit_id ?? "不明";
+
         box.append(
           element("strong", `${date} — ${action}`),
-          element("div", `履歴ID：${h.id ?? "不明"} / リビジョン：${h.revision ?? "不明"}`, "muted")
+          element(
+            "div",
+            `監査履歴ID：${auditId}`,
+            "muted"
+          )
         );
+
+        if (h.before_data) {
+          box.append(
+            element(
+              "p",
+              `変更前：${h.before_data.motion || "論題名なし"}`,
+              "muted"
+            )
+          );
+        }
+
+        if (h.after_data) {
+          box.append(
+            element(
+              "p",
+              `変更後：${h.after_data.motion || "論題名なし"}`,
+              "muted"
+            )
+          );
+        }
+
         content.append(box);
       });
     } catch (error) {
-      content.replaceChildren(element("p", "履歴取得エラー：" + error.message, "error"));
+      content.replaceChildren(
+        element("p", "履歴取得エラー：" + error.message, "error")
+      );
     }
   }
+
 
   function resetForm() {
     editingId = null;
@@ -934,57 +977,117 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     }
   }
 
+
   async function openRestorePicker(id) {
-    const motion = motions.find(m => idKey(m.id) === idKey(id) && m.is_deleted);
+    const motion = motions.find(
+      m => idKey(m.id) === idKey(id) && m.is_deleted
+    );
+
     if (!motion) return;
+
     const revision = revisionOf(motion);
+
     if (revision === null) {
-      setMessage("formStatus", "現在のリビジョンが取得できません。再読み込みしてください。", "error");
+      setMessage(
+        "formStatus",
+        "現在のリビジョンが取得できません。再読み込みしてください。",
+        "error"
+      );
       return;
     }
 
     restoreMotionId = motion.id;
     restoreRevision = revision;
+
     const content = $("restoreContent");
-    content.replaceChildren(element("p", "監査履歴を読み込み中…", "muted"));
+    content.replaceChildren(
+      element("p", "監査履歴を読み込み中…", "muted")
+    );
     show("restoreModal", true);
 
     try {
-      const result = await api(`/api/motion-history?motionId=${encodeURIComponent(id)}`);
-      content.replaceChildren();
-      const history = Array.isArray(result.history) ? result.history : [];
+      const result = await api(
+        `/api/motion-history?motionId=${encodeURIComponent(id)}`
+      );
 
-      if (!history.length) {
-        content.append(element("p", "復元に使える履歴が見つかりません。", "error"));
+      content.replaceChildren();
+
+      const history = Array.isArray(result.history)
+        ? result.history
+        : [];
+
+      // 復元関数が対応するのは UPDATE / DELETE の before_data。
+      const candidates = history.filter(h =>
+        ["UPDATE", "DELETE"].includes(
+          String(h.action || "").toUpperCase()
+        ) &&
+        h.before_data &&
+        typeof h.before_data === "object" &&
+        !Array.isArray(h.before_data) &&
+        String(h.motion_id) === String(id) &&
+        h.audit_id !== undefined &&
+        h.audit_id !== null &&
+        /^[1-9]\d*$/.test(String(h.audit_id))
+      );
+
+      if (!candidates.length) {
+        content.append(
+          element(
+            "p",
+            "復元に使える履歴が見つかりません。UPDATE / DELETE の監査履歴と before_data を確認してください。",
+            "error"
+          )
+        );
         return;
       }
 
-      history.forEach(h => {
-        const auditId = h.id;
-        const action = String(h.action || h.operation || "変更");
-        const date = h.changed_at || h.created_at || h.date || "日時不明";
+      candidates.forEach(h => {
+        const auditId = String(h.audit_id);
+        const action = String(h.action).toUpperCase();
+        const date = h.changed_at || "日時不明";
+        const snapshot = h.before_data;
+
         const box = element("div", undefined, "audit-option");
+
         box.append(
           element("strong", `${date} — ${action}`),
-          element("div", `監査履歴ID：${auditId ?? "不明"} / リビジョン：${h.revision ?? "不明"}`, "muted")
+          element(
+            "div",
+            `監査履歴ID：${auditId}`,
+            "muted"
+          ),
+          element(
+            "div",
+            `復元する論題：${snapshot.motion || "論題名なし"}`,
+            "muted"
+          ),
+          element(
+            "div",
+            `${snapshot.tournament || "大会名なし"} / ${snapshot.year || "年度なし"}`,
+            "muted"
+          )
         );
-
-        const validId = auditId !== undefined && auditId !== null &&
-          /^(0|[1-9]\d*)$/.test(String(auditId)) && String(auditId) !== "0";
 
         const button = makeButton(
           "この履歴から復元",
-          () => restoreMotion(restoreMotionId, auditId, restoreRevision),
+          () => restoreMotion(
+            restoreMotionId,
+            auditId,
+            restoreRevision
+          ),
           "success small"
         );
-        button.disabled = !validId;
+
         box.append(button);
         content.append(box);
       });
     } catch (error) {
-      content.replaceChildren(element("p", "履歴取得エラー：" + error.message, "error"));
+      content.replaceChildren(
+        element("p", "履歴取得エラー：" + error.message, "error")
+      );
     }
   }
+
 
   async function restoreMotion(id, auditId, expectedRevision) {
     if (busy || !confirm("選択した監査履歴から論題を復元しますか？")) return;
