@@ -4,10 +4,7 @@ import {
   randomBytes,
 } from "node:crypto";
 
-import {
-  requireAdmin,
-  supabase,
-} from "./_admin.js";
+import { requireAdmin, supabase } from "./_admin.js";
 
 function sha256(value) {
   return createHash("sha256").update(value, "utf8").digest("hex");
@@ -32,19 +29,9 @@ export default async function handler(req, res) {
     });
   }
 
-  // 既存のサーバー管理トークンによる認証。
-  // この関数の戻り値ではなく、レスポンスが終了したかで判定する。
-  try {
-    await requireAdmin(req, res);
-
-    if (res.writableEnded) {
-      return;
-    }
-  } catch (error) {
-    console.error("Login-code issuance authorization failed:", error);
-
-    return sendJson(res, 500, {
-      error: "認証コードの発行権限を確認できませんでした。",
+  if (!requireAdmin(req)) {
+    return sendJson(res, 401, {
+      error: "認証コードを発行する権限がありません。",
     });
   }
 
@@ -65,10 +52,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    const userId = body.userId.toLowerCase();
+
     const members = await supabase(
       "debate_members" +
         "?select=user_id,revoked_at" +
-        `&user_id=eq.${encodeURIComponent(body.userId)}` +
+        `&user_id=eq.${encodeURIComponent(userId)}` +
         "&limit=1",
     );
 
@@ -82,19 +71,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // 32バイトの暗号学的乱数をBase64URLで表現する。
+    // 暗号学的に安全な32バイトのランダムコードを生成する。
     const code = randomBytes(32).toString("base64url");
     const codeHash = sha256(code);
 
-    // 同一メンバーのコードを更新する。
-    // 既存のコードは新しいハッシュに置き換わるため使用できなくなる。
+    // 同じメンバーのコードがあれば置き換える。
+    // データベースには平文コードを保存しない。
     await supabase("debate_login_codes", {
       method: "POST",
       headers: {
         Prefer: "resolution=merge-duplicates,return=minimal",
       },
       body: {
-        user_id: body.userId,
+        user_id: userId,
         code_hash: codeHash,
         created_at: new Date().toISOString(),
         revoked_at: null,
@@ -103,15 +92,17 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, {
       ok: true,
-      message: "ログインコードを発行しました。このコードを安全に保管してください。",
-      userId: body.userId,
+      message:
+        "ログインコードを発行しました。コードはこの画面でのみ確認できるため、安全に保管してください。",
+      userId,
       code,
     });
   } catch (error) {
     console.error("Login-code issuance failed:", error);
 
     return sendJson(res, 503, {
-      error: "ログインコードを発行できませんでした。時間をおいて再度お試しください。",
+      error:
+        "ログインコードを発行できませんでした。設定やデータベースの状態を確認してください。",
     });
   }
 }
