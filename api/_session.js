@@ -1,9 +1,10 @@
-
 import { createHash, randomBytes } from "node:crypto";
 import { supabase } from "./_admin.js";
 
 export const SESSION_COOKIE = "debate_session";
-export const SESSION_TTL_SECONDS = 12 * 60 * 60;
+
+// ログイン状態を180日間維持する
+export const SESSION_TTL_SECONDS = 180 * 24 * 60 * 60;
 
 function sha256(value) {
   return createHash("sha256").update(value, "utf8").digest("hex");
@@ -22,7 +23,7 @@ function parseCookies(header) {
     try {
       cookies[name] = decodeURIComponent(value);
     } catch {
-      // 不正なCookie値は無視する。
+      // 不正なCookie値は無視する
     }
   }
 
@@ -37,11 +38,17 @@ function cookieOptions() {
 }
 
 export function sessionCookie(token) {
-  return `${SESSION_COOKIE}=${encodeURIComponent(token)}; Max-Age=${SESSION_TTL_SECONDS}; ${cookieOptions()}`;
+  return (
+    `${SESSION_COOKIE}=${encodeURIComponent(token)}; ` +
+    `Max-Age=${SESSION_TTL_SECONDS}; ${cookieOptions()}`
+  );
 }
 
 export function clearSessionCookie() {
-  return `${SESSION_COOKIE}=; Max-Age=0; ${cookieOptions()}`;
+  return (
+    `${SESSION_COOKIE}=; Max-Age=0; ` +
+    `Expires=Thu, 01 Jan 1970 00:00:00 GMT; ${cookieOptions()}`
+  );
 }
 
 export function sendSessionJson(res, status, data, headers = {}) {
@@ -60,15 +67,19 @@ export async function createSession(userId) {
     throw new Error("INVALID_SESSION_USER");
   }
 
+  // Cookieにはランダムな秘密トークンを保存し、
+  // データベースにはそのSHA-256ハッシュだけを保存する。
   const token = randomBytes(32).toString("base64url");
   const tokenHash = sha256(token);
   const expiresAt = new Date(
-    Date.now() + SESSION_TTL_SECONDS * 1000,
+    Date.now() + SESSION_TTL_SECONDS * 1000
   ).toISOString();
 
   await supabase("debate_sessions", {
     method: "POST",
-    headers: { Prefer: "return=minimal" },
+    headers: {
+      Prefer: "return=minimal",
+    },
     body: {
       token_hash: tokenHash,
       user_id: userId,
@@ -94,7 +105,7 @@ export async function getSession(req) {
 
   const sessions = await supabase(
     "debate_sessions?select=token_hash,user_id,expires_at,revoked_at" +
-      `&token_hash=eq.${encodeURIComponent(tokenHash)}&limit=1`,
+      `&token_hash=eq.${encodeURIComponent(tokenHash)}&limit=1`
   );
 
   if (!Array.isArray(sessions) || sessions.length !== 1) {
@@ -102,18 +113,20 @@ export async function getSession(req) {
   }
 
   const session = sessions[0];
+  const expiry = Date.parse(session.expires_at);
 
   if (
     session.revoked_at !== null ||
-    !Number.isFinite(Date.parse(session.expires_at)) ||
-    Date.parse(session.expires_at) <= Date.now()
+    !Number.isFinite(expiry) ||
+    expiry <= Date.now()
   ) {
     return null;
   }
 
+  // アカウント自体が停止されていないことも確認する。
   const members = await supabase(
     "debate_members?select=user_id,revoked_at" +
-      `&user_id=eq.${encodeURIComponent(session.user_id)}&limit=1`,
+      `&user_id=eq.${encodeURIComponent(session.user_id)}&limit=1`
   );
 
   if (
@@ -140,7 +153,7 @@ export async function requireSession(req, res) {
         res,
         401,
         { error: "ログインが必要です。" },
-        { "Set-Cookie": clearSessionCookie() },
+        { "Set-Cookie": clearSessionCookie() }
       );
 
       return null;
@@ -148,7 +161,10 @@ export async function requireSession(req, res) {
 
     return session;
   } catch (error) {
-    console.error("Session verification failed:", error);
+    console.error(
+      "Session verification failed:",
+      error?.status || "unknown"
+    );
 
     sendSessionJson(res, 503, {
       error: "認証サービスを一時的に利用できません。",
@@ -172,11 +188,16 @@ export async function revokeSession(req) {
   const tokenHash = sha256(token);
 
   await supabase(
-    `debate_sessions?token_hash=eq.${encodeURIComponent(tokenHash)}`,
+    "debate_sessions?token_hash=eq." +
+      encodeURIComponent(tokenHash),
     {
       method: "PATCH",
-      headers: { Prefer: "return=minimal" },
-      body: { revoked_at: new Date().toISOString() },
-    },
+      headers: {
+        Prefer: "return=minimal",
+      },
+      body: {
+        revoked_at: new Date().toISOString(),
+      },
+    }
   );
 }
