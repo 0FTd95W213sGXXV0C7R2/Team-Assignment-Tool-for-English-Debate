@@ -1,5 +1,11 @@
+
 import { timingSafeEqual } from "node:crypto";
 
+/**
+ * 旧APIとの互換性を維持するためのトークン検証。
+ * Supabase Authへの移行後も、内部処理などで使用される
+ * 可能性があるため、使用箇所の監査が終わるまでは残す。
+ */
 export function requireAdmin(req) {
   const secret = process.env.ADMIN_API_TOKEN;
   const header = req.headers?.authorization || "";
@@ -48,6 +54,11 @@ function parseSupabaseJson(text) {
   }
 }
 
+/**
+ * SupabaseのREST APIをサーバー側から呼び出す。
+ * サービスロールキーはサーバー環境変数からのみ取得する。
+ * ブラウザーへこのキーを返してはならない。
+ */
 export async function supabase(path, options = {}) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -101,15 +112,17 @@ export async function supabase(path, options = {}) {
 }
 
 /**
- * Cookieセッションと管理者権限を検証する。
+ * 認証済みユーザーの管理APIアクセスを検証する。
+ *
+ * 認証そのものは _session.js の getSession() に委譲する。
+ * 新しい仕様では、認証に成功したユーザー全員を管理者とする。
+ * debate_admin_roles テーブルの個別登録・停止状態には依存しない。
  *
  * API側では必ず await authorizeAdmin(req, res) を使うこと。
- * 既存の requireAdmin(req) とは異なり、非同期関数。
  */
 export async function authorizeAdmin(req, res) {
   const {
     getSession,
-    clearSessionCookie,
     sendSessionJson,
   } = await import("./_session.js");
 
@@ -119,7 +132,7 @@ export async function authorizeAdmin(req, res) {
     session = await getSession(req);
   } catch (error) {
     console.error(
-      "Admin session verification failed:",
+      "Admin authentication failed:",
       error?.status || "unknown",
     );
 
@@ -131,54 +144,21 @@ export async function authorizeAdmin(req, res) {
   }
 
   if (!session) {
-    sendSessionJson(
-      res,
-      401,
-      { error: "ログインが必要です。" },
-      { "Set-Cookie": clearSessionCookie() },
-    );
-
-    return null;
-  }
-
-  try {
-    const roles = await supabase(
-      "debate_admin_roles" +
-        "?select=user_id,suspended_at" +
-        `&user_id=eq.${encodeURIComponent(session.userId)}` +
-        "&limit=1",
-    );
-
-    if (
-      !Array.isArray(roles) ||
-      roles.length !== 1 ||
-      roles[0].suspended_at !== null
-    ) {
-      sendSessionJson(res, 403, {
-        error: "管理者権限がありません。",
-      });
-
-      return null;
-    }
-
-    return session;
-  } catch (error) {
-    console.error(
-      "Admin role verification failed:",
-      error?.status || "unknown",
-    );
-
-    sendSessionJson(res, 503, {
-      error: "権限情報を確認できませんでした。",
+    sendSessionJson(res, 401, {
+      error: "ログインが必要です。",
     });
 
     return null;
   }
+
+  // 管理者ロールの個別登録は要求しない。
+  // getSession() が認証済みユーザーのみを返すことが前提。
+  return session;
 }
 
 /**
  * 旧API用の互換関数。
- * 全APIの移行が完了した段階で使用箇所をなくす。
+ * 移行完了後、全使用箇所を確認してから扱いを決める。
  */
 export function reject(req, res) {
   if (req.method !== "POST") {
@@ -200,3 +180,4 @@ export function reject(req, res) {
 
   return false;
 }
+
