@@ -1,15 +1,16 @@
-
 import {
   getSession,
   clearSessionCookie,
   sendSessionJson,
 } from "./_session.js";
 
+import { supabase } from "./_admin.js";
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return sendSessionJson(res, 405, {
-      error: "method_not_allowed",
+    return res.status(405).json({
+      error: "Method not allowed",
     });
   }
 
@@ -22,26 +23,38 @@ export default async function handler(req, res) {
         200,
         {
           authenticated: false,
-          user: null,
+          isAdmin: false,
         },
         {
           "Set-Cookie": clearSessionCookie(),
-        },
+        }
       );
     }
 
+    const roles = await supabase(
+      "debate_admin_roles?select=user_id,suspended_at" +
+        `&user_id=eq.${encodeURIComponent(session.userId)}&limit=1`
+    );
+
+    const isAdmin =
+      Array.isArray(roles) &&
+      roles.length === 1 &&
+      roles[0].suspended_at === null;
+
     return sendSessionJson(res, 200, {
       authenticated: true,
-      user: {
-        id: session.userId,
-      },
+      isAdmin,
+      userId: session.userId,
       expiresAt: session.expiresAt,
     });
   } catch (error) {
-    console.error("Authentication status check failed:", error);
+    console.error(
+      "Auth status check failed:",
+      error?.status || "unknown"
+    );
 
     return sendSessionJson(res, 503, {
-      error: "authentication_temporarily_unavailable",
+      error: "ログイン状態を確認できませんでした。",
     });
   }
 }
