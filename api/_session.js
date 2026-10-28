@@ -1,6 +1,4 @@
 
-import { supabase } from "./_admin.js";
-
 export const SESSION_COOKIE = "debate_session";
 export const SESSION_TTL_SECONDS = 180 * 24 * 60 * 60;
 
@@ -76,13 +74,11 @@ export function sendSessionJson(res, status, data, headers = {}) {
 }
 
 /**
- * Supabase Authのアクセストークンを検証する。
- *
- * トークンの署名や有効性を自前で推測せず、
- * Supabase Authの /auth/v1/user エンドポイントで検証する。
+ * Supabase Authでアクセストークンを検証する。
+ * メールアドレスが確認済みであることを必須とする。
  *
  * Google IDを持つユーザーは、確認済みメールアドレスが
- * 許可ドメインに属している場合に限ってアクセスできる。
+ * 許可ドメインに完全一致する場合に限りアクセスできる。
  *
  * メール・パスワード登録ユーザーにはドメイン制限を設けない。
  */
@@ -130,12 +126,16 @@ export async function getSession(req) {
     return null;
   }
 
-  // メールアドレスの確認が完了していないユーザーは拒否する。
   if (!user.email_confirmed_at) {
     return null;
   }
 
   const email = user.email.trim().toLowerCase();
+
+  if (!email) {
+    return null;
+  }
+
   const identities = Array.isArray(user.identities)
     ? user.identities
     : [];
@@ -206,11 +206,8 @@ export async function requireSession(req, res) {
 }
 
 /**
- * 旧APIとの互換性を維持するための移行用関数。
- *
- * 新しい認証方式ではSupabase Authがセッションを管理するため、
- * この関数で独自セッションを新規作成しない。
- * 古い auth-login.js から呼び出された場合は明示的に失敗させる。
+ * 旧APIとの互換性のために残す。
+ * 独自セッションの新規作成は許可しない。
  */
 export async function createSession() {
   throw new Error(
@@ -219,11 +216,9 @@ export async function createSession() {
 }
 
 /**
- * Supabase Authのサインアウトは、クライアントが
- * supabase.auth.signOut() を呼び出して実行する。
- * この関数は旧APIとの互換性のために残す。
+ * Supabase Authのサインアウトはクライアント側で行う。
+ * 旧APIとの互換性のために関数を残す。
  */
 export async function revokeSession() {
   return;
 }
-
