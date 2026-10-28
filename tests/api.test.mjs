@@ -8,14 +8,31 @@ import {
 import motionWrite from "../api/motion-write.js";
 import motionRestore from "../api/motion-restore.js";
 import motionHistory from "../api/motion-history.js";
+import { withAdminSession } from "./auth-mock.mjs";
 
 function mockResponse() {
   return {
     statusCode: 200,
     headers: {},
     body: undefined,
+    rawBody: undefined,
     setHeader(name, value) {
       this.headers[name] = value;
+    },
+    writeHead(code, headers = {}) {
+      this.statusCode = code;
+      Object.assign(this.headers, headers);
+      return this;
+    },
+    end(data) {
+      this.rawBody = data;
+      if (typeof data === "string") {
+        try {
+          this.body = JSON.parse(data);
+        } catch {
+          this.body = data;
+        }
+      }
     },
     status(code) {
       this.statusCode = code;
@@ -73,27 +90,25 @@ test("motion-write は POST 以外を拒否する", async () => {
 });
 
 test("motion-write は管理者認証なしのリクエストを拒否する", async () => {
-  await withAdminToken(async () => {
-    const res = mockResponse();
+  const res = mockResponse();
 
-    await motionWrite(
-      { method: "POST", headers: {}, body: { action: "insert" } },
-      res
-    );
+  await motionWrite(
+    { method: "POST", headers: {}, body: { action: "insert" } },
+    res
+  );
 
-    assert.equal(res.statusCode, 401);
-    assert.equal(res.body.error, "Unauthorized");
-  });
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.body.error, "ログインが必要です。");
 });
 
 test("motion-write は不正な action を拒否する", async () => {
-  await withAdminToken(async () => {
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionWrite(
       {
         method: "POST",
-        headers: { authorization: "Bearer " + "a".repeat(64) },
+        headers: session.headers,
         body: { action: "unknown" }
       },
       res
@@ -105,13 +120,13 @@ test("motion-write は不正な action を拒否する", async () => {
 });
 
 test("motion-write は revision のない更新を拒否する", async () => {
-  await withAdminToken(async () => {
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionWrite(
       {
         method: "POST",
-        headers: { authorization: "Bearer " + "a".repeat(64) },
+        headers: session.headers,
         body: {
           action: "update",
           id: "test-id",
@@ -129,13 +144,13 @@ test("motion-write は revision のない更新を拒否する", async () => {
 });
 
 test("motion-write は不正な論題データを拒否する", async () => {
-  await withAdminToken(async () => {
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionWrite(
       {
         method: "POST",
-        headers: { authorization: "Bearer " + "a".repeat(64) },
+        headers: session.headers,
         body: {
           action: "insert",
           motion: "",
@@ -163,49 +178,29 @@ test("revision の整数形式を検証する", () => {
 });
 
 test("motion-restore は不正な入力を拒否する", async () => {
-  await withAdminToken(async () => {
-    const originalUrl = process.env.SUPABASE_URL;
-    const originalKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  await withAdminSession(async (session) => {
+    const cases = [
+      { id: "", auditId: "1", expectedRevision: "0" },
+      { id: "motion-1", auditId: "0", expectedRevision: "0" },
+      { id: "motion-1", auditId: "-1", expectedRevision: "0" },
+      { id: "motion-1", auditId: "1", expectedRevision: "-1" },
+      { id: "motion-1", auditId: "1.5", expectedRevision: "0" }
+    ];
 
-    try {
-      process.env.SUPABASE_URL = "https://example.supabase.co";
-      process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
+    for (const body of cases) {
+      const res = mockResponse();
 
-      const cases = [
-        { id: "", auditId: "1", expectedRevision: "0" },
-        { id: "motion-1", auditId: "0", expectedRevision: "0" },
-        { id: "motion-1", auditId: "-1", expectedRevision: "0" },
-        { id: "motion-1", auditId: "1", expectedRevision: "-1" },
-        { id: "motion-1", auditId: "1.5", expectedRevision: "0" }
-      ];
+      await motionRestore(
+        {
+          method: "POST",
+          headers: session.headers,
+          body
+        },
+        res
+      );
 
-      for (const body of cases) {
-        const res = mockResponse();
-
-        await motionRestore(
-          {
-            method: "POST",
-            headers: { authorization: "Bearer " + "a".repeat(64) },
-            body
-          },
-          res
-        );
-
-        assert.equal(res.statusCode, 400);
-        assert.equal(res.body.error, "Invalid request");
-      }
-    } finally {
-      if (originalUrl === undefined) {
-        delete process.env.SUPABASE_URL;
-      } else {
-        process.env.SUPABASE_URL = originalUrl;
-      }
-
-      if (originalKey === undefined) {
-        delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-      } else {
-        process.env.SUPABASE_SERVICE_ROLE_KEY = originalKey;
-      }
+      assert.equal(res.statusCode, 400);
+      assert.equal(res.body.error, "Invalid request");
     }
   });
 });
@@ -224,27 +219,25 @@ test("motion-history は GET 以外を拒否する", async () => {
 });
 
 test("motion-history は管理者認証なしのリクエストを拒否する", async () => {
-  await withAdminToken(async () => {
-    const res = mockResponse();
+  const res = mockResponse();
 
-    await motionHistory(
-      { method: "GET", headers: {}, query: {} },
-      res
-    );
+  await motionHistory(
+    { method: "GET", headers: {}, query: {} },
+    res
+  );
 
-    assert.equal(res.statusCode, 401);
-    assert.equal(res.body.error, "Unauthorized");
-  });
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.body.error, "ログインが必要です。");
 });
 
 test("motion-history は空の motionId を拒否する", async () => {
-  await withAdminToken(async () => {
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionHistory(
       {
         method: "GET",
-        headers: { authorization: "Bearer " + "a".repeat(64) },
+        headers: session.headers,
         query: { motionId: "" }
       },
       res

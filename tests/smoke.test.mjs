@@ -2,14 +2,31 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { requireAdmin } from "../api/_admin.js";
 import motionWrite from "../api/motion-write.js";
+import { withAdminSession } from "./auth-mock.mjs";
 
 function mockResponse() {
   return {
     statusCode: 200,
     headers: {},
     body: undefined,
+    rawBody: undefined,
     setHeader(name, value) {
       this.headers[name] = value;
+    },
+    writeHead(code, headers = {}) {
+      this.statusCode = code;
+      Object.assign(this.headers, headers);
+      return this;
+    },
+    end(data) {
+      this.rawBody = data;
+      if (typeof data === "string") {
+        try {
+          this.body = JSON.parse(data);
+        } catch {
+          this.body = data;
+        }
+      }
     },
     status(code) {
       this.statusCode = code;
@@ -62,43 +79,25 @@ test("motion-write は POST 以外を拒否する", async () => {
 });
 
 test("motion-write は管理者認証なしのリクエストを拒否する", async () => {
-  const original = process.env.ADMIN_API_TOKEN;
+  const res = mockResponse();
 
-  try {
-    process.env.ADMIN_API_TOKEN = "a".repeat(64);
+  await motionWrite(
+    { method: "POST", headers: {}, body: { action: "insert" } },
+    res
+  );
 
-    const res = mockResponse();
-
-    await motionWrite(
-      { method: "POST", headers: {}, body: { action: "insert" } },
-      res
-    );
-
-    assert.equal(res.statusCode, 401);
-    assert.equal(res.body.error, "Unauthorized");
-  } finally {
-    if (original === undefined) {
-      delete process.env.ADMIN_API_TOKEN;
-    } else {
-      process.env.ADMIN_API_TOKEN = original;
-    }
-  }
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.body.error, "ログインが必要です。");
 });
 
 test("motion-write は不正な action を拒否する", async () => {
-  const original = process.env.ADMIN_API_TOKEN;
-
-  try {
-    process.env.ADMIN_API_TOKEN = "a".repeat(64);
-
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionWrite(
       {
         method: "POST",
-        headers: {
-          authorization: "Bearer " + "a".repeat(64)
-        },
+        headers: session.headers,
         body: { action: "unknown" }
       },
       res
@@ -106,29 +105,17 @@ test("motion-write は不正な action を拒否する", async () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.error, "Invalid action");
-  } finally {
-    if (original === undefined) {
-      delete process.env.ADMIN_API_TOKEN;
-    } else {
-      process.env.ADMIN_API_TOKEN = original;
-    }
-  }
+  });
 });
 
 test("motion-write は revision のない更新を拒否する", async () => {
-  const original = process.env.ADMIN_API_TOKEN;
-
-  try {
-    process.env.ADMIN_API_TOKEN = "a".repeat(64);
-
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionWrite(
       {
         method: "POST",
-        headers: {
-          authorization: "Bearer " + "a".repeat(64)
-        },
+        headers: session.headers,
         body: {
           action: "update",
           id: "test-id",
@@ -142,29 +129,17 @@ test("motion-write は revision のない更新を拒否する", async () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.error, "Invalid revision");
-  } finally {
-    if (original === undefined) {
-      delete process.env.ADMIN_API_TOKEN;
-    } else {
-      process.env.ADMIN_API_TOKEN = original;
-    }
-  }
+  });
 });
 
 test("motion-write は不正な論題データを拒否する", async () => {
-  const original = process.env.ADMIN_API_TOKEN;
-
-  try {
-    process.env.ADMIN_API_TOKEN = "a".repeat(64);
-
+  await withAdminSession(async (session) => {
     const res = mockResponse();
 
     await motionWrite(
       {
         method: "POST",
-        headers: {
-          authorization: "Bearer " + "a".repeat(64)
-        },
+        headers: session.headers,
         body: {
           action: "insert",
           motion: "",
@@ -177,13 +152,7 @@ test("motion-write は不正な論題データを拒否する", async () => {
 
     assert.equal(res.statusCode, 400);
     assert.equal(res.body.error, "Invalid motion data");
-  } finally {
-    if (original === undefined) {
-      delete process.env.ADMIN_API_TOKEN;
-    } else {
-      process.env.ADMIN_API_TOKEN = original;
-    }
-  }
+  });
 });
 import motionRestore from "../api/motion-restore.js";
 import { normalizeNonNegativeBigint } from "../api/_admin.js";
@@ -200,15 +169,7 @@ test("整数の revision を正規化する", () => {
 });
 
 test("motion-restore は不正な入力を拒否する", async () => {
-  const originalToken = process.env.ADMIN_API_TOKEN;
-  const originalUrl = process.env.SUPABASE_URL;
-  const originalKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  try {
-    process.env.ADMIN_API_TOKEN = "a".repeat(64);
-    process.env.SUPABASE_URL = "https://example.supabase.co";
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-key";
-
+  await withAdminSession(async (session) => {
     const cases = [
       { id: "", auditId: "1", expectedRevision: "0" },
       { id: "motion-1", auditId: "0", expectedRevision: "0" },
@@ -235,9 +196,7 @@ test("motion-restore は不正な入力を拒否する", async () => {
       await motionRestore(
         {
           method: "POST",
-          headers: {
-            authorization: "Bearer " + "a".repeat(64)
-          },
+          headers: session.headers,
           body
         },
         res
@@ -246,15 +205,6 @@ test("motion-restore は不正な入力を拒否する", async () => {
       assert.equal(res.statusCode, 400);
       assert.equal(res.body.error, "Invalid request");
     }
-  } finally {
-    if (originalToken === undefined) delete process.env.ADMIN_API_TOKEN;
-    else process.env.ADMIN_API_TOKEN = originalToken;
-
-    if (originalUrl === undefined) delete process.env.SUPABASE_URL;
-    else process.env.SUPABASE_URL = originalUrl;
-
-    if (originalKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    else process.env.SUPABASE_SERVICE_ROLE_KEY = originalKey;
-  }
+  });
 });
 

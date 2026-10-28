@@ -16,7 +16,7 @@ import motionHistory from "./api/motion-history.js";
 import motionAdminList from "./api/motion-admin-list.js";
 import motionCurrent from "./api/motion-current.js";
 import motionList from "./api/motion-list.js";
-import addMotion from "./api/add-motion.js";
+import addMotion from "./legacy/add-motion.js";
 import adminMembers from "./api/admin-members.js";
 
 const ROOT = resolve(fileURLToPath(new URL(".", import.meta.url)));
