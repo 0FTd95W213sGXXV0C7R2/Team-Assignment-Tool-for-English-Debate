@@ -1,5 +1,4 @@
-
-import { requireAdmin, supabase } from "./_admin.js";
+import { authorizeAdmin, supabase } from "./_admin.js";
 
 function send(res, status, body) {
   return res.status(status).json(body);
@@ -8,11 +7,15 @@ function send(res, status, body) {
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return send(res, 405, { error: "Method not allowed" });
+    return send(res, 405, {
+      error: "Method not allowed",
+    });
   }
 
-  if (!requireAdmin(req)) {
-    return send(res, 401, { error: "Unauthorized" });
+  const session = await authorizeAdmin(req, res);
+
+  if (!session) {
+    return;
   }
 
   const query = req.query || {};
@@ -24,7 +27,9 @@ export default async function handler(req, res) {
       (typeof rawMotionId !== "string" ||
         !/^[a-zA-Z0-9_-]{1,100}$/.test(rawMotionId)))
   ) {
-    return send(res, 400, { error: "Invalid motionId" });
+    return send(res, 400, {
+      error: "Invalid motionId",
+    });
   }
 
   const rawLimit = query.limit ?? "100";
@@ -36,7 +41,9 @@ export default async function handler(req, res) {
     limit < 1 ||
     limit > 500
   ) {
-    return send(res, 400, { error: "Invalid limit" });
+    return send(res, 400, {
+      error: "Invalid limit",
+    });
   }
 
   const rawOffset = query.offset ?? "0";
@@ -47,7 +54,9 @@ export default async function handler(req, res) {
     !Number.isSafeInteger(offset) ||
     offset < 0
   ) {
-    return send(res, 400, { error: "Invalid offset" });
+    return send(res, 400, {
+      error: "Invalid offset",
+    });
   }
 
   const params = new URLSearchParams();
@@ -69,20 +78,20 @@ export default async function handler(req, res) {
     return send(res, 200, {
       history: Array.isArray(result) ? result : [],
       limit,
-      offset
+      offset,
     });
   } catch (error) {
     const status = error?.status;
 
     if (status === 401 || status === 403) {
       return send(res, 502, {
-        error: "Audit history access denied"
+        error: "Audit history access denied",
       });
     }
 
     if (status === 404) {
       return send(res, 503, {
-        error: "Audit history is not configured"
+        error: "Audit history is not configured",
       });
     }
 
@@ -92,7 +101,7 @@ export default async function handler(req, res) {
     );
 
     return send(res, 500, {
-      error: "Failed to load motion history"
+      error: "Failed to load motion history",
     });
   }
 }
