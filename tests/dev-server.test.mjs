@@ -47,7 +47,7 @@ test("存在しないページは404を返す", async () => {
 
   assert.equal(response.status, 404);
   assert.deepEqual(await response.json(), {
-    error: "Not found"
+    error: "指定されたページが見つかりません。"
   });
 });
 
@@ -62,7 +62,7 @@ test("不正なJSONを送るAPIリクエストは400を返す", async () => {
 
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), {
-    error: "Invalid JSON body"
+    error: "送信データの形式が正しくありません。"
   });
 });
 
@@ -74,7 +74,7 @@ test("GET専用APIへのPOSTは405を返す", async () => {
   assert.equal(response.status, 405);
   assert.equal(response.headers.get("allow"), "GET");
   assert.deepEqual(await response.json(), {
-    error: "Method not allowed"
+    error: "この操作は許可されていません。"
   });
 });
 
@@ -83,7 +83,7 @@ test("存在しないAPIは404を返す", async () => {
 
   assert.equal(response.status, 404);
   assert.deepEqual(await response.json(), {
-    error: "Not found"
+    error: "指定されたAPIが見つかりません。"
   });
 });
 
