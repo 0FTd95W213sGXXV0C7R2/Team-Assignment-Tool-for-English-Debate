@@ -203,10 +203,13 @@ export default async function handler(req, res) {
       res,
       200,
       {
-        ok: true,
-        message: "ログインしました。",
-        expiresAt: session.expiresAt,
-      },
+  ok: true,
+  message: "ログインしました。",
+  user: {
+    id: loginCode.user_id,
+  },
+  expiresAt: session.expiresAt,
+},
       {
         "Set-Cookie": sessionCookie(session.token),
       },
