@@ -1,13 +1,34 @@
+
 import {
   authorizeAdmin,
   supabase,
   normalizeNonNegativeBigint,
 } from "./_admin.js";
 
+function send(res, status, body) {
+  return res.status(status).json(body);
+}
+
+function getErrorMessage(error) {
+  return [
+    error?.data?.message,
+    error?.message,
+    error?.data?.details,
+    error?.data?.hint,
+  ]
+    .filter(
+      (value) =>
+        typeof value === "string" &&
+        value.length > 0
+    )
+    .join(" ");
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({
+
+    return send(res, 405, {
       error: "Method not allowed",
     });
   }
@@ -18,19 +39,39 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { id, auditId, expectedRevision } = req.body || {};
-  const auditKey = normalizeNonNegativeBigint(auditId);
-  const revision = normalizeNonNegativeBigint(expectedRevision);
+  const body = req.body;
 
   if (
-    typeof id !== "string" ||
-    id.length < 1 ||
+    !body ||
+    typeof body !== "object" ||
+    Array.isArray(body)
+  ) {
+    return send(res, 400, {
+      error: "Invalid request",
+    });
+  }
+
+  const id =
+    typeof body.id === "string"
+      ? body.id.trim()
+      : "";
+
+  const auditKey = normalizeNonNegativeBigint(
+    body.auditId
+  );
+
+  const revision = normalizeNonNegativeBigint(
+    body.expectedRevision
+  );
+
+  if (
+    !id ||
     id.length > 100 ||
     auditKey === null ||
     auditKey === "0" ||
     revision === null
   ) {
-    return res.status(400).json({
+    return send(res, 400, {
       error: "Invalid request",
     });
   }
@@ -48,43 +89,37 @@ export default async function handler(req, res) {
       }
     );
 
-    return res.status(200).json({ restored });
+    return send(res, 200, {
+      restored,
+    });
   } catch (error) {
-    const message = [
-      error?.data?.message,
-      error?.message,
-      error?.data?.details,
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const message = getErrorMessage(error);
 
-    if (message.includes("DUPLICATE_MOTION")) {
-      return res.status(409).json({
-        error: "Duplicate motion",
+    if (/DUPLICATE_MOTION|duplicate/i.test(message)) {
+      return send(res, 409, {
+        error: "DUPLICATE_MOTION",
       });
     }
 
-    if (message.includes("REVISION_CONFLICT")) {
-      return res.status(409).json({
-        error: "Revision conflict",
+    if (/REVISION_CONFLICT|revision/i.test(message)) {
+      return send(res, 409, {
+        error: "REVISION_CONFLICT",
       });
     }
 
     if (
-      message.includes("NOT_FOUND") ||
-      message.includes("SNAPSHOT_NOT_FOUND")
+      /NOT_FOUND|SNAPSHOT_NOT_FOUND/i.test(message)
     ) {
-      return res.status(404).json({
-        error: "Not found",
+      return send(res, 404, {
+        error: "NOT_FOUND",
       });
     }
 
     if (
-      message.includes("INVALID_REQUEST") ||
-      message.includes("INVALID_SNAPSHOT")
+      /INVALID_REQUEST|INVALID_SNAPSHOT/i.test(message)
     ) {
-      return res.status(422).json({
-        error: "Invalid restore request",
+      return send(res, 422, {
+        error: "INVALID_RESTORE_REQUEST",
       });
     }
 
@@ -93,8 +128,9 @@ export default async function handler(req, res) {
       error?.status || "unknown"
     );
 
-    return res.status(500).json({
+    return send(res, 500, {
       error: "Restore failed",
     });
   }
 }
+
