@@ -17,6 +17,7 @@ import motionAdminList from "./api/motion-admin-list.js";
 import motionCurrent from "./api/motion-current.js";
 import motionList from "./api/motion-list.js";
 import addMotion from "./api/add-motion.js";
+import adminMembers from "./api/admin-members.js";
 
 const ROOT = resolve(fileURLToPath(new URL(".", import.meta.url)));
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -33,7 +34,7 @@ const API_ROUTES = new Map([
   ["auth-me", { handler: authMe, method: "GET" }],
   ["auth-logout", { handler: authLogout, method: "POST" }],
   ["auth-code-issue", { handler: authCodeIssue, method: "POST" }],
-
+  
   ["motion-write", { handler: motionWrite, method: "POST" }],
   ["motion-record", { handler: motionRecord, method: "POST" }],
   ["motion-restore", { handler: motionRestore, method: "POST" }],
@@ -42,6 +43,7 @@ const API_ROUTES = new Map([
   ["motion-current", { handler: motionCurrent, method: "GET" }],
   ["motion-list", { handler: motionList, method: "GET" }],
   ["add-motion", { handler: addMotion, method: null }],
+  ["admin-members", { handler: adminMembers, method: null }],
 ]);
 
 function sendJson(res, status, data) {
