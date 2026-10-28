@@ -5,7 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>チーム分け＆論題管理システム</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   font-family: system-ui, -apple-system, sans-serif;
@@ -59,7 +58,7 @@ button {
   font-weight: 600;
   cursor: pointer;
 }
-button:disabled { opacity: .5; }
+button:disabled { opacity: .5; cursor: not-allowed; }
 .secondary { background: #64748b; }
 .danger { background: #dc2626; }
 .success { background: #16a34a; }
@@ -73,7 +72,7 @@ button:disabled { opacity: .5; }
   margin: 9px 0;
   overflow-wrap: anywhere;
 }
-.item-actions { display: flex; gap: 7px; margin-top: 9px; }
+.item-actions { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
 .panel { background: #f1f5f9; padding: 14px; border-radius: 9px; }
 .notice {
   padding: 12px;
@@ -81,6 +80,7 @@ button:disabled { opacity: .5; }
   border-radius: 8px;
   background: #dbeafe;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .error { background: #fee2e2; color: #991b1b; }
 .ok { background: #dcfce7; color: #166534; }
@@ -113,6 +113,8 @@ header {
   border-radius: 12px;
   padding: 20px;
   width: min(100%, 500px);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 @media (max-width: 650px) {
   .grid { grid-template-columns: 1fr; }
@@ -125,17 +127,61 @@ header {
 <header>
   <div class="row" style="justify-content:space-between">
     <h1>チーム分け＆論題管理システム</h1>
-    <button id="back" class="secondary small hidden">← メニュー</button>
+    <div class="row">
+      <span id="userLabel" class="muted"></span>
+      <button id="logout" class="secondary small hidden" type="button">ログアウト</button>
+      <button id="back" class="secondary small hidden" type="button">← メニュー</button>
+    </div>
   </div>
-  <div id="connection" class="muted">データベース接続確認中…</div>
+  <div id="connection" class="muted">ログイン状態を確認中…</div>
 </header>
 
-<section id="home" class="card">
+<section id="auth" class="card hidden">
+  <h2 id="authHeading">ログイン</h2>
+  <p class="muted">登録済みのアカウントでログインしてください。</p>
+
+  <form id="loginForm">
+    <label for="loginEmail">メールアドレス</label>
+    <input id="loginEmail" type="email" autocomplete="username"
+      required maxlength="254">
+
+    <label for="loginPassword">パスワード</label>
+    <input id="loginPassword" type="password"
+      autocomplete="current-password" required maxlength="128">
+
+    <button class="full" type="submit" style="margin-top:14px">ログイン</button>
+  </form>
+
+  <div id="registerFields" class="hidden">
+    <label for="registerPassword">パスワード</label>
+    <input id="registerPassword" type="password"
+      autocomplete="new-password" minlength="6" maxlength="128">
+
+    <label for="registerPasswordConfirm">パスワード（確認）</label>
+    <input id="registerPasswordConfirm" type="password"
+      autocomplete="new-password" minlength="6" maxlength="128">
+
+    <label for="inviteCode">共通招待コード</label>
+    <input id="inviteCode" type="password" autocomplete="off"
+      maxlength="200">
+
+    <button id="register" class="success full" type="button"
+      style="margin-top:14px">アカウントを登録</button>
+  </div>
+
+  <div class="row" style="margin-top:14px">
+    <button id="toggleRegister" class="secondary small" type="button">
+      初めて利用する方はこちら
+    </button>
+  </div>
+  <div id="authStatus" class="notice hidden" role="status"></div>
+</section>
+
+<section id="home" class="card hidden">
   <h2>メニュー</h2>
-  <button id="goAssign" class="full">チーム分け ＆ 論題記録</button>
-  <button id="goManage" class="secondary full" style="margin-top:12px">
-    新規論題追加・管理
-  </button>
+  <button id="goAssign" class="full" type="button">チーム分け ＆ 論題記録</button>
+  <button id="goManage" class="secondary full" style="margin-top:12px"
+    type="button">新規論題追加・管理</button>
 </section>
 
 <section id="assign" class="hidden">
@@ -143,7 +189,7 @@ header {
     <h2>1. 論題の選択・実施記録</h2>
     <div class="row" style="justify-content:space-between">
       <span class="muted">ランダムに最大4件表示</span>
-      <button id="shuffle" class="secondary small">シャッフル</button>
+      <button id="shuffle" class="secondary small" type="button">シャッフル</button>
     </div>
     <div id="candidates"></div>
 
@@ -162,9 +208,8 @@ header {
 
     <div id="chosen" class="notice ok hidden">
       <div id="chosenText"></div>
-      <button id="clearChosen" class="danger small" style="margin-top:8px">
-        選択解除
-      </button>
+      <button id="clearChosen" class="danger small" style="margin-top:8px"
+        type="button">選択解除</button>
     </div>
   </div>
 
@@ -188,10 +233,8 @@ header {
         <input id="teamSize" type="number" min="1" max="30" value="3">
       </div>
     </div>
-    <p class="muted">
-      定員を超えたメンバーはジャッジ候補になります。
-    </p>
-    <button id="generate" class="full">チームを割り振る</button>
+    <p class="muted">定員を超えたメンバーはジャッジ候補になります。</p>
+    <button id="generate" class="full" type="button">チームを割り振る</button>
     <div id="assignResult"></div>
   </div>
 </section>
@@ -199,7 +242,6 @@ header {
 <section id="manage" class="hidden">
   <div class="card">
     <h2 id="formHeading">新規論題の追加</h2>
-
     <div id="motionForm">
       <label for="motion">論題 *</label>
       <input id="motion" placeholder="THW ...">
@@ -226,8 +268,8 @@ header {
       </div>
 
       <div class="row" style="margin-top:15px">
-        <button id="preview">入力内容を確認する</button>
-        <button id="cancelEdit" class="secondary hidden">
+        <button id="preview" type="button">入力内容を確認する</button>
+        <button id="cancelEdit" class="secondary hidden" type="button">
           編集をキャンセル
         </button>
       </div>
@@ -237,46 +279,34 @@ header {
       <h3>登録内容の確認</h3>
       <div id="previewText"></div>
       <div class="row">
-        <button id="revise" class="secondary">修正する</button>
-        <button id="save" class="success">この内容で決定する</button>
+        <button id="revise" class="secondary" type="button">修正する</button>
+        <button id="save" class="success" type="button">この内容で決定する</button>
       </div>
     </div>
-
-    <div id="formStatus" class="notice hidden"></div>
+    <div id="formStatus" class="notice hidden" role="status"></div>
   </div>
 
   <div class="card">
     <h2>登録済み論題一覧</h2>
     <input id="manageSearch" type="search" placeholder="キーワード検索">
-
     <div class="grid">
-      <select id="manageTournament">
-        <option value="">すべての大会</option>
-      </select>
-      <select id="manageYear">
-        <option value="">すべての年度</option>
-      </select>
+      <select id="manageTournament"><option value="">すべての大会</option></select>
+      <select id="manageYear"><option value="">すべての年度</option></select>
     </div>
-
     <select id="manageStatus" style="margin-top:10px">
       <option value="all">すべての実施状況</option>
       <option value="done">直近1年に実施</option>
       <option value="not_done">直近1年に未実施</option>
     </select>
-
     <div class="row" style="margin-top:12px">
-      <button id="addTournament" class="secondary small">
-        大会選択肢を追加
-      </button>
-      <button id="export" class="secondary small">
-        motions.jsonをダウンロード
-      </button>
-      <button id="reload" class="secondary small">
-        再読み込み
-      </button>
+      <button id="addTournament" class="secondary small" type="button">大会選択肢を追加</button>
+      <button id="export" class="secondary small" type="button">JSONをダウンロード</button>
+      <button id="reload" class="secondary small" type="button">再読み込み</button>
     </div>
-
     <div id="manageList" class="scroll"></div>
+    <h3>削除済み論題</h3>
+    <p class="muted">復元機能がAPI側で有効な場合、ここから復元できます。</p>
+    <div id="deletedList" class="scroll"></div>
   </div>
 </section>
 </main>
@@ -288,8 +318,8 @@ header {
     <div id="confirmMotion" class="panel"></div>
     <div id="confirmError" class="notice error hidden"></div>
     <div class="row" style="margin-top:15px">
-      <button id="closeModal" class="secondary">キャンセル</button>
-      <button id="record" class="success">記録を確定する</button>
+      <button id="closeModal" class="secondary" type="button">キャンセル</button>
+      <button id="record" class="success" type="button">記録を確定する</button>
     </div>
   </div>
 </div>
@@ -298,14 +328,8 @@ header {
 "use strict";
 
 (() => {
-  const SUPABASE_URL = "https://kiewlmqxsqcysswcruiw.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZXdsbXF4c3FjeXNzd2NydWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MTQ3OTIsImV4cCI6MjEwODM5MDc5Mn0.2XvgZDhvCdOj9e5M57q-SZ0FHNV-sNcI9Py5TgNj6u0";
-
   const $ = id => document.getElementById(id);
-
-  const show = (id, visible) => {
-    $(id).classList.toggle("hidden", !visible);
-  };
+  const show = (id, visible) => $(id).classList.toggle("hidden", !visible);
 
   function element(tag, text, className = "") {
     const el = document.createElement(tag);
@@ -328,7 +352,8 @@ header {
     show(id, Boolean(text));
   }
 
-  let db = null;
+  let currentUser = null;
+  let registering = false;
   let motions = [];
   let selectedMotion = null;
   let pendingId = null;
@@ -336,19 +361,46 @@ header {
   let busy = false;
   let customTournaments = [];
 
+  function apiErrorMessage(body, fallback) {
+    return body?.error || body?.message || fallback;
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(path, {
+      credentials: "same-origin",
+      ...options,
+      headers: {
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.headers || {})
+      }
+    });
+
+    const body = await response.json().catch(() => ({}));
+
+    if (response.status === 401 && !path.startsWith("/api/auth-")) {
+      currentUser = null;
+      showAuth("セッションが切れました。もう一度ログインしてください。");
+    }
+
+    if (!response.ok) {
+      throw new Error(apiErrorMessage(body, `APIエラー（${response.status}）`));
+    }
+    return body;
+  }
+
   function historyOf(motion) {
-    return Array.isArray(motion.history)
-      ? motion.history.filter(v =>
-          typeof v === "string" && !Number.isNaN(Date.parse(v))
-        )
-      : [];
+    if (Array.isArray(motion.history)) {
+      return motion.history.filter(v =>
+        typeof v === "string" && !Number.isNaN(Date.parse(v))
+      );
+    }
+    return [];
   }
 
   function recentHistory(motion) {
     const cutoff = new Date();
     cutoff.setFullYear(cutoff.getFullYear() - 1);
     const now = new Date();
-
     return historyOf(motion).filter(v => {
       const date = new Date(v);
       return date >= cutoff && date <= now;
@@ -358,7 +410,6 @@ header {
   function normalizeTournament(value) {
     const t = String(value || "").trim();
     if (!t || t === "-") return "その他の大会";
-
     if (t.includes("部活")) return "部活内";
     if (t.toLowerCase().includes("sola cup")) return "SOLA CUP";
     if (t.includes("HEnDA")) return "HEnDA全国大会";
@@ -368,36 +419,164 @@ header {
     if (t.includes("連盟杯")) return "HPDU連盟杯";
     if (/新緑杯|新芽杯/.test(t)) return "HPDU新緑杯・新芽杯";
     if (t.includes("合宿")) return "夏合宿";
-    if (/PDA首都圏公立|首都圏公立|日比谷/.test(t)) {
-      return "PDA首都圏公立大会";
-    }
-    if (/PDA全国大会|全国大会|冬全国大会/.test(t)) {
-      return "PDA全国大会";
-    }
+    if (/PDA首都圏公立|首都圏公立|日比谷/.test(t)) return "PDA首都圏公立大会";
+    if (/PDA全国大会|全国大会|冬全国大会/.test(t)) return "PDA全国大会";
     return t;
   }
 
   function changeView(view) {
-    ["home", "assign", "manage"].forEach(id => {
-      show(id, id === view);
-    });
+    ["home", "assign", "manage"].forEach(id => show(id, id === view));
     show("back", view !== "home");
-
     if (view === "assign") renderCandidates();
     if (view === "manage") renderManagement();
-
     window.scrollTo(0, 0);
+  }
+
+  function showAuth(message = "") {
+    show("auth", true);
+    show("home", false);
+    show("assign", false);
+    show("manage", false);
+    show("back", false);
+    show("logout", false);
+    $("userLabel").textContent = "";
+    $("connection").textContent = "ログインが必要です。";
+    setMessage("authStatus", message, message ? "error" : "");
+    $("loginPassword").value = "";
+  }
+
+  function showApp(user) {
+    currentUser = user;
+    show("auth", false);
+    show("home", true);
+    show("assign", false);
+    show("manage", false);
+    show("back", false);
+    show("logout", true);
+    $("userLabel").textContent = user?.email || "";
+    $("connection").textContent = "論題データを読み込み中…";
+    changeView("home");
+    fetchMotions();
+  }
+
+  function updateAuthMode() {
+    $("authHeading").textContent = registering ? "初回登録" : "ログイン";
+    $("loginForm").classList.toggle("hidden", registering);
+    show("registerFields", registering);
+    $("toggleRegister").textContent = registering
+      ? "ログイン画面に戻る"
+      : "初めて利用する方はこちら";
+    setMessage("authStatus", "");
+  }
+
+  async function checkSession() {
+    try {
+      const result = await api("/api/auth-me");
+      if (result.user) {
+        showApp(result.user);
+      } else {
+        showAuth();
+      }
+    } catch (error) {
+      showAuth("ログイン状態を確認できませんでした。API設定を確認してください。");
+      console.error(error);
+    }
+  }
+
+  async function login(event) {
+    event.preventDefault();
+    setMessage("authStatus", "ログイン中…");
+    const email = $("loginEmail").value.trim();
+    const password = $("loginPassword").value;
+
+    try {
+      const result = await api("/api/auth-login", {
+        method: "POST",
+        body: JSON.stringify({ email, password })
+      });
+      if (!result.user) throw new Error("ログイン情報を確認できませんでした。");
+      setMessage("authStatus", "");
+      showApp(result.user);
+    } catch (error) {
+      setMessage("authStatus", error.message, "error");
+    }
+  }
+
+  async function register() {
+    const email = $("loginEmail").value.trim();
+    const password = $("registerPassword").value;
+    const confirmation = $("registerPasswordConfirm").value;
+    const inviteCode = $("inviteCode").value;
+
+    if (!email) {
+      setMessage("authStatus", "メールアドレスを入力してください。", "error");
+      return;
+    }
+    if (password.length < 6 || password.length > 128) {
+      setMessage("authStatus", "パスワードは6～128文字で入力してください。", "error");
+      return;
+    }
+    if (password !== confirmation) {
+      setMessage("authStatus", "確認用パスワードが一致しません。", "error");
+      return;
+    }
+    if (!inviteCode.trim()) {
+      setMessage("authStatus", "共通招待コードを入力してください。", "error");
+      return;
+    }
+
+    $("register").disabled = true;
+    setMessage("authStatus", "登録中…");
+
+    try {
+      const result = await api("/api/auth-register", {
+        method: "POST",
+        body: JSON.stringify({ email, password, inviteCode })
+      });
+
+      $("inviteCode").value = "";
+      $("registerPassword").value = "";
+      $("registerPasswordConfirm").value = "";
+
+      if (result.user) {
+        setMessage("authStatus", "");
+        showApp(result.user);
+      } else {
+        registering = false;
+        updateAuthMode();
+        setMessage(
+          "authStatus",
+          result.message || "登録しました。ログインしてください。",
+          "ok"
+        );
+      }
+    } catch (error) {
+      setMessage("authStatus", error.message, "error");
+    } finally {
+      $("register").disabled = false;
+    }
+  }
+
+  async function logout() {
+    $("logout").disabled = true;
+    try {
+      await api("/api/auth-logout", { method: "POST", body: "{}" });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      $("logout").disabled = false;
+      currentUser = null;
+      motions = [];
+      selectedMotion = null;
+      showAuth("ログアウトしました。");
+    }
   }
 
   function updateSelect(id, values, firstLabel) {
     const select = $(id);
     const previous = select.value;
     select.replaceChildren(new Option(firstLabel, ""));
-
-    values.forEach(value => {
-      select.add(new Option(value, value));
-    });
-
+    values.forEach(value => select.add(new Option(value, value)));
     select.value = values.includes(previous) ? previous : "";
   }
 
@@ -432,6 +611,7 @@ header {
     const status = $(prefix + "Status").value;
 
     return motions.filter(m => {
+      if (m.is_deleted) return false;
       const norm = normalizeTournament(m.tournament);
       const y = String(m.year || "");
       const target = [m.motion || "", norm, m.tournament || "", y].join(" ");
@@ -443,43 +623,35 @@ header {
       const done = recentHistory(m).length > 0;
       if (status === "done" && !done) return false;
       if (status === "not_done" && done) return false;
-
       return true;
     });
   }
 
   function motionItem(m, management = false) {
     const item = element("div", undefined, "item");
-    const title = element("strong", m.motion || "論題名なし");
-    const meta = element(
-      "div",
-      `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`,
-      "muted"
+    item.append(
+      element("strong", m.motion || "論題名なし"),
+      element("div",
+        `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`,
+        "muted")
     );
 
-    item.append(title, meta);
-
     if (management) {
-      const history = recentHistory(m);
       item.append(element(
         "div",
-        `直近1年の実施回数：${history.length}回`,
+        `直近1年の実施回数：${recentHistory(m).length}回`,
         "muted"
       ));
-
       const actions = element("div", undefined, "item-actions");
       actions.append(
         makeButton("編集", () => startEdit(m.id)),
+        makeButton("履歴", () => showHistory(m.id)),
         makeButton("削除", () => deleteMotion(m.id), "danger small")
       );
       item.append(actions);
     } else {
-      item.append(makeButton(
-        "記録する",
-        () => openRecordModal(m.id)
-      ));
+      item.append(makeButton("記録する", () => openRecordModal(m.id)));
     }
-
     return item;
   }
 
@@ -495,12 +667,13 @@ header {
     const container = $("candidates");
     container.replaceChildren();
 
-    const candidates = shuffleArray([...motions]).slice(0, 4);
+    const candidates = shuffleArray(
+      motions.filter(m => !m.is_deleted).slice()
+    ).slice(0, 4);
 
     if (!candidates.length) {
       container.append(element("p", "論題がありません。", "muted"));
     }
-
     candidates.forEach(m => container.append(motionItem(m)));
     renderPreSearch();
   }
@@ -509,95 +682,65 @@ header {
     const container = $("preResults");
     container.replaceChildren();
 
-    const active =
-      $("preSearch").value.trim() ||
-      $("preTournament").value ||
-      $("preYear").value ||
+    const active = $("preSearch").value.trim() ||
+      $("preTournament").value || $("preYear").value ||
       $("preStatus").value !== "all";
 
     if (!active) return;
 
     const results = filteredMotions("pre");
     container.append(element("p", `${results.length}件ヒット`, "muted"));
-
-    results.slice(0, 200).forEach(m => {
-      container.append(motionItem(m));
-    });
+    results.slice(0, 200).forEach(m => container.append(motionItem(m)));
 
     if (results.length > 200) {
-      container.append(element(
-        "p",
-        "先頭200件を表示しています。検索条件を追加してください。",
-        "muted"
-      ));
+      container.append(element("p", "先頭200件を表示しています。", "muted"));
     }
   }
 
   function renderManagement() {
     const container = $("manageList");
+    const deletedContainer = $("deletedList");
     container.replaceChildren();
+    deletedContainer.replaceChildren();
 
     const results = filteredMotions("manage");
-
-    container.append(element(
-      "p",
-      `${results.length}件 / 全${motions.length}件`,
-      "muted"
-    ));
-
-    results.slice(0, 300).forEach(m => {
-      container.append(motionItem(m, true));
-    });
+    container.append(element("p",
+      `${results.length}件 / 全${motions.filter(m => !m.is_deleted).length}件`,
+      "muted"));
+    results.slice(0, 300).forEach(m => container.append(motionItem(m, true)));
 
     if (results.length > 300) {
-      container.append(element(
-        "p",
-        "先頭300件を表示しています。",
-        "muted"
-      ));
+      container.append(element("p", "先頭300件を表示しています。", "muted"));
     }
+
+    const deleted = motions.filter(m => m.is_deleted);
+    deletedContainer.append(element("p", `${deleted.length}件`, "muted"));
+
+    deleted.slice(0, 200).forEach(m => {
+      const item = element("div", undefined, "item");
+      item.append(element("strong", m.motion || "論題名なし"));
+      item.append(element("div",
+        `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`,
+        "muted"));
+      item.append(makeButton("復元", () => restoreMotion(m.id), "success small"));
+      deletedContainer.append(item);
+    });
   }
 
   async function fetchMotions() {
-    if (!db) {
-      $("connection").textContent = "Supabaseに接続できません。";
-      return;
-    }
+    if (!currentUser) return;
 
+    $("connection").textContent = "論題データを読み込み中…";
     try {
-      const all = [];
-      let offset = 0;
-
-      while (true) {
-        const { data, error } = await db
-          .from("motions")
-          .select("*")
-          .order("id", { ascending: true })
-          .range(offset, offset + 999);
-
-        if (error) throw error;
-
-        all.push(...(data || []));
-
-        if (!data || data.length < 1000) break;
-
-        offset += 1000;
-        if (offset >= 50000) {
-          throw new Error("取得上限を超えました。");
-        }
-      }
-
-      motions = all;
+      const result = await api("/api/motion-list");
+      motions = Array.isArray(result.motions) ? result.motions : [];
       $("connection").textContent =
-        `データベース接続済み・${motions.length}件`;
-
+        `ログイン中：${currentUser.email || ""} ・ 論題${motions.length}件`;
       updateFilters();
       renderCandidates();
       renderManagement();
-
     } catch (error) {
-      $("connection").textContent =
-        "データ取得エラー：" + error.message;
+      $("connection").textContent = "データ取得エラー：" + error.message;
       console.error(error);
     }
   }
@@ -605,7 +748,6 @@ header {
   function openRecordModal(id) {
     const m = motions.find(x => String(x.id) === String(id));
     if (!m) return;
-
     pendingId = m.id;
     $("confirmMotion").textContent = m.motion;
     setMessage("confirmError", "");
@@ -620,59 +762,58 @@ header {
   async function recordMotion() {
     if (busy || pendingId === null) return;
 
-    if (!db) {
-      setMessage("confirmError", "DBに接続できません。", "error");
-      return;
-    }
-
-    const m = motions.find(x => String(x.id) === String(pendingId));
-    if (!m) return;
-
+    const id = pendingId;
     busy = true;
     $("record").disabled = true;
 
     try {
-      const history = [...historyOf(m), new Date().toISOString()];
+      await api("/api/motion-record", {
+        method: "POST",
+        body: JSON.stringify({ id })
+      });
 
-      const { error } = await db
-        .from("motions")
-        .update({ history })
-        .eq("id", m.id);
-
-      if (error) throw error;
-
-      selectedMotion = m.motion;
-      $("chosenText").textContent = "記録済み：" + selectedMotion;
-      show("chosen", true);
-
+      const m = motions.find(x => String(x.id) === String(id));
+      if (m) {
+        selectedMotion = m.motion;
+        $("chosenText").textContent = "記録済み：" + selectedMotion;
+        show("chosen", true);
+      }
       closeRecordModal();
       await fetchMotions();
-
     } catch (error) {
-      setMessage(
-        "confirmError",
-        "記録に失敗しました：" + error.message,
-        "error"
-      );
+      setMessage("confirmError", "記録に失敗しました：" + error.message, "error");
     } finally {
       busy = false;
       $("record").disabled = false;
     }
   }
 
+  async function showHistory(id) {
+    try {
+      const result = await api(`/api/motion-history?id=${encodeURIComponent(id)}`);
+      const history = Array.isArray(result.history) ? result.history : [];
+      const lines = history.map(h => {
+        if (typeof h === "string") return h;
+        const date = h.changed_at || h.created_at || h.date || "";
+        const action = h.action || h.operation || "変更";
+        return `${date} — ${action}`;
+      });
+      alert(lines.length ? lines.join("\n") : "履歴はありません。");
+    } catch (error) {
+      alert("履歴取得エラー：" + error.message);
+    }
+  }
+
   function resetForm() {
     editingId = null;
-
     ["motion", "tournament", "year", "doneDate"].forEach(id => {
       $(id).value = "";
     });
-
     $("done").checked = false;
     show("doneDateBox", false);
     show("cancelEdit", false);
     show("motionForm", true);
     show("previewBox", false);
-
     $("formHeading").textContent = "新規論題の追加";
   }
 
@@ -681,29 +822,22 @@ header {
     if (!m) return;
 
     editingId = m.id;
-
     $("motion").value = m.motion || "";
     $("tournament").value = m.tournament === "-" ? "" : m.tournament || "";
     $("year").value = m.year === "-" ? "" : m.year || "";
 
-    const history = historyOf(m).sort(
-      (a, b) => Date.parse(b) - Date.parse(a)
-    );
-
+    const history = historyOf(m).sort((a, b) => Date.parse(b) - Date.parse(a));
     $("done").checked = history.length > 0;
     show("doneDateBox", history.length > 0);
-
     $("doneDate").value = history.length
       ? new Date(history[0]).toISOString().slice(0, 10)
       : "";
 
     $("formHeading").textContent = "論題の編集";
-
     show("cancelEdit", true);
     show("motionForm", true);
     show("previewBox", false);
     setMessage("formStatus", "");
-
     window.scrollTo(0, 0);
   }
 
@@ -719,13 +853,13 @@ header {
 
   function previewMotion() {
     const v = formData();
-
     if (!v.motion) {
       setMessage("formStatus", "論題を入力してください。", "error");
       return;
     }
 
     const duplicate = motions.find(m =>
+      !m.is_deleted &&
       String(m.id) !== String(editingId) &&
       (m.motion || "").trim().toLowerCase() === v.motion.toLowerCase() &&
       (m.tournament || "").trim().toLowerCase() === v.tournament.toLowerCase() &&
@@ -733,32 +867,23 @@ header {
     );
 
     if (duplicate) {
-      setMessage(
-        "formStatus",
-        "同一の論題・大会名・年度のデータが存在します。",
-        "error"
-      );
+      setMessage("formStatus",
+        "同一の論題・大会名・年度のデータが存在します。", "error");
       return;
     }
 
     setMessage("formStatus", "");
-
     const container = $("previewText");
     container.replaceChildren();
 
-    const fields = [
+    [
       ["論題", v.motion],
       ["大会名", v.tournament || "未入力"],
       ["年度", v.year || "未入力"],
       ["実施状況", v.done ? `実施済み（${v.date}）` : "未実施"]
-    ];
-
-    fields.forEach(([label, value]) => {
+    ].forEach(([label, value]) => {
       const p = element("p");
-      p.append(
-        element("strong", label + "："),
-        element("span", value)
-      );
+      p.append(element("strong", label + "："), element("span", value));
       container.append(p);
     });
 
@@ -768,72 +893,35 @@ header {
 
   async function saveMotion() {
     if (busy) return;
+    const v = formData();
 
-    if (!db) {
-      setMessage("formStatus", "DBに接続できません。", "error");
+    if (!v.motion) {
+      setMessage("formStatus", "論題を入力してください。", "error");
       return;
     }
-
-    const v = formData();
-    if (!v.motion) return;
-
-    const current = motions.find(
-      m => String(m.id) === String(editingId)
-    );
-
-    let history = [];
-
-    if (editingId !== null && current) {
-      history = historyOf(current);
-
-      if (v.done) {
-        const iso = new Date(v.date + "T00:00:00").toISOString();
-        if (!history.some(h => h.slice(0, 10) === v.date)) {
-          history.push(iso);
-        }
-      } else {
-        history = [];
-      }
-    } else if (v.done) {
-      history = [new Date(v.date + "T00:00:00").toISOString()];
-    }
-
-    const payload = {
-      motion: v.motion,
-      tournament: v.tournament,
-      year: v.year,
-      history
-    };
 
     busy = true;
     $("save").disabled = true;
 
     try {
-      let result;
-
-      if (editingId !== null) {
-        result = await db
-          .from("motions")
-          .update(payload)
-          .eq("id", editingId);
-      } else {
-        result = await db
-          .from("motions")
-          .insert([payload]);
-      }
-
-      if (result.error) throw result.error;
+      await api("/api/motion-write", {
+        method: "POST",
+        body: JSON.stringify({
+          action: editingId === null ? "create" : "update",
+          id: editingId,
+          motion: v.motion,
+          tournament: v.tournament || "-",
+          year: v.year || "-",
+          done: v.done,
+          date: v.done ? v.date : null
+        })
+      });
 
       resetForm();
       setMessage("formStatus", "保存しました。", "ok");
       await fetchMotions();
-
     } catch (error) {
-      setMessage(
-        "formStatus",
-        "保存に失敗しました：" + error.message,
-        "error"
-      );
+      setMessage("formStatus", "保存に失敗しました：" + error.message, "error");
     } finally {
       busy = false;
       $("save").disabled = false;
@@ -842,30 +930,38 @@ header {
 
   async function deleteMotion(id) {
     const m = motions.find(x => String(x.id) === String(id));
-
-    if (!m || !db || busy) return;
-
+    if (!m || busy) return;
     if (!confirm(`「${m.motion}」を削除しますか？`)) return;
 
     busy = true;
-
     try {
-      const { error } = await db
-        .from("motions")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-
+      await api("/api/motion-write", {
+        method: "POST",
+        body: JSON.stringify({ action: "delete", id })
+      });
       setMessage("formStatus", "削除しました。", "ok");
       await fetchMotions();
-
     } catch (error) {
-      setMessage(
-        "formStatus",
-        "削除に失敗しました：" + error.message,
-        "error"
-      );
+      setMessage("formStatus", "削除に失敗しました：" + error.message, "error");
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function restoreMotion(id) {
+    if (busy) return;
+    if (!confirm("この論題を復元しますか？")) return;
+
+    busy = true;
+    try {
+      await api("/api/motion-restore", {
+        method: "POST",
+        body: JSON.stringify({ id })
+      });
+      setMessage("formStatus", "復元しました。", "ok");
+      await fetchMotions();
+    } catch (error) {
+      setMessage("formStatus", "復元に失敗しました：" + error.message, "error");
     } finally {
       busy = false;
     }
@@ -874,31 +970,19 @@ header {
   function generateAssignments() {
     const participants = $("participants").value
       .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-
     const judges = $("judges").value
       .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-
     const pairs = Number($("pairs").value);
     const size = Number($("teamSize").value);
     const result = $("assignResult");
-
     result.replaceChildren();
 
     if (!Number.isInteger(size) || size < 1 || size > 30) {
-      result.append(element(
-        "div",
-        "チーム人数は1～30で指定してください。",
-        "notice error"
-      ));
+      result.append(element("div", "チーム人数は1～30で指定してください。", "notice error"));
       return;
     }
-
     if (!participants.length) {
-      result.append(element(
-        "div",
-        "参加者を入力してください。",
-        "notice error"
-      ));
+      result.append(element("div", "参加者を入力してください。", "notice error"));
       return;
     }
 
@@ -917,29 +1001,18 @@ header {
     judges.push(...overflow);
 
     if (overflow.length) {
-      result.append(element(
-        "p",
+      result.append(element("p",
         `定員超過の${overflow.length}人をジャッジ候補にしました。`,
-        "notice"
-      ));
+        "notice"));
     }
 
-    const completePairs = Math.min(
-      pairs,
-      Math.floor(participants.length / (size * 2))
-    );
-
+    const completePairs = Math.min(pairs, Math.floor(participants.length / (size * 2)));
     if (!completePairs) {
-      result.append(element(
-        "div",
-        `最低${size * 2}人必要です。`,
-        "notice error"
-      ));
+      result.append(element("div", `最低${size * 2}人必要です。`, "notice error"));
       return;
     }
 
     const teams = [];
-
     for (let i = 0; i < completePairs * 2; i++) {
       teams.push(participants.splice(0, size));
     }
@@ -948,39 +1021,24 @@ header {
       const match = element("div", undefined, "match");
       match.append(element("strong", `Match ${i + 1}`));
 
-      const fields = [
+      [
         ["Government", teams[i * 2].join("、")],
         ["Opposition", teams[i * 2 + 1].join("、")],
         ["Judge", judges.shift() || "未割り当て"],
         ["Motion", selectedMotion || "未選択"]
-      ];
-
-      fields.forEach(([label, value]) => {
+      ].forEach(([label, value]) => {
         const p = element("p");
-        p.append(
-          element("strong", label + "："),
-          element("span", value)
-        );
+        p.append(element("strong", label + "："), element("span", value));
         match.append(p);
       });
-
       result.append(match);
     }
 
     if (participants.length) {
-      result.append(element(
-        "p",
-        "未割り当ての参加者：" + participants.join("、"),
-        "muted"
-      ));
+      result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
     }
-
     if (judges.length) {
-      result.append(element(
-        "p",
-        "その他のジャッジ：" + judges.join("、"),
-        "muted"
-      ));
+      result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
     }
   }
 
@@ -989,27 +1047,28 @@ header {
       [JSON.stringify(motions, null, 2)],
       { type: "application/json;charset=utf-8" }
     );
-
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-
     a.href = url;
     a.download = "motions.json";
-
     document.body.appendChild(a);
     a.click();
     a.remove();
-
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
   function bindEvents() {
     for (let i = 1; i <= 10; i++) {
-      $("pairs").add(new Option(
-        `${i}組（${i * 2}チーム）`,
-        String(i)
-      ));
+      $("pairs").add(new Option(`${i}組（${i * 2}チーム）`, String(i)));
     }
+
+    $("loginForm").addEventListener("submit", login);
+    $("toggleRegister").addEventListener("click", () => {
+      registering = !registering;
+      updateAuthMode();
+    });
+    $("register").addEventListener("click", register);
+    $("logout").addEventListener("click", logout);
 
     $("goAssign").addEventListener("click", () => changeView("assign"));
     $("goManage").addEventListener("click", () => changeView("manage"));
@@ -1017,7 +1076,6 @@ header {
 
     $("shuffle").addEventListener("click", renderCandidates);
     $("generate").addEventListener("click", generateAssignments);
-
     $("clearChosen").addEventListener("click", () => {
       selectedMotion = null;
       show("chosen", false);
@@ -1025,20 +1083,14 @@ header {
 
     $("closeModal").addEventListener("click", closeRecordModal);
     $("record").addEventListener("click", recordMotion);
-
-    $("done").addEventListener("change", () => {
-      show("doneDateBox", $("done").checked);
-    });
+    $("done").addEventListener("change", () => show("doneDateBox", $("done").checked));
 
     $("preview").addEventListener("click", previewMotion);
-
     $("revise").addEventListener("click", () => {
       show("previewBox", false);
       show("motionForm", true);
     });
-
     $("save").addEventListener("click", saveMotion);
-
     $("cancelEdit").addEventListener("click", () => {
       resetForm();
       setMessage("formStatus", "");
@@ -1046,7 +1098,6 @@ header {
 
     $("export").addEventListener("click", downloadJSON);
     $("reload").addEventListener("click", fetchMotions);
-
     $("addTournament").addEventListener("click", () => {
       const name = prompt("追加する大会名を入力してください。");
       if (name && name.trim()) {
@@ -1057,40 +1108,24 @@ header {
 
     ["pre", "manage"].forEach(prefix => {
       ["Search", "Tournament", "Year", "Status"].forEach(suffix => {
-        const event = suffix === "Search" ? "input" : "change";
-        const render = prefix === "pre"
-          ? renderPreSearch
-          : renderManagement;
-
-        $(prefix + suffix).addEventListener(event, render);
+        $(prefix + suffix).addEventListener(
+          suffix === "Search" ? "input" : "change",
+          prefix === "pre" ? renderPreSearch : renderManagement
+        );
       });
     });
 
     try {
-      $("participants").value =
-        localStorage.getItem("debate_participants") || "";
-      $("judges").value =
-        localStorage.getItem("debate_judges") || "";
+      $("participants").value = localStorage.getItem("debate_participants") || "";
+      $("judges").value = localStorage.getItem("debate_judges") || "";
     } catch (error) {
       console.warn(error);
     }
   }
 
   bindEvents();
-
-  try {
-    if (!window.supabase ||
-        typeof window.supabase.createClient !== "function") {
-      throw new Error("Supabase SDKを読み込めませんでした。");
-    }
-
-    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    fetchMotions();
-
-  } catch (error) {
-    $("connection").textContent = "接続エラー：" + error.message;
-    console.error(error);
-  }
+  updateAuthMode();
+  checkSession();
 })();
 </script>
 </body>
