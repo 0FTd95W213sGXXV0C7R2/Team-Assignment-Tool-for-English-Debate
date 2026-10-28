@@ -36,8 +36,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 .modal{position:fixed;inset:0;z-index:20;background:#0008;display:grid;place-items:center;padding:16px}
 .dialog{background:white;border-radius:12px;padding:20px;width:min(100%,500px);max-height:90vh;overflow-y:auto}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#64748b;font-size:.85rem}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#cbd5e1;flex:1}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:15px}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <main>
@@ -50,19 +53,37 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       <button id="back" class="secondary small hidden" type="button">← メニュー</button>
     </div>
   </div>
-  <div id="connection" class="muted">ログイン状態を確認中…</div>
+  <div id="connection" class="muted">認証設定を読み込み中…</div>
 </header>
 
 <section id="auth" class="card hidden">
-  <h2>ログイン</h2>
-  <p class="muted">管理者から発行された個別ログインコードを入力してください。</p>
+  <h2>ログイン・新規登録</h2>
+  <p class="muted">Google アカウント、またはメールアドレスとパスワードでログインできます。</p>
+
+  <button id="googleLogin" class="full" type="button">Google でログイン</button>
+
+  <div class="auth-divider">またはメールアドレスでログイン</div>
+
   <form id="loginForm">
-    <label for="loginCode">ログインコード</label>
-    <input id="loginCode" type="password" autocomplete="current-password"
-      required maxlength="256" autocapitalize="none" spellcheck="false">
+    <label for="authEmail">メールアドレス</label>
+    <input id="authEmail" type="email" autocomplete="email"
+      required maxlength="320" autocapitalize="none" spellcheck="false">
+
+    <label for="authPassword">パスワード</label>
+    <input id="authPassword" type="password" autocomplete="current-password"
+      required minlength="8" maxlength="128">
+
     <button id="loginButton" class="full" type="submit" style="margin-top:14px">ログイン</button>
   </form>
-  <p class="muted">初回ログイン後は、セッションが有効な間、自動的にログインします。</p>
+
+  <button id="signupButton" class="secondary full" type="button" style="margin-top:10px">
+    新規アカウントを登録
+  </button>
+
+  <p class="muted">
+    新規登録後は、登録したメールアドレスに届く確認メールの案内に従ってください。
+    Google ログインは指定された学校ドメインのメールアドレスに限られます。
+  </p>
   <div id="authStatus" class="notice hidden" role="status" aria-live="polite"></div>
 </section>
 
@@ -203,6 +224,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     show(id, Boolean(text));
   }
 
+  let supabaseClient = null;
   let currentUser = null;
   let motions = [];
   let selectedMotion = null;
@@ -210,29 +232,67 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   let editingId = null;
   let busy = false;
   let customTournaments = [];
+  let authInitialized = false;
 
   function apiErrorMessage(body, fallback) {
     return body?.error || body?.message || fallback;
   }
 
+  function getAuthErrorMessage(error) {
+    const message = error?.message || "認証処理に失敗しました。";
+
+    if (/invalid login credentials/i.test(message)) {
+      return "メールアドレスまたはパスワードが正しくありません。";
+    }
+    if (/email not confirmed/i.test(message)) {
+      return "メールアドレスの確認が完了していません。確認メールをご確認ください。";
+    }
+    if (/user already registered/i.test(message)) {
+      return "このメールアドレスは既に登録されています。ログインしてください。";
+    }
+    if (/password should be at least/i.test(message)) {
+      return "パスワードが短すぎます。";
+    }
+    return message;
+  }
+
+  async function getAccessToken() {
+    if (!supabaseClient) return null;
+
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error) throw error;
+    return data.session?.access_token || null;
+  }
+
   async function api(path, options = {}) {
+    const headers = { ...(options.headers || {}) };
+    const token = await getAccessToken();
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const response = await fetch(path, {
       credentials: "same-origin",
       ...options,
       headers: {
         ...(options.body ? { "Content-Type": "application/json" } : {}),
-        ...(options.headers || {})
+        ...headers
       }
     });
+
     const body = await response.json().catch(() => ({}));
 
     if (response.status === 401 && !path.startsWith("/api/auth-")) {
       currentUser = null;
-      showAuth("セッションが切れました。もう一度ログインしてください。");
+      showAuth("認証状態を確認できません。再度ログインしてください。");
     }
+
     if (!response.ok) {
       throw new Error(apiErrorMessage(body, `APIエラー（${response.status}）`));
     }
+
     return body;
   }
 
@@ -249,6 +309,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     const cutoff = new Date();
     cutoff.setFullYear(cutoff.getFullYear() - 1);
     const now = new Date();
+
     return historyOf(motion).filter(v => {
       const date = new Date(v);
       return date >= cutoff && date <= now;
@@ -275,12 +336,14 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function changeView(view) {
     ["home", "assign", "manage"].forEach(id => show(id, id === view));
     show("back", view !== "home");
+
     if (view === "assign") renderCandidates();
     if (view === "manage") renderManagement();
+
     window.scrollTo(0, 0);
   }
 
-  function showAuth(message = "") {
+  function showAuth(message = "", type = "error") {
     currentUser = null;
     show("auth", true);
     show("home", false);
@@ -288,14 +351,15 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     show("manage", false);
     show("back", false);
     show("logout", false);
+
     $("userLabel").textContent = "";
     $("connection").textContent = "ログインが必要です。";
-    $("loginCode").value = "";
-    setMessage("authStatus", message, message ? "error" : "");
+    setMessage("authStatus", message, message ? type : "");
   }
 
   function displayUser(user) {
-    return user?.displayName || user?.name || user?.userId || user?.id || "ログイン中";
+    return user?.email || user?.user_metadata?.full_name ||
+      user?.user_metadata?.name || user?.id || "ログイン中";
   }
 
   function showApp(user) {
@@ -306,77 +370,209 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     show("manage", false);
     show("back", false);
     show("logout", true);
+
     $("userLabel").textContent = displayUser(user);
     $("connection").textContent = "論題データを読み込み中…";
+
     changeView("home");
     fetchMotions();
   }
 
+  async function validateCurrentSession(session) {
+    if (!session?.access_token) return false;
+
+    const result = await api("/api/auth-me");
+
+    if (!result.authenticated || !result.isAdmin) {
+      await supabaseClient.auth.signOut();
+      showAuth("認証状態を確認できませんでした。再度ログインしてください。");
+      return false;
+    }
+
+    return true;
+  }
+
   async function checkSession() {
     try {
-      const result = await api("/api/auth-me");
-      if (result.user) {
-        showApp(result.user);
-      } else {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+
+      const session = data.session;
+
+      if (!session) {
         showAuth();
+        return;
+      }
+
+      const valid = await validateCurrentSession(session);
+
+      if (valid) {
+        showApp(session.user);
       }
     } catch (error) {
-      showAuth("ログイン状態を確認できませんでした。API設定を確認してください。");
-      console.error(error);
+      console.error("Session check failed:", error);
+      showAuth("ログイン状態を確認できませんでした。設定と通信状態を確認してください。");
     }
   }
 
   async function login(event) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || !supabaseClient) return;
 
-    const code = $("loginCode").value.trim();
-    if (!code) {
-      setMessage("authStatus", "ログインコードを入力してください。", "error");
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+
+    busy = true;
+    $("loginButton").disabled = true;
+    $("signupButton").disabled = true;
+    $("googleLogin").disabled = true;
+    setMessage("authStatus", "ログイン中…");
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+      if (!data.session || !data.user) {
+        throw new Error("ログインセッションを作成できませんでした。");
+      }
+
+      const valid = await validateCurrentSession(data.session);
+
+      if (!valid) return;
+
+      $("authPassword").value = "";
+      setMessage("authStatus", "");
+      showApp(data.user);
+    } catch (error) {
+      setMessage("authStatus", getAuthErrorMessage(error), "error");
+    } finally {
+      busy = false;
+      $("loginButton").disabled = false;
+      $("signupButton").disabled = false;
+      $("googleLogin").disabled = false;
+    }
+  }
+
+  async function signup() {
+    if (busy || !supabaseClient) return;
+
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+
+    if (!email) {
+      setMessage("authStatus", "メールアドレスを入力してください。", "error");
+      $("authEmail").focus();
+      return;
+    }
+
+    if (password.length < 8) {
+      setMessage("authStatus", "パスワードは8文字以上で入力してください。", "error");
+      $("authPassword").focus();
       return;
     }
 
     busy = true;
     $("loginButton").disabled = true;
-    setMessage("authStatus", "ログイン中…");
+    $("signupButton").disabled = true;
+    $("googleLogin").disabled = true;
+    setMessage("authStatus", "アカウントを登録しています…");
 
     try {
-      const result = await api("/api/auth-login", {
-        method: "POST",
-        body: JSON.stringify({ code })
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin + window.location.pathname
+        }
       });
-      if (!result.user) throw new Error("ログイン情報を確認できませんでした。");
-      $("loginCode").value = "";
-      setMessage("authStatus", "");
-      showApp(result.user);
+
+      if (error) throw error;
+
+      if (data.session && data.user) {
+        const valid = await validateCurrentSession(data.session);
+
+        if (valid) {
+          showApp(data.user);
+          return;
+        }
+      }
+
+      $("authPassword").value = "";
+      setMessage(
+        "authStatus",
+        "登録処理を受け付けました。メールボックスを確認し、確認メールのリンクを開いてください。確認が完了したらログインできます。",
+        "ok"
+      );
     } catch (error) {
-      setMessage("authStatus", error.message, "error");
+      setMessage("authStatus", getAuthErrorMessage(error), "error");
     } finally {
       busy = false;
       $("loginButton").disabled = false;
+      $("signupButton").disabled = false;
+      $("googleLogin").disabled = false;
+    }
+  }
+
+  async function loginWithGoogle() {
+    if (busy || !supabaseClient) return;
+
+    busy = true;
+    $("loginButton").disabled = true;
+    $("signupButton").disabled = true;
+    $("googleLogin").disabled = true;
+    setMessage("authStatus", "Google のログイン画面へ移動しています…");
+
+    try {
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + window.location.pathname,
+          queryParams: {
+            hd: "st.spec.ed.jp"
+          }
+        }
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      setMessage("authStatus", getAuthErrorMessage(error), "error");
+      busy = false;
+      $("loginButton").disabled = false;
+      $("signupButton").disabled = false;
+      $("googleLogin").disabled = false;
     }
   }
 
   async function logout() {
-    if (busy) return;
+    if (busy || !supabaseClient) return;
+
+    busy = true;
     $("logout").disabled = true;
+
     try {
-      await api("/api/auth-logout", { method: "POST", body: "{}" });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      $("logout").disabled = false;
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) throw error;
+
       currentUser = null;
       motions = [];
       selectedMotion = null;
       closeRecordModal();
-      showAuth("ログアウトしました。");
+      showAuth("ログアウトしました。", "ok");
+    } catch (error) {
+      setMessage("authStatus", "ログアウトに失敗しました：" + getAuthErrorMessage(error), "error");
+    } finally {
+      busy = false;
+      $("logout").disabled = false;
     }
   }
 
   function updateSelect(id, values, firstLabel) {
     const select = $(id);
     const previous = select.value;
+
     select.replaceChildren(new Option(firstLabel, ""));
     values.forEach(value => select.add(new Option(value, value)));
     select.value = values.includes(previous) ? previous : "";
@@ -388,6 +584,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       ...customTournaments,
       "その他の大会"
     ])].sort((a, b) => a.localeCompare(b, "ja"));
+
     const years = [...new Set(motions.map(m => String(m.year || ""))
       .filter(y => y && y !== "-"))].sort((a, b) => b.localeCompare(a, "ja"));
 
@@ -411,20 +608,25 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     return motions.filter(m => {
       if (m.is_deleted) return false;
+
       const norm = normalizeTournament(m.tournament);
       const y = String(m.year || "");
+
       if (!matchesKeywords([m.motion || "", norm, m.tournament || "", y].join(" "), search)) return false;
       if (tournament && norm !== tournament) return false;
       if (year && y !== year) return false;
+
       const done = recentHistory(m).length > 0;
       if (status === "done" && !done) return false;
       if (status === "not_done" && done) return false;
+
       return true;
     });
   }
 
   function motionItem(m, management = false) {
     const item = element("div", undefined, "item");
+
     item.append(
       element("strong", m.motion || "論題名なし"),
       element("div", `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`, "muted")
@@ -432,16 +634,19 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     if (management) {
       item.append(element("div", `直近1年の実施回数：${recentHistory(m).length}回`, "muted"));
+
       const actions = element("div", undefined, "item-actions");
       actions.append(
         makeButton("編集", () => startEdit(m.id)),
         makeButton("履歴", () => showHistory(m.id)),
         makeButton("削除", () => deleteMotion(m.id), "danger small")
       );
+
       item.append(actions);
     } else {
       item.append(makeButton("記録する", () => openRecordModal(m.id)));
     }
+
     return item;
   }
 
@@ -450,14 +655,20 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
+
     return array;
   }
 
   function renderCandidates() {
     const container = $("candidates");
     container.replaceChildren();
+
     const candidates = shuffleArray(motions.filter(m => !m.is_deleted).slice()).slice(0, 4);
-    if (!candidates.length) container.append(element("p", "論題がありません。", "muted"));
+
+    if (!candidates.length) {
+      container.append(element("p", "論題がありません。", "muted"));
+    }
+
     candidates.forEach(m => container.append(motionItem(m)));
     renderPreSearch();
   }
@@ -465,49 +676,75 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function renderPreSearch() {
     const container = $("preResults");
     container.replaceChildren();
+
     const active = $("preSearch").value.trim() ||
-      $("preTournament").value || $("preYear").value ||
+      $("preTournament").value ||
+      $("preYear").value ||
       $("preStatus").value !== "all";
+
     if (!active) return;
 
     const results = filteredMotions("pre");
     container.append(element("p", `${results.length}件ヒット`, "muted"));
+
     results.slice(0, 200).forEach(m => container.append(motionItem(m)));
-    if (results.length > 200) container.append(element("p", "先頭200件を表示しています。", "muted"));
+
+    if (results.length > 200) {
+      container.append(element("p", "先頭200件を表示しています。", "muted"));
+    }
   }
 
   function renderManagement() {
     const container = $("manageList");
     const deletedContainer = $("deletedList");
+
     container.replaceChildren();
     deletedContainer.replaceChildren();
 
     const results = filteredMotions("manage");
-    container.append(element("p",
-      `${results.length}件 / 全${motions.filter(m => !m.is_deleted).length}件`, "muted"));
+
+    container.append(element(
+      "p",
+      `${results.length}件 / 全${motions.filter(m => !m.is_deleted).length}件`,
+      "muted"
+    ));
+
     results.slice(0, 300).forEach(m => container.append(motionItem(m, true)));
-    if (results.length > 300) container.append(element("p", "先頭300件を表示しています。", "muted"));
+
+    if (results.length > 300) {
+      container.append(element("p", "先頭300件を表示しています。", "muted"));
+    }
 
     const deleted = motions.filter(m => m.is_deleted);
+
     deletedContainer.append(element("p", `${deleted.length}件`, "muted"));
+
     deleted.slice(0, 200).forEach(m => {
       const item = element("div", undefined, "item");
+
       item.append(
         element("strong", m.motion || "論題名なし"),
         element("div", `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`, "muted"),
         makeButton("復元", () => restoreMotion(m.id), "success small")
       );
+
       deletedContainer.append(item);
     });
   }
 
   async function fetchMotions() {
     if (!currentUser) return;
+
     $("connection").textContent = "論題データを読み込み中…";
+
     try {
       const result = await api("/api/motion-list");
+
       motions = Array.isArray(result.motions) ? result.motions : [];
-      $("connection").textContent = `ログイン中：${displayUser(currentUser)} ・ 論題${motions.length}件`;
+
+      $("connection").textContent =
+        `ログイン中：${displayUser(currentUser)} ・ 論題${motions.length}件`;
+
       updateFilters();
       renderCandidates();
       renderManagement();
@@ -520,6 +757,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function openRecordModal(id) {
     const m = motions.find(x => String(x.id) === String(id));
     if (!m) return;
+
     pendingId = m.id;
     $("confirmMotion").textContent = m.motion;
     setMessage("confirmError", "");
@@ -533,17 +771,25 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
   async function recordMotion() {
     if (busy || pendingId === null) return;
+
     const id = pendingId;
     busy = true;
     $("record").disabled = true;
+
     try {
-      await api("/api/motion-record", { method: "POST", body: JSON.stringify({ id }) });
+      await api("/api/motion-record", {
+        method: "POST",
+        body: JSON.stringify({ id })
+      });
+
       const m = motions.find(x => String(x.id) === String(id));
+
       if (m) {
         selectedMotion = m.motion;
         $("chosenText").textContent = "記録済み：" + selectedMotion;
         show("chosen", true);
       }
+
       closeRecordModal();
       await fetchMotions();
     } catch (error) {
@@ -558,12 +804,16 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     try {
       const result = await api(`/api/motion-history?id=${encodeURIComponent(id)}`);
       const history = Array.isArray(result.history) ? result.history : [];
+
       const lines = history.map(h => {
         if (typeof h === "string") return h;
+
         const date = h.changed_at || h.created_at || h.date || "";
         const action = h.action || h.operation || "変更";
+
         return `${date} — ${action}`;
       });
+
       alert(lines.length ? lines.join("\n") : "履歴はありません。");
     } catch (error) {
       alert("履歴取得エラー：" + error.message);
@@ -572,7 +822,11 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
   function resetForm() {
     editingId = null;
-    ["motion", "tournament", "year", "doneDate"].forEach(id => $(id).value = "");
+
+    ["motion", "tournament", "year", "doneDate"].forEach(id => {
+      $(id).value = "";
+    });
+
     $("done").checked = false;
     show("doneDateBox", false);
     show("cancelEdit", false);
@@ -584,21 +838,27 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   function startEdit(id) {
     const m = motions.find(x => String(x.id) === String(id));
     if (!m) return;
+
     editingId = m.id;
     $("motion").value = m.motion || "";
     $("tournament").value = m.tournament === "-" ? "" : m.tournament || "";
     $("year").value = m.year === "-" ? "" : m.year || "";
 
     const history = historyOf(m).sort((a, b) => Date.parse(b) - Date.parse(a));
+
     $("done").checked = history.length > 0;
     show("doneDateBox", history.length > 0);
-    $("doneDate").value = history.length ? new Date(history[0]).toISOString().slice(0, 10) : "";
+
+    $("doneDate").value = history.length
+      ? new Date(history[0]).toISOString().slice(0, 10)
+      : "";
 
     $("formHeading").textContent = "論題の編集";
     show("cancelEdit", true);
     show("motionForm", true);
     show("previewBox", false);
     setMessage("formStatus", "");
+
     window.scrollTo(0, 0);
   }
 
@@ -614,10 +874,12 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
   function previewMotion() {
     const v = formData();
+
     if (!v.motion) {
       setMessage("formStatus", "論題を入力してください。", "error");
       return;
     }
+
     const duplicate = motions.find(m =>
       !m.is_deleted &&
       String(m.id) !== String(editingId) &&
@@ -625,14 +887,17 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       (m.tournament || "").trim().toLowerCase() === v.tournament.toLowerCase() &&
       String(m.year || "").trim().toLowerCase() === v.year.toLowerCase()
     );
+
     if (duplicate) {
       setMessage("formStatus", "同一の論題・大会名・年度のデータが存在します。", "error");
       return;
     }
 
     setMessage("formStatus", "");
+
     const container = $("previewText");
     container.replaceChildren();
+
     [
       ["論題", v.motion],
       ["大会名", v.tournament || "未入力"],
@@ -643,19 +908,24 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
       p.append(element("strong", label + "："), element("span", value));
       container.append(p);
     });
+
     show("motionForm", false);
     show("previewBox", true);
   }
 
   async function saveMotion() {
     if (busy) return;
+
     const v = formData();
+
     if (!v.motion) {
       setMessage("formStatus", "論題を入力してください。", "error");
       return;
     }
+
     busy = true;
     $("save").disabled = true;
+
     try {
       await api("/api/motion-write", {
         method: "POST",
@@ -669,6 +939,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
           date: v.done ? v.date : null
         })
       });
+
       resetForm();
       setMessage("formStatus", "保存しました。", "ok");
       await fetchMotions();
@@ -682,13 +953,17 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
   async function deleteMotion(id) {
     const m = motions.find(x => String(x.id) === String(id));
+
     if (!m || busy || !confirm(`「${m.motion}」を削除しますか？`)) return;
+
     busy = true;
+
     try {
       await api("/api/motion-write", {
         method: "POST",
         body: JSON.stringify({ action: "delete", id })
       });
+
       setMessage("formStatus", "削除しました。", "ok");
       await fetchMotions();
     } catch (error) {
@@ -700,9 +975,15 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
   async function restoreMotion(id) {
     if (busy || !confirm("この論題を復元しますか？")) return;
+
     busy = true;
+
     try {
-      await api("/api/motion-restore", { method: "POST", body: JSON.stringify({ id }) });
+      await api("/api/motion-restore", {
+        method: "POST",
+        body: JSON.stringify({ id })
+      });
+
       setMessage("formStatus", "復元しました。", "ok");
       await fetchMotions();
     } catch (error) {
@@ -713,44 +994,65 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   }
 
   function generateAssignments() {
-    const participants = $("participants").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    const judges = $("judges").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const participants = $("participants").value
+      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+
+    const judges = $("judges").value
+      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+
     const pairs = Number($("pairs").value);
     const size = Number($("teamSize").value);
     const result = $("assignResult");
+
     result.replaceChildren();
 
     if (!Number.isInteger(size) || size < 1 || size > 30) {
       result.append(element("div", "チーム人数は1～30で指定してください。", "notice error"));
       return;
     }
+
     if (!participants.length) {
       result.append(element("div", "参加者を入力してください。", "notice error"));
       return;
     }
+
     try {
       localStorage.setItem("debate_participants", $("participants").value);
       localStorage.setItem("debate_judges", $("judges").value);
-    } catch (error) { console.warn(error); }
+    } catch (error) {
+      console.warn(error);
+    }
 
     shuffleArray(participants);
     shuffleArray(judges);
+
     const capacity = pairs * 2 * size;
     const overflow = participants.splice(capacity);
+
     judges.push(...overflow);
-    if (overflow.length) result.append(element("p", `定員超過の${overflow.length}人をジャッジ候補にしました。`, "notice"));
+
+    if (overflow.length) {
+      result.append(element("p", `定員超過の${overflow.length}人をジャッジ候補にしました。`, "notice"));
+    }
 
     const completePairs = Math.min(pairs, Math.floor(participants.length / (size * 2)));
+
     if (!completePairs) {
       result.append(element("div", `最低${size * 2}人必要です。`, "notice error"));
       return;
     }
+
     const teams = [];
-    for (let i = 0; i < completePairs * 2; i++) teams.push(participants.splice(0, size));
+
+    for (let i = 0; i < completePairs * 2; i++) {
+      teams.push(participants.splice(0, size));
+    }
 
     for (let i = 0; i < completePairs; i++) {
       const match = element("div", undefined, "match");
+
       match.append(element("strong", `Match ${i + 1}`));
+
       [
         ["Government", teams[i * 2].join("、")],
         ["Opposition", teams[i * 2 + 1].join("、")],
@@ -761,28 +1063,111 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
         p.append(element("strong", label + "："), element("span", value));
         match.append(p);
       });
+
       result.append(match);
     }
-    if (participants.length) result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
-    if (judges.length) result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
+
+    if (participants.length) {
+      result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
+    }
+
+    if (judges.length) {
+      result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
+    }
   }
 
   function downloadJSON() {
-    const blob = new Blob([JSON.stringify(motions, null, 2)], { type: "application/json;charset=utf-8" });
+    const blob = new Blob(
+      [JSON.stringify(motions, null, 2)],
+      { type: "application/json;charset=utf-8" }
+    );
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = "motions.json";
+
     document.body.appendChild(a);
     a.click();
     a.remove();
+
     setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
+  async function initializeAuth() {
+    try {
+      if (!window.supabase?.createClient) {
+        throw new Error("Supabase Auth SDKを読み込めませんでした。");
+      }
+
+      const response = await fetch("/api/auth-config", {
+        method: "GET",
+        cache: "no-store",
+        headers: { Accept: "application/json" }
+      });
+
+      const config = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(config.error || "Supabase Authの設定を取得できませんでした。");
+      }
+
+      if (!config.supabaseUrl || !config.supabaseAnonKey) {
+        throw new Error("Supabase Authの公開設定が不完全です。");
+      }
+
+      supabaseClient = window.supabase.createClient(
+        config.supabaseUrl,
+        config.supabaseAnonKey,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (!authInitialized) return;
+
+        if (event === "SIGNED_OUT" || !session) {
+          currentUser = null;
+          showAuth();
+          return;
+        }
+
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+          // 認証状態の切り替え後にサーバー側でも検証する。
+          queueMicrotask(async () => {
+            try {
+              const valid = await validateCurrentSession(session);
+              if (valid) showApp(session.user);
+            } catch (error) {
+              console.error("Auth state verification failed:", error);
+              showAuth("認証状態を確認できませんでした。再度ログインしてください。");
+            }
+          });
+        }
+      });
+
+      authInitialized = true;
+      await checkSession();
+    } catch (error) {
+      console.error("Auth initialization failed:", error);
+      showAuth("認証設定を読み込めませんでした：" + error.message, "error");
+    }
+  }
+
   function bindEvents() {
-    for (let i = 1; i <= 10; i++) $("pairs").add(new Option(`${i}組（${i * 2}チーム）`, String(i)));
+    for (let i = 1; i <= 10; i++) {
+      $("pairs").add(new Option(`${i}組（${i * 2}チーム）`, String(i)));
+    }
 
     $("loginForm").addEventListener("submit", login);
+    $("signupButton").addEventListener("click", signup);
+    $("googleLogin").addEventListener("click", loginWithGoogle);
     $("logout").addEventListener("click", logout);
 
     $("goAssign").addEventListener("click", () => changeView("assign"));
@@ -790,6 +1175,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     $("back").addEventListener("click", () => changeView("home"));
     $("shuffle").addEventListener("click", renderCandidates);
     $("generate").addEventListener("click", generateAssignments);
+
     $("clearChosen").addEventListener("click", () => {
       selectedMotion = null;
       show("chosen", false);
@@ -797,22 +1183,31 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
 
     $("closeModal").addEventListener("click", closeRecordModal);
     $("record").addEventListener("click", recordMotion);
-    $("done").addEventListener("change", () => show("doneDateBox", $("done").checked));
+
+    $("done").addEventListener("change", () => {
+      show("doneDateBox", $("done").checked);
+    });
+
     $("preview").addEventListener("click", previewMotion);
+
     $("revise").addEventListener("click", () => {
       show("previewBox", false);
       show("motionForm", true);
     });
+
     $("save").addEventListener("click", saveMotion);
+
     $("cancelEdit").addEventListener("click", () => {
       resetForm();
       setMessage("formStatus", "");
     });
+
     $("export").addEventListener("click", downloadJSON);
     $("reload").addEventListener("click", fetchMotions);
 
     $("addTournament").addEventListener("click", () => {
       const name = prompt("追加する大会名を入力してください。");
+
       if (name && name.trim()) {
         customTournaments.push(name.trim());
         updateFilters();
@@ -831,11 +1226,13 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     try {
       $("participants").value = localStorage.getItem("debate_participants") || "";
       $("judges").value = localStorage.getItem("debate_judges") || "";
-    } catch (error) { console.warn(error); }
+    } catch (error) {
+      console.warn(error);
+    }
   }
 
   bindEvents();
-  checkSession();
+  initializeAuth();
 })();
 </script>
 </body>
