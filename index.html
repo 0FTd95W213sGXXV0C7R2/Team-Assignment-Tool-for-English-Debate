@@ -6,120 +6,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>チーム分け＆論題管理システム</title>
 <style>
-:root {
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #1e293b;
-  background: #f8fafc;
-}
-* { box-sizing: border-box; }
-body { margin: 0; padding: 12px 14px 40px; }
-main { max-width: 920px; margin: auto; }
-h1 { font-size: 1.5rem; color: #2563eb; }
-h2 { font-size: 1.2rem; margin-top: 0; }
-h3 { font-size: 1.05rem; color: #2563eb; }
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin: 16px 0;
-  box-shadow: 0 2px 10px #00000010;
-}
-.hidden { display: none !important; }
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-label { display: block; font-weight: 600; margin: 12px 0 5px; }
-input, textarea, select {
-  width: 100%;
-  padding: 11px;
-  font: inherit;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-}
-textarea { min-height: 120px; resize: vertical; }
-input[type="checkbox"] { width: auto; }
-button {
-  background: #2563eb;
-  color: white;
-  border: 0;
-  border-radius: 8px;
-  padding: 11px 15px;
-  min-height: 44px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-button:disabled { opacity: .5; cursor: not-allowed; }
-.secondary { background: #64748b; }
-.danger { background: #dc2626; }
-.success { background: #16a34a; }
-.small { font-size: .85rem; padding: 7px 11px; min-height: 36px; }
-.full { width: 100%; }
-.muted { font-size: .88rem; color: #64748b; }
-.item {
-  padding: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  margin: 9px 0;
-  overflow-wrap: anywhere;
-}
-.item-actions { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
-.panel { background: #f1f5f9; padding: 14px; border-radius: 9px; }
-.notice {
-  padding: 12px;
-  margin-top: 12px;
-  border-radius: 8px;
-  background: #dbeafe;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.error { background: #fee2e2; color: #991b1b; }
-.ok { background: #dcfce7; color: #166534; }
-.scroll { max-height: 400px; overflow-y: auto; }
-.match {
-  padding: 14px;
-  border-left: 4px solid #2563eb;
-  background: #f1f5f9;
-  margin: 12px 0;
-  border-radius: 8px;
-}
-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #f8fafc;
-  padding: 5px 0 10px;
-}
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  background: #0008;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-}
-.dialog {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  width: min(100%, 500px);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-@media (max-width: 650px) {
-  .grid { grid-template-columns: 1fr; }
-  .card { padding: 15px; }
-}
+:root{font-family:system-ui,-apple-system,sans-serif;color:#1e293b;background:#f8fafc}
+*{box-sizing:border-box}
+body{margin:0;padding:12px 14px 40px}
+main{max-width:920px;margin:auto}
+h1{font-size:1.5rem;color:#2563eb}
+h2{font-size:1.2rem;margin-top:0}
+h3{font-size:1.05rem;color:#2563eb}
+.card{background:white;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 2px 10px #00000010}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+label{display:block;font-weight:600;margin:12px 0 5px}
+input,textarea,select{width:100%;padding:11px;font:inherit;border:1px solid #cbd5e1;border-radius:8px;background:white}
+textarea{min-height:120px;resize:vertical}
+input[type=checkbox]{width:auto}
+button{background:#2563eb;color:white;border:0;border-radius:8px;padding:11px 15px;min-height:44px;font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.secondary{background:#64748b}.danger{background:#dc2626}.success{background:#16a34a}
+.small{font-size:.85rem;padding:7px 11px;min-height:36px}.full{width:100%}
+.muted{font-size:.88rem;color:#64748b}
+.item{padding:12px;border:1px solid #cbd5e1;border-radius:8px;margin:9px 0;overflow-wrap:anywhere}
+.item-actions{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.panel{background:#f1f5f9;padding:14px;border-radius:9px}
+.notice{padding:12px;margin-top:12px;border-radius:8px;background:#dbeafe;white-space:pre-wrap;overflow-wrap:anywhere}
+.error{background:#fee2e2;color:#991b1b}.ok{background:#dcfce7;color:#166534}
+.scroll{max-height:400px;overflow-y:auto}
+.match{padding:14px;border-left:4px solid #2563eb;background:#f1f5f9;margin:12px 0;border-radius:8px}
+header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
+.modal{position:fixed;inset:0;z-index:20;background:#0008;display:grid;place-items:center;padding:16px}
+.dialog{background:white;border-radius:12px;padding:20px;width:min(100%,500px);max-height:90vh;overflow-y:auto}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:15px}}
 </style>
 </head>
 <body>
@@ -137,51 +54,22 @@ header {
 </header>
 
 <section id="auth" class="card hidden">
-  <h2 id="authHeading">ログイン</h2>
-  <p class="muted">登録済みのアカウントでログインしてください。</p>
-
+  <h2>ログイン</h2>
+  <p class="muted">管理者から発行された個別ログインコードを入力してください。</p>
   <form id="loginForm">
-    <label for="loginEmail">メールアドレス</label>
-    <input id="loginEmail" type="email" autocomplete="username"
-      required maxlength="254">
-
-    <label for="loginPassword">パスワード</label>
-    <input id="loginPassword" type="password"
-      autocomplete="current-password" required maxlength="128">
-
-    <button class="full" type="submit" style="margin-top:14px">ログイン</button>
+    <label for="loginCode">ログインコード</label>
+    <input id="loginCode" type="password" autocomplete="current-password"
+      required maxlength="256" autocapitalize="none" spellcheck="false">
+    <button id="loginButton" class="full" type="submit" style="margin-top:14px">ログイン</button>
   </form>
-
-  <div id="registerFields" class="hidden">
-    <label for="registerPassword">パスワード</label>
-    <input id="registerPassword" type="password"
-      autocomplete="new-password" minlength="6" maxlength="128">
-
-    <label for="registerPasswordConfirm">パスワード（確認）</label>
-    <input id="registerPasswordConfirm" type="password"
-      autocomplete="new-password" minlength="6" maxlength="128">
-
-    <label for="inviteCode">共通招待コード</label>
-    <input id="inviteCode" type="password" autocomplete="off"
-      maxlength="200">
-
-    <button id="register" class="success full" type="button"
-      style="margin-top:14px">アカウントを登録</button>
-  </div>
-
-  <div class="row" style="margin-top:14px">
-    <button id="toggleRegister" class="secondary small" type="button">
-      初めて利用する方はこちら
-    </button>
-  </div>
-  <div id="authStatus" class="notice hidden" role="status"></div>
+  <p class="muted">初回ログイン後は、セッションが有効な間、自動的にログインします。</p>
+  <div id="authStatus" class="notice hidden" role="status" aria-live="polite"></div>
 </section>
 
 <section id="home" class="card hidden">
   <h2>メニュー</h2>
   <button id="goAssign" class="full" type="button">チーム分け ＆ 論題記録</button>
-  <button id="goManage" class="secondary full" style="margin-top:12px"
-    type="button">新規論題追加・管理</button>
+  <button id="goManage" class="secondary full" style="margin-top:12px" type="button">新規論題追加・管理</button>
 </section>
 
 <section id="assign" class="hidden">
@@ -192,7 +80,6 @@ header {
       <button id="shuffle" class="secondary small" type="button">シャッフル</button>
     </div>
     <div id="candidates"></div>
-
     <h3>論題を検索・絞り込み</h3>
     <input id="preSearch" type="search" placeholder="キーワード検索">
     <div class="grid">
@@ -205,33 +92,18 @@ header {
       <option value="not_done">直近1年に未実施の論題</option>
     </select>
     <div id="preResults" class="scroll"></div>
-
     <div id="chosen" class="notice ok hidden">
       <div id="chosenText"></div>
-      <button id="clearChosen" class="danger small" style="margin-top:8px"
-        type="button">選択解除</button>
+      <button id="clearChosen" class="danger small" style="margin-top:8px" type="button">選択解除</button>
     </div>
   </div>
-
   <div class="card">
     <h2>2. メンバー・チーム設定</h2>
     <div class="grid">
-      <div>
-        <label for="participants">メンバー（1行に1人）</label>
-        <textarea id="participants"></textarea>
-      </div>
-      <div>
-        <label for="judges">事前指定ジャッジ</label>
-        <textarea id="judges"></textarea>
-      </div>
-      <div>
-        <label for="pairs">試合数</label>
-        <select id="pairs"></select>
-      </div>
-      <div>
-        <label for="teamSize">1チームの人数</label>
-        <input id="teamSize" type="number" min="1" max="30" value="3">
-      </div>
+      <div><label for="participants">メンバー（1行に1人）</label><textarea id="participants"></textarea></div>
+      <div><label for="judges">事前指定ジャッジ</label><textarea id="judges"></textarea></div>
+      <div><label for="pairs">試合数</label><select id="pairs"></select></div>
+      <div><label for="teamSize">1チームの人数</label><input id="teamSize" type="number" min="1" max="30" value="3"></div>
     </div>
     <p class="muted">定員を超えたメンバーはジャッジ候補になります。</p>
     <button id="generate" class="full" type="button">チームを割り振る</button>
@@ -243,41 +115,22 @@ header {
   <div class="card">
     <h2 id="formHeading">新規論題の追加</h2>
     <div id="motionForm">
-      <label for="motion">論題 *</label>
-      <input id="motion" placeholder="THW ...">
-
+      <label for="motion">論題 *</label><input id="motion" placeholder="THW ...">
       <div class="grid">
-        <div>
-          <label for="tournament">大会名</label>
-          <input id="tournament" placeholder="HPDU推奨">
-        </div>
-        <div>
-          <label for="year">年度</label>
-          <input id="year" placeholder="2026">
-        </div>
+        <div><label for="tournament">大会名</label><input id="tournament" placeholder="HPDU推奨"></div>
+        <div><label for="year">年度</label><input id="year" placeholder="2026"></div>
       </div>
-
-      <label>
-        <input id="done" type="checkbox">
-        過去に実施したことがある
-      </label>
-
+      <label><input id="done" type="checkbox"> 過去に実施したことがある</label>
       <div id="doneDateBox" class="hidden">
-        <label for="doneDate">実施日（不明なら2024-01-01）</label>
-        <input id="doneDate" type="date">
+        <label for="doneDate">実施日（不明なら2024-01-01）</label><input id="doneDate" type="date">
       </div>
-
       <div class="row" style="margin-top:15px">
         <button id="preview" type="button">入力内容を確認する</button>
-        <button id="cancelEdit" class="secondary hidden" type="button">
-          編集をキャンセル
-        </button>
+        <button id="cancelEdit" class="secondary hidden" type="button">編集をキャンセル</button>
       </div>
     </div>
-
     <div id="previewBox" class="panel hidden">
-      <h3>登録内容の確認</h3>
-      <div id="previewText"></div>
+      <h3>登録内容の確認</h3><div id="previewText"></div>
       <div class="row">
         <button id="revise" class="secondary" type="button">修正する</button>
         <button id="save" class="success" type="button">この内容で決定する</button>
@@ -285,7 +138,6 @@ header {
     </div>
     <div id="formStatus" class="notice hidden" role="status"></div>
   </div>
-
   <div class="card">
     <h2>登録済み論題一覧</h2>
     <input id="manageSearch" type="search" placeholder="キーワード検索">
@@ -326,7 +178,6 @@ header {
 
 <script>
 "use strict";
-
 (() => {
   const $ = id => document.getElementById(id);
   const show = (id, visible) => $(id).classList.toggle("hidden", !visible);
@@ -353,7 +204,6 @@ header {
   }
 
   let currentUser = null;
-  let registering = false;
   let motions = [];
   let selectedMotion = null;
   let pendingId = null;
@@ -374,14 +224,12 @@ header {
         ...(options.headers || {})
       }
     });
-
     const body = await response.json().catch(() => ({}));
 
     if (response.status === 401 && !path.startsWith("/api/auth-")) {
       currentUser = null;
       showAuth("セッションが切れました。もう一度ログインしてください。");
     }
-
     if (!response.ok) {
       throw new Error(apiErrorMessage(body, `APIエラー（${response.status}）`));
     }
@@ -433,6 +281,7 @@ header {
   }
 
   function showAuth(message = "") {
+    currentUser = null;
     show("auth", true);
     show("home", false);
     show("assign", false);
@@ -441,8 +290,12 @@ header {
     show("logout", false);
     $("userLabel").textContent = "";
     $("connection").textContent = "ログインが必要です。";
+    $("loginCode").value = "";
     setMessage("authStatus", message, message ? "error" : "");
-    $("loginPassword").value = "";
+  }
+
+  function displayUser(user) {
+    return user?.displayName || user?.name || user?.userId || user?.id || "ログイン中";
   }
 
   function showApp(user) {
@@ -453,20 +306,10 @@ header {
     show("manage", false);
     show("back", false);
     show("logout", true);
-    $("userLabel").textContent = user?.email || "";
+    $("userLabel").textContent = displayUser(user);
     $("connection").textContent = "論題データを読み込み中…";
     changeView("home");
     fetchMotions();
-  }
-
-  function updateAuthMode() {
-    $("authHeading").textContent = registering ? "初回登録" : "ログイン";
-    $("loginForm").classList.toggle("hidden", registering);
-    show("registerFields", registering);
-    $("toggleRegister").textContent = registering
-      ? "ログイン画面に戻る"
-      : "初めて利用する方はこちら";
-    setMessage("authStatus", "");
   }
 
   async function checkSession() {
@@ -485,79 +328,37 @@ header {
 
   async function login(event) {
     event.preventDefault();
+    if (busy) return;
+
+    const code = $("loginCode").value.trim();
+    if (!code) {
+      setMessage("authStatus", "ログインコードを入力してください。", "error");
+      return;
+    }
+
+    busy = true;
+    $("loginButton").disabled = true;
     setMessage("authStatus", "ログイン中…");
-    const email = $("loginEmail").value.trim();
-    const password = $("loginPassword").value;
 
     try {
       const result = await api("/api/auth-login", {
         method: "POST",
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ code })
       });
       if (!result.user) throw new Error("ログイン情報を確認できませんでした。");
+      $("loginCode").value = "";
       setMessage("authStatus", "");
       showApp(result.user);
     } catch (error) {
       setMessage("authStatus", error.message, "error");
-    }
-  }
-
-  async function register() {
-    const email = $("loginEmail").value.trim();
-    const password = $("registerPassword").value;
-    const confirmation = $("registerPasswordConfirm").value;
-    const inviteCode = $("inviteCode").value;
-
-    if (!email) {
-      setMessage("authStatus", "メールアドレスを入力してください。", "error");
-      return;
-    }
-    if (password.length < 6 || password.length > 128) {
-      setMessage("authStatus", "パスワードは6～128文字で入力してください。", "error");
-      return;
-    }
-    if (password !== confirmation) {
-      setMessage("authStatus", "確認用パスワードが一致しません。", "error");
-      return;
-    }
-    if (!inviteCode.trim()) {
-      setMessage("authStatus", "共通招待コードを入力してください。", "error");
-      return;
-    }
-
-    $("register").disabled = true;
-    setMessage("authStatus", "登録中…");
-
-    try {
-      const result = await api("/api/auth-register", {
-        method: "POST",
-        body: JSON.stringify({ email, password, inviteCode })
-      });
-
-      $("inviteCode").value = "";
-      $("registerPassword").value = "";
-      $("registerPasswordConfirm").value = "";
-
-      if (result.user) {
-        setMessage("authStatus", "");
-        showApp(result.user);
-      } else {
-        registering = false;
-        updateAuthMode();
-        setMessage(
-          "authStatus",
-          result.message || "登録しました。ログインしてください。",
-          "ok"
-        );
-      }
-    } catch (error) {
-      setMessage("authStatus", error.message, "error");
     } finally {
-      $("register").disabled = false;
+      busy = false;
+      $("loginButton").disabled = false;
     }
   }
 
   async function logout() {
+    if (busy) return;
     $("logout").disabled = true;
     try {
       await api("/api/auth-logout", { method: "POST", body: "{}" });
@@ -568,6 +369,7 @@ header {
       currentUser = null;
       motions = [];
       selectedMotion = null;
+      closeRecordModal();
       showAuth("ログアウトしました。");
     }
   }
@@ -586,11 +388,8 @@ header {
       ...customTournaments,
       "その他の大会"
     ])].sort((a, b) => a.localeCompare(b, "ja"));
-
-    const years = [...new Set(
-      motions.map(m => String(m.year || ""))
-        .filter(y => y && y !== "-")
-    )].sort((a, b) => b.localeCompare(a, "ja"));
+    const years = [...new Set(motions.map(m => String(m.year || ""))
+      .filter(y => y && y !== "-"))].sort((a, b) => b.localeCompare(a, "ja"));
 
     updateSelect("preTournament", tournaments, "すべての大会");
     updateSelect("manageTournament", tournaments, "すべての大会");
@@ -614,12 +413,9 @@ header {
       if (m.is_deleted) return false;
       const norm = normalizeTournament(m.tournament);
       const y = String(m.year || "");
-      const target = [m.motion || "", norm, m.tournament || "", y].join(" ");
-
-      if (!matchesKeywords(target, search)) return false;
+      if (!matchesKeywords([m.motion || "", norm, m.tournament || "", y].join(" "), search)) return false;
       if (tournament && norm !== tournament) return false;
       if (year && y !== year) return false;
-
       const done = recentHistory(m).length > 0;
       if (status === "done" && !done) return false;
       if (status === "not_done" && done) return false;
@@ -631,17 +427,11 @@ header {
     const item = element("div", undefined, "item");
     item.append(
       element("strong", m.motion || "論題名なし"),
-      element("div",
-        `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`,
-        "muted")
+      element("div", `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`, "muted")
     );
 
     if (management) {
-      item.append(element(
-        "div",
-        `直近1年の実施回数：${recentHistory(m).length}回`,
-        "muted"
-      ));
+      item.append(element("div", `直近1年の実施回数：${recentHistory(m).length}回`, "muted"));
       const actions = element("div", undefined, "item-actions");
       actions.append(
         makeButton("編集", () => startEdit(m.id)),
@@ -666,14 +456,8 @@ header {
   function renderCandidates() {
     const container = $("candidates");
     container.replaceChildren();
-
-    const candidates = shuffleArray(
-      motions.filter(m => !m.is_deleted).slice()
-    ).slice(0, 4);
-
-    if (!candidates.length) {
-      container.append(element("p", "論題がありません。", "muted"));
-    }
+    const candidates = shuffleArray(motions.filter(m => !m.is_deleted).slice()).slice(0, 4);
+    if (!candidates.length) container.append(element("p", "論題がありません。", "muted"));
     candidates.forEach(m => container.append(motionItem(m)));
     renderPreSearch();
   }
@@ -681,20 +465,15 @@ header {
   function renderPreSearch() {
     const container = $("preResults");
     container.replaceChildren();
-
     const active = $("preSearch").value.trim() ||
       $("preTournament").value || $("preYear").value ||
       $("preStatus").value !== "all";
-
     if (!active) return;
 
     const results = filteredMotions("pre");
     container.append(element("p", `${results.length}件ヒット`, "muted"));
     results.slice(0, 200).forEach(m => container.append(motionItem(m)));
-
-    if (results.length > 200) {
-      container.append(element("p", "先頭200件を表示しています。", "muted"));
-    }
+    if (results.length > 200) container.append(element("p", "先頭200件を表示しています。", "muted"));
   }
 
   function renderManagement() {
@@ -705,37 +484,30 @@ header {
 
     const results = filteredMotions("manage");
     container.append(element("p",
-      `${results.length}件 / 全${motions.filter(m => !m.is_deleted).length}件`,
-      "muted"));
+      `${results.length}件 / 全${motions.filter(m => !m.is_deleted).length}件`, "muted"));
     results.slice(0, 300).forEach(m => container.append(motionItem(m, true)));
-
-    if (results.length > 300) {
-      container.append(element("p", "先頭300件を表示しています。", "muted"));
-    }
+    if (results.length > 300) container.append(element("p", "先頭300件を表示しています。", "muted"));
 
     const deleted = motions.filter(m => m.is_deleted);
     deletedContainer.append(element("p", `${deleted.length}件`, "muted"));
-
     deleted.slice(0, 200).forEach(m => {
       const item = element("div", undefined, "item");
-      item.append(element("strong", m.motion || "論題名なし"));
-      item.append(element("div",
-        `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`,
-        "muted"));
-      item.append(makeButton("復元", () => restoreMotion(m.id), "success small"));
+      item.append(
+        element("strong", m.motion || "論題名なし"),
+        element("div", `${normalizeTournament(m.tournament)} / ${m.year || "年度なし"}`, "muted"),
+        makeButton("復元", () => restoreMotion(m.id), "success small")
+      );
       deletedContainer.append(item);
     });
   }
 
   async function fetchMotions() {
     if (!currentUser) return;
-
     $("connection").textContent = "論題データを読み込み中…";
     try {
       const result = await api("/api/motion-list");
       motions = Array.isArray(result.motions) ? result.motions : [];
-      $("connection").textContent =
-        `ログイン中：${currentUser.email || ""} ・ 論題${motions.length}件`;
+      $("connection").textContent = `ログイン中：${displayUser(currentUser)} ・ 論題${motions.length}件`;
       updateFilters();
       renderCandidates();
       renderManagement();
@@ -761,17 +533,11 @@ header {
 
   async function recordMotion() {
     if (busy || pendingId === null) return;
-
     const id = pendingId;
     busy = true;
     $("record").disabled = true;
-
     try {
-      await api("/api/motion-record", {
-        method: "POST",
-        body: JSON.stringify({ id })
-      });
-
+      await api("/api/motion-record", { method: "POST", body: JSON.stringify({ id }) });
       const m = motions.find(x => String(x.id) === String(id));
       if (m) {
         selectedMotion = m.motion;
@@ -806,9 +572,7 @@ header {
 
   function resetForm() {
     editingId = null;
-    ["motion", "tournament", "year", "doneDate"].forEach(id => {
-      $(id).value = "";
-    });
+    ["motion", "tournament", "year", "doneDate"].forEach(id => $(id).value = "");
     $("done").checked = false;
     show("doneDateBox", false);
     show("cancelEdit", false);
@@ -820,7 +584,6 @@ header {
   function startEdit(id) {
     const m = motions.find(x => String(x.id) === String(id));
     if (!m) return;
-
     editingId = m.id;
     $("motion").value = m.motion || "";
     $("tournament").value = m.tournament === "-" ? "" : m.tournament || "";
@@ -829,9 +592,7 @@ header {
     const history = historyOf(m).sort((a, b) => Date.parse(b) - Date.parse(a));
     $("done").checked = history.length > 0;
     show("doneDateBox", history.length > 0);
-    $("doneDate").value = history.length
-      ? new Date(history[0]).toISOString().slice(0, 10)
-      : "";
+    $("doneDate").value = history.length ? new Date(history[0]).toISOString().slice(0, 10) : "";
 
     $("formHeading").textContent = "論題の編集";
     show("cancelEdit", true);
@@ -857,7 +618,6 @@ header {
       setMessage("formStatus", "論題を入力してください。", "error");
       return;
     }
-
     const duplicate = motions.find(m =>
       !m.is_deleted &&
       String(m.id) !== String(editingId) &&
@@ -865,17 +625,14 @@ header {
       (m.tournament || "").trim().toLowerCase() === v.tournament.toLowerCase() &&
       String(m.year || "").trim().toLowerCase() === v.year.toLowerCase()
     );
-
     if (duplicate) {
-      setMessage("formStatus",
-        "同一の論題・大会名・年度のデータが存在します。", "error");
+      setMessage("formStatus", "同一の論題・大会名・年度のデータが存在します。", "error");
       return;
     }
 
     setMessage("formStatus", "");
     const container = $("previewText");
     container.replaceChildren();
-
     [
       ["論題", v.motion],
       ["大会名", v.tournament || "未入力"],
@@ -886,7 +643,6 @@ header {
       p.append(element("strong", label + "："), element("span", value));
       container.append(p);
     });
-
     show("motionForm", false);
     show("previewBox", true);
   }
@@ -894,15 +650,12 @@ header {
   async function saveMotion() {
     if (busy) return;
     const v = formData();
-
     if (!v.motion) {
       setMessage("formStatus", "論題を入力してください。", "error");
       return;
     }
-
     busy = true;
     $("save").disabled = true;
-
     try {
       await api("/api/motion-write", {
         method: "POST",
@@ -916,7 +669,6 @@ header {
           date: v.done ? v.date : null
         })
       });
-
       resetForm();
       setMessage("formStatus", "保存しました。", "ok");
       await fetchMotions();
@@ -930,9 +682,7 @@ header {
 
   async function deleteMotion(id) {
     const m = motions.find(x => String(x.id) === String(id));
-    if (!m || busy) return;
-    if (!confirm(`「${m.motion}」を削除しますか？`)) return;
-
+    if (!m || busy || !confirm(`「${m.motion}」を削除しますか？`)) return;
     busy = true;
     try {
       await api("/api/motion-write", {
@@ -949,15 +699,10 @@ header {
   }
 
   async function restoreMotion(id) {
-    if (busy) return;
-    if (!confirm("この論題を復元しますか？")) return;
-
+    if (busy || !confirm("この論題を復元しますか？")) return;
     busy = true;
     try {
-      await api("/api/motion-restore", {
-        method: "POST",
-        body: JSON.stringify({ id })
-      });
+      await api("/api/motion-restore", { method: "POST", body: JSON.stringify({ id }) });
       setMessage("formStatus", "復元しました。", "ok");
       await fetchMotions();
     } catch (error) {
@@ -968,10 +713,8 @@ header {
   }
 
   function generateAssignments() {
-    const participants = $("participants").value
-      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-    const judges = $("judges").value
-      .split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const participants = $("participants").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const judges = $("judges").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
     const pairs = Number($("pairs").value);
     const size = Number($("teamSize").value);
     const result = $("assignResult");
@@ -985,42 +728,29 @@ header {
       result.append(element("div", "参加者を入力してください。", "notice error"));
       return;
     }
-
     try {
       localStorage.setItem("debate_participants", $("participants").value);
       localStorage.setItem("debate_judges", $("judges").value);
-    } catch (error) {
-      console.warn(error);
-    }
+    } catch (error) { console.warn(error); }
 
     shuffleArray(participants);
     shuffleArray(judges);
-
     const capacity = pairs * 2 * size;
     const overflow = participants.splice(capacity);
     judges.push(...overflow);
-
-    if (overflow.length) {
-      result.append(element("p",
-        `定員超過の${overflow.length}人をジャッジ候補にしました。`,
-        "notice"));
-    }
+    if (overflow.length) result.append(element("p", `定員超過の${overflow.length}人をジャッジ候補にしました。`, "notice"));
 
     const completePairs = Math.min(pairs, Math.floor(participants.length / (size * 2)));
     if (!completePairs) {
       result.append(element("div", `最低${size * 2}人必要です。`, "notice error"));
       return;
     }
-
     const teams = [];
-    for (let i = 0; i < completePairs * 2; i++) {
-      teams.push(participants.splice(0, size));
-    }
+    for (let i = 0; i < completePairs * 2; i++) teams.push(participants.splice(0, size));
 
     for (let i = 0; i < completePairs; i++) {
       const match = element("div", undefined, "match");
       match.append(element("strong", `Match ${i + 1}`));
-
       [
         ["Government", teams[i * 2].join("、")],
         ["Opposition", teams[i * 2 + 1].join("、")],
@@ -1033,20 +763,12 @@ header {
       });
       result.append(match);
     }
-
-    if (participants.length) {
-      result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
-    }
-    if (judges.length) {
-      result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
-    }
+    if (participants.length) result.append(element("p", "未割り当ての参加者：" + participants.join("、"), "muted"));
+    if (judges.length) result.append(element("p", "その他のジャッジ：" + judges.join("、"), "muted"));
   }
 
   function downloadJSON() {
-    const blob = new Blob(
-      [JSON.stringify(motions, null, 2)],
-      { type: "application/json;charset=utf-8" }
-    );
+    const blob = new Blob([JSON.stringify(motions, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -1058,22 +780,14 @@ header {
   }
 
   function bindEvents() {
-    for (let i = 1; i <= 10; i++) {
-      $("pairs").add(new Option(`${i}組（${i * 2}チーム）`, String(i)));
-    }
+    for (let i = 1; i <= 10; i++) $("pairs").add(new Option(`${i}組（${i * 2}チーム）`, String(i)));
 
     $("loginForm").addEventListener("submit", login);
-    $("toggleRegister").addEventListener("click", () => {
-      registering = !registering;
-      updateAuthMode();
-    });
-    $("register").addEventListener("click", register);
     $("logout").addEventListener("click", logout);
 
     $("goAssign").addEventListener("click", () => changeView("assign"));
     $("goManage").addEventListener("click", () => changeView("manage"));
     $("back").addEventListener("click", () => changeView("home"));
-
     $("shuffle").addEventListener("click", renderCandidates);
     $("generate").addEventListener("click", generateAssignments);
     $("clearChosen").addEventListener("click", () => {
@@ -1084,7 +798,6 @@ header {
     $("closeModal").addEventListener("click", closeRecordModal);
     $("record").addEventListener("click", recordMotion);
     $("done").addEventListener("change", () => show("doneDateBox", $("done").checked));
-
     $("preview").addEventListener("click", previewMotion);
     $("revise").addEventListener("click", () => {
       show("previewBox", false);
@@ -1095,9 +808,9 @@ header {
       resetForm();
       setMessage("formStatus", "");
     });
-
     $("export").addEventListener("click", downloadJSON);
     $("reload").addEventListener("click", fetchMotions);
+
     $("addTournament").addEventListener("click", () => {
       const name = prompt("追加する大会名を入力してください。");
       if (name && name.trim()) {
@@ -1118,13 +831,10 @@ header {
     try {
       $("participants").value = localStorage.getItem("debate_participants") || "";
       $("judges").value = localStorage.getItem("debate_judges") || "";
-    } catch (error) {
-      console.warn(error);
-    }
+    } catch (error) { console.warn(error); }
   }
 
   bindEvents();
-  updateAuthMode();
   checkSession();
 })();
 </script>
