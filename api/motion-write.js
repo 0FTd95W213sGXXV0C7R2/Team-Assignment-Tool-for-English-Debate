@@ -1,6 +1,5 @@
-
 import { createHash } from "node:crypto";
-import { requireAdmin, supabase } from "./_admin.js";
+import { authorizeAdmin, supabase } from "./_admin.js";
 
 function send(res, status, body) {
   return res.status(status).json(body);
@@ -17,9 +16,11 @@ function normalizeRevision(value) {
 
   try {
     const revision = BigInt(value);
+
     if (revision < 0n || revision > 9223372036854775807n) {
       return undefined;
     }
+
     return revision.toString();
   } catch {
     return undefined;
@@ -32,16 +33,20 @@ export default async function handler(req, res) {
     return send(res, 405, { error: "Method not allowed" });
   }
 
-  if (!requireAdmin(req)) {
-    return send(res, 401, { error: "Unauthorized" });
+  const session = await authorizeAdmin(req, res);
+
+  if (!session) {
+    return;
   }
 
   const body = req.body;
+
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return send(res, 400, { error: "Invalid request" });
   }
 
   const { action } = body;
+
   if (!["insert", "update", "delete"].includes(action)) {
     return send(res, 400, { error: "Invalid action" });
   }
@@ -93,8 +98,11 @@ export default async function handler(req, res) {
   }
 
   const token = process.env.ADMIN_API_TOKEN;
+
   if (!token) {
-    return send(res, 500, { error: "Server configuration missing" });
+    return send(res, 500, {
+      error: "Server configuration missing",
+    });
   }
 
   const tokenHash = createHash("sha256")
@@ -113,12 +121,12 @@ export default async function handler(req, res) {
                 motion: motion.trim(),
                 tournament: tournament.trim(),
                 year: String(year),
-                history
+                history,
               }
             : null,
         p_expected_revision: expectedRevision,
-        p_client_hash: tokenHash
-      }
+        p_client_hash: tokenHash,
+      },
     });
 
     return send(res, 200, result);
@@ -126,7 +134,7 @@ export default async function handler(req, res) {
     const message = [
       error?.data?.message,
       error?.message,
-      error?.data?.details
+      error?.data?.details,
     ]
       .filter(Boolean)
       .join(" ");
@@ -161,7 +169,7 @@ export default async function handler(req, res) {
     );
 
     return send(res, 500, {
-      error: "Failed to update motion"
+      error: "Failed to update motion",
     });
   }
 }
