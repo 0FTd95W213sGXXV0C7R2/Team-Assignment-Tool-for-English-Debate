@@ -1,20 +1,21 @@
+
 import { supabase } from "./_admin.js";
 import {
   requireSession,
   sendSessionJson,
 } from "./_session.js";
 
+const PAGE_SIZE = 1000;
+const MAX_OFFSET = 49999;
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({
+    return sendSessionJson(res, 405, {
       error: "Method not allowed",
     });
   }
 
-  // ログイン済みの有効なアカウントであることを確認する。
-  // 管理者権限が停止されたアカウントでも、
-  // ログインが有効なら論題一覧の閲覧は許可する。
   const session = await requireSession(req, res);
 
   if (!session) {
@@ -22,13 +23,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = new URL(
-      req.url,
-      "http://localhost"
-    );
+    const url = new URL(req.url, "http://localhost");
 
     const rawOffset =
-      req.query?.offset ?? url.searchParams.get("offset") ?? "0";
+      req.query?.offset ??
+      url.searchParams.get("offset") ??
+      "0";
 
     const offsetText = String(rawOffset);
 
@@ -43,18 +43,18 @@ export default async function handler(req, res) {
     if (
       !Number.isSafeInteger(offset) ||
       offset < 0 ||
-      offset > 49999
+      offset > MAX_OFFSET
     ) {
       return sendSessionJson(res, 400, {
-        error: "offset は0以上49999以下で指定してください。",
+        error: `offset は0以上${MAX_OFFSET}以下で指定してください。`,
       });
     }
 
+    // 削除済み論題も取得し、復元機能で利用できるようにする。
     const rows = await supabase(
       "motions?select=id,motion,tournament,year,history,revision,is_deleted" +
-        "&is_deleted=eq.false" +
         "&order=id.asc" +
-        `&offset=${offset}&limit=1000`
+        `&offset=${offset}&limit=${PAGE_SIZE}`
     );
 
     if (!Array.isArray(rows)) {
@@ -63,7 +63,11 @@ export default async function handler(req, res) {
       });
     }
 
-    return sendSessionJson(res, 200, rows);
+    return sendSessionJson(res, 200, {
+      motions: rows,
+      offset,
+      limit: PAGE_SIZE,
+    });
   } catch (error) {
     console.error(
       "Motion list retrieval failed:",
