@@ -1,14 +1,13 @@
+
 import {
   getSession,
-  clearSessionCookie,
   sendSessionJson,
 } from "./_session.js";
-
-import { supabase } from "./_admin.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
+
     return res.status(405).json({
       error: "Method not allowed",
     });
@@ -18,34 +17,24 @@ export default async function handler(req, res) {
     const session = await getSession(req);
 
     if (!session) {
-      return sendSessionJson(
-        res,
-        200,
-        {
-          authenticated: false,
-          isAdmin: false,
-        },
-        {
-          "Set-Cookie": clearSessionCookie(),
-        }
-      );
+      return sendSessionJson(res, 200, {
+        authenticated: false,
+        isAdmin: false,
+        user: null,
+      });
     }
-
-    const roles = await supabase(
-      "debate_admin_roles?select=user_id,suspended_at" +
-        `&user_id=eq.${encodeURIComponent(session.userId)}&limit=1`
-    );
-
-    const isAdmin =
-      Array.isArray(roles) &&
-      roles.length === 1 &&
-      roles[0].suspended_at === null;
 
     return sendSessionJson(res, 200, {
       authenticated: true,
-      isAdmin,
+      isAdmin: true,
       userId: session.userId,
+      email: session.email,
+      provider: session.provider,
       expiresAt: session.expiresAt,
+      user: {
+        id: session.userId,
+        email: session.email,
+      },
     });
   } catch (error) {
     console.error(
