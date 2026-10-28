@@ -1,19 +1,22 @@
-
 import {
-  reject,
+  authorizeAdmin,
   supabase,
-  normalizeNonNegativeBigint
+  normalizeNonNegativeBigint,
 } from "./_admin.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({
-      error: "Method not allowed"
+      error: "Method not allowed",
     });
   }
 
-  if (reject(req, res)) return;
+  const session = await authorizeAdmin(req, res);
+
+  if (!session) {
+    return;
+  }
 
   const { id, auditId, expectedRevision } = req.body || {};
   const auditKey = normalizeNonNegativeBigint(auditId);
@@ -28,7 +31,7 @@ export default async function handler(req, res) {
     revision === null
   ) {
     return res.status(400).json({
-      error: "Invalid request"
+      error: "Invalid request",
     });
   }
 
@@ -40,8 +43,8 @@ export default async function handler(req, res) {
         body: {
           p_id: id,
           p_audit_id: auditKey,
-          p_expected_revision: revision
-        }
+          p_expected_revision: revision,
+        },
       }
     );
 
@@ -50,20 +53,20 @@ export default async function handler(req, res) {
     const message = [
       error?.data?.message,
       error?.message,
-      error?.data?.details
+      error?.data?.details,
     ]
       .filter(Boolean)
       .join(" ");
 
     if (message.includes("DUPLICATE_MOTION")) {
       return res.status(409).json({
-        error: "Duplicate motion"
+        error: "Duplicate motion",
       });
     }
 
     if (message.includes("REVISION_CONFLICT")) {
       return res.status(409).json({
-        error: "Revision conflict"
+        error: "Revision conflict",
       });
     }
 
@@ -72,7 +75,7 @@ export default async function handler(req, res) {
       message.includes("SNAPSHOT_NOT_FOUND")
     ) {
       return res.status(404).json({
-        error: "Not found"
+        error: "Not found",
       });
     }
 
@@ -81,7 +84,7 @@ export default async function handler(req, res) {
       message.includes("INVALID_SNAPSHOT")
     ) {
       return res.status(422).json({
-        error: "Invalid restore request"
+        error: "Invalid restore request",
       });
     }
 
@@ -91,8 +94,7 @@ export default async function handler(req, res) {
     );
 
     return res.status(500).json({
-      error: "Restore failed"
+      error: "Restore failed",
     });
   }
 }
-
