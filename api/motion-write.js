@@ -1,3 +1,4 @@
+
 import { createHash } from "node:crypto";
 import { authorizeAdmin, supabase } from "./_admin.js";
 
@@ -27,10 +28,24 @@ function normalizeRevision(value) {
   }
 }
 
+function getErrorMessage(error) {
+  return [
+    error?.data?.message,
+    error?.message,
+    error?.data?.details,
+    error?.data?.hint,
+  ]
+    .filter((value) => typeof value === "string" && value.length > 0)
+    .join(" ");
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return send(res, 405, { error: "Method not allowed" });
+
+    return send(res, 405, {
+      error: "Method not allowed",
+    });
   }
 
   const session = await authorizeAdmin(req, res);
@@ -42,19 +57,36 @@ export default async function handler(req, res) {
   const body = req.body;
 
   if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return send(res, 400, { error: "Invalid request" });
+    return send(res, 400, {
+      error: "Invalid request",
+    });
   }
 
-  const { action } = body;
+  // 旧フロントエンドの "create" を "insert" に正規化する。
+  const action =
+    body.action === "create" ? "insert" : body.action;
 
   if (!["insert", "update", "delete"].includes(action)) {
-    return send(res, 400, { error: "Invalid action" });
+    return send(res, 400, {
+      error: "Invalid action",
+    });
   }
 
-  const id = body.id == null ? null : String(body.id);
+  const id =
+    body.id === undefined || body.id === null
+      ? null
+      : String(body.id).trim();
 
   if (action !== "insert" && (!id || id.length > 100)) {
-    return send(res, 400, { error: "Invalid id" });
+    return send(res, 400, {
+      error: "Invalid id",
+    });
+  }
+
+  if (action === "insert" && id !== null && id.length > 100) {
+    return send(res, 400, {
+      error: "Invalid id",
+    });
   }
 
   const expectedRevision = normalizeRevision(body.expectedRevision);
@@ -63,7 +95,9 @@ export default async function handler(req, res) {
     expectedRevision === undefined ||
     (action !== "insert" && expectedRevision === null)
   ) {
-    return send(res, 400, { error: "Invalid revision" });
+    return send(res, 400, {
+      error: "Invalid revision",
+    });
   }
 
   const row =
@@ -90,10 +124,14 @@ export default async function handler(req, res) {
       !Array.isArray(history) ||
       history.length > 500 ||
       history.some(
-        (item) => typeof item !== "string" || item.length > 40
+        (item) =>
+          typeof item !== "string" ||
+          item.length > 40
       )
     ) {
-      return send(res, 400, { error: "Invalid motion data" });
+      return send(res, 400, {
+        error: "Invalid motion data",
+      });
     }
   }
 
@@ -131,36 +169,42 @@ export default async function handler(req, res) {
 
     return send(res, 200, result);
   } catch (error) {
-    const message = [
-      error?.data?.message,
-      error?.message,
-      error?.data?.details,
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const message = getErrorMessage(error);
 
     if (/REVISION_CONFLICT|revision/i.test(message)) {
-      return send(res, 409, { error: "REVISION_CONFLICT" });
+      return send(res, 409, {
+        error: "REVISION_CONFLICT",
+      });
     }
 
     if (/DUPLICATE_MOTION|duplicate|unique/i.test(message)) {
-      return send(res, 409, { error: "DUPLICATE_MOTION" });
+      return send(res, 409, {
+        error: "DUPLICATE_MOTION",
+      });
     }
 
     if (/NOT_FOUND/i.test(message)) {
-      return send(res, 404, { error: "NOT_FOUND" });
+      return send(res, 404, {
+        error: "NOT_FOUND",
+      });
     }
 
     if (/DELETED/i.test(message)) {
-      return send(res, 409, { error: "MOTION_DELETED" });
+      return send(res, 409, {
+        error: "MOTION_DELETED",
+      });
     }
 
     if (/RATE_LIMIT/i.test(message)) {
-      return send(res, 429, { error: "RATE_LIMITED" });
+      return send(res, 429, {
+        error: "RATE_LIMITED",
+      });
     }
 
     if (/INVALID_/i.test(message)) {
-      return send(res, 400, { error: "INVALID_REQUEST" });
+      return send(res, 400, {
+        error: "INVALID_REQUEST",
+      });
     }
 
     console.error(
@@ -173,3 +217,4 @@ export default async function handler(req, res) {
     });
   }
 }
+
