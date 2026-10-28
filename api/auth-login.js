@@ -1,4 +1,3 @@
-
 import { createHash } from "node:crypto";
 import { supabase } from "./_admin.js";
 import {
@@ -7,182 +6,104 @@ import {
   sendSessionJson,
 } from "./_session.js";
 
-const MAX_LOGIN_ATTEMPTS = 20;
-
 function sha256(value) {
-  return createHash("sha256").update(value, "utf8").digest("hex");
+  return createHash("sha256")
+    .update(value, "utf8")
+    .digest("hex");
 }
 
-function sendError(res, status, message) {
-  return sendSessionJson(res, status, {
-    ok: false,
-    error: message,
-  });
-}
+function getClientIp(req) {
+  // プロキシが付加するヘッダーを無条件に信頼しない。
+  // 本番環境では、信頼できるプロキシが設定する値を使うよう
+  // デプロイ環境に合わせて別途調整する。
+  const forwarded = req.headers?.["x-forwarded-for"];
 
-function getClientAddressKey(req) {
-  // 任意の X-Forwarded-For は信用しない。
-  // 信頼できるプロキシを設定する場合は別途対応する。
-  const address =
-    typeof req.socket?.remoteAddress === "string"
-      ? req.socket.remoteAddress
-      : "unknown";
-
-  return sha256(`debate-login-address:${address}`);
-}
-
-async function consumeLoginAttempt(bucketHash) {
-  const result = await supabase(
-    "rpc/debate_consume_login_attempt",
-    {
-      method: "POST",
-      body: {
-        p_bucket_hash: bucketHash,
-        p_max_attempts: MAX_LOGIN_ATTEMPTS,
-      },
-    },
-  );
-
-  return result === true;
-}
-
-function readCode(body) {
-  if (
-    !body ||
-    typeof body !== "object" ||
-    Array.isArray(body) ||
-    typeof body.code !== "string"
-  ) {
-    return null;
+  if (typeof forwarded === "string" && forwarded.length <= 200) {
+    return forwarded.split(",")[0].trim().slice(0, 100);
   }
 
-  const code = body.code.trim();
+  return "unknown";
+}
 
-  if (!/^[A-Za-z0-9_-]{32,128}$/.test(code)) {
-    return null;
+function readBody(req) {
+  if (req.body && typeof req.body === "object") {
+    return req.body;
   }
 
-  return code;
+  if (typeof req.body === "string") {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-
-    return sendError(
-      res,
-      405,
-      "この操作は許可されていません。",
-    );
+    return res.status(405).json({
+      error: "Method not allowed",
+    });
   }
 
-  let body;
+  const body = readBody(req);
+  const code =
+    typeof body?.code === "string" ? body.code.trim() : "";
+
+  if (!/^[A-Za-z0-9_-]{40,50}$/.test(code)) {
+    return sendSessionJson(res, 400, {
+      error: "ログインコードが正しくありません。",
+    });
+  }
 
   try {
-    if (
-      req.body &&
-      typeof req.body === "object" &&
-      !Buffer.isBuffer(req.body)
-    ) {
-      body = req.body;
-    } else {
-      let raw = "";
+    const ip = getClientIp(req);
+    const bucketHash = sha256(ip);
 
-      for await (const chunk of req) {
-        raw += chunk.toString("utf8");
-
-        if (Buffer.byteLength(raw, "utf8") > 8192) {
-          return sendError(
-            res,
-            413,
-            "送信データの量が上限を超えています。",
-          );
-        }
+    // 既存のDB側レート制限RPCを使用する。
+    // 制限に達した場合はログイン処理を進めない。
+    const attempts = await supabase(
+      "rpc/debate_consume_login_attempt",
+      {
+        method: "POST",
+        body: {
+          p_bucket_hash: bucketHash,
+          p_max_attempts: 20,
+        },
       }
+    );
 
-      body = JSON.parse(raw);
+    if (attempts === false || attempts === null) {
+      return sendSessionJson(res, 429, {
+        error: "ログイン試行回数の上限に達しました。時間をおいて再試行してください。",
+      });
     }
-  } catch {
-    return sendError(
-      res,
-      400,
-      "送信データの形式が正しくありません。",
-    );
-  }
 
-  let allowed;
+    const codeHash = sha256(code);
 
-  try {
-    allowed = await consumeLoginAttempt(
-      getClientAddressKey(req),
-    );
-  } catch (error) {
-    console.error("Login rate-limit check failed:", error);
-
-    return sendError(
-      res,
-      503,
-      "認証サービスを一時的に利用できません。時間をおいて再度お試しください。",
-    );
-  }
-
-  if (!allowed) {
-    return sendError(
-      res,
-      429,
-      "ログイン試行回数が上限に達しました。しばらくしてから再度お試しください。",
-    );
-  }
-
-  const code = readCode(body);
-
-  if (!code) {
-    return sendError(
-      res,
-      401,
-      "ログインコードが正しくありません。",
-    );
-  }
-
-  const codeHash = sha256(code);
-
-  try {
-    const codeRows = await supabase(
-      "debate_login_codes" +
-        "?select=user_id,code_hash,revoked_at" +
-        `&code_hash=eq.${encodeURIComponent(codeHash)}` +
-        "&limit=1",
+    const codes = await supabase(
+      "debate_login_codes?select=user_id,code_hash,revoked_at" +
+        `&code_hash=eq.${encodeURIComponent(codeHash)}&limit=1`
     );
 
     if (
-      !Array.isArray(codeRows) ||
-      codeRows.length !== 1
+      !Array.isArray(codes) ||
+      codes.length !== 1 ||
+      codes[0].revoked_at !== null
     ) {
-      return sendError(
-        res,
-        401,
-        "ログインコードが正しくありません。",
-      );
+      return sendSessionJson(res, 401, {
+        error: "ログインコードが正しくありません。",
+      });
     }
 
-    const loginCode = codeRows[0];
-
-    if (
-      loginCode.revoked_at !== null ||
-      loginCode.code_hash !== codeHash
-    ) {
-      return sendError(
-        res,
-        401,
-        "ログインコードが正しくありません。",
-      );
-    }
+    const loginCode = codes[0];
 
     const members = await supabase(
-      "debate_members" +
-        "?select=user_id,revoked_at" +
-        `&user_id=eq.${encodeURIComponent(loginCode.user_id)}` +
-        "&limit=1",
+      "debate_members?select=user_id,revoked_at" +
+        `&user_id=eq.${encodeURIComponent(loginCode.user_id)}&limit=1`
     );
 
     if (
@@ -190,38 +111,34 @@ export default async function handler(req, res) {
       members.length !== 1 ||
       members[0].revoked_at !== null
     ) {
-      return sendError(
-        res,
-        401,
-        "このアカウントは利用できません。管理者にお問い合わせください。",
-      );
+      return sendSessionJson(res, 401, {
+        error: "このアカウントは利用できません。",
+      });
     }
 
-    const session = await createSession(loginCode.user_id);
+    const { token, expiresAt } = await createSession(
+      loginCode.user_id
+    );
 
     return sendSessionJson(
       res,
       200,
       {
-  ok: true,
-  message: "ログインしました。",
-  user: {
-    id: loginCode.user_id,
-  },
-  expiresAt: session.expiresAt,
-},
-      {
-        "Set-Cookie": sessionCookie(session.token),
+        authenticated: true,
+        expiresAt,
       },
+      {
+        "Set-Cookie": sessionCookie(token),
+      }
     );
   } catch (error) {
-    console.error("Login request failed:", error);
-
-    return sendError(
-      res,
-      503,
-      "ログイン処理に失敗しました。時間をおいて再度お試しください。",
+    console.error(
+      "Login failed:",
+      error?.status || "unknown"
     );
+
+    return sendSessionJson(res, 503, {
+      error: "ログイン処理を完了できませんでした。時間をおいて再試行してください。",
+    });
   }
 }
-
