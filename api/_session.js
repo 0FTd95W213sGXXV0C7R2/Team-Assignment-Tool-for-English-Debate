@@ -22,7 +22,7 @@ function parseCookies(header) {
     try {
       cookies[name] = decodeURIComponent(value);
     } catch {
-      // Ignore malformed cookies.
+      // 不正なCookie値は無視する。
     }
   }
 
@@ -37,16 +37,11 @@ function cookieOptions() {
 }
 
 export function sessionCookie(token) {
-  return (
-    `${SESSION_COOKIE}=${encodeURIComponent(token)}` +
-    `; Max-Age=${SESSION_TTL_SECONDS}; ${cookieOptions()}`
-  );
+  return `${SESSION_COOKIE}=${encodeURIComponent(token)}; Max-Age=${SESSION_TTL_SECONDS}; ${cookieOptions()}`;
 }
 
 export function clearSessionCookie() {
-  return (
-    `${SESSION_COOKIE}=; Max-Age=0; ${cookieOptions()}`
-  );
+  return `${SESSION_COOKIE}=; Max-Age=0; ${cookieOptions()}`;
 }
 
 export function sendSessionJson(res, status, data, headers = {}) {
@@ -73,9 +68,7 @@ export async function createSession(userId) {
 
   await supabase("debate_sessions", {
     method: "POST",
-    headers: {
-      Prefer: "return=minimal",
-    },
+    headers: { Prefer: "return=minimal" },
     body: {
       token_hash: tokenHash,
       user_id: userId,
@@ -83,10 +76,7 @@ export async function createSession(userId) {
     },
   });
 
-  return {
-    token,
-    expiresAt,
-  };
+  return { token, expiresAt };
 }
 
 export async function getSession(req) {
@@ -103,10 +93,8 @@ export async function getSession(req) {
   const tokenHash = sha256(token);
 
   const sessions = await supabase(
-    "debate_sessions" +
-      "?select=token_hash,user_id,expires_at,revoked_at" +
-      `&token_hash=eq.${encodeURIComponent(tokenHash)}` +
-      "&limit=1",
+    "debate_sessions?select=token_hash,user_id,expires_at,revoked_at" +
+      `&token_hash=eq.${encodeURIComponent(tokenHash)}&limit=1`,
   );
 
   if (!Array.isArray(sessions) || sessions.length !== 1) {
@@ -124,10 +112,8 @@ export async function getSession(req) {
   }
 
   const members = await supabase(
-    "debate_members" +
-      "?select=user_id,revoked_at" +
-      `&user_id=eq.${encodeURIComponent(session.user_id)}` +
-      "&limit=1",
+    "debate_members?select=user_id,revoked_at" +
+      `&user_id=eq.${encodeURIComponent(session.user_id)}&limit=1`,
   );
 
   if (
@@ -153,7 +139,7 @@ export async function requireSession(req, res) {
       sendSessionJson(
         res,
         401,
-        { error: "authentication_required" },
+        { error: "ログインが必要です。" },
         { "Set-Cookie": clearSessionCookie() },
       );
 
@@ -165,7 +151,7 @@ export async function requireSession(req, res) {
     console.error("Session verification failed:", error);
 
     sendSessionJson(res, 503, {
-      error: "authentication_temporarily_unavailable",
+      error: "認証サービスを一時的に利用できません。",
     });
 
     return null;
@@ -189,12 +175,8 @@ export async function revokeSession(req) {
     `debate_sessions?token_hash=eq.${encodeURIComponent(tokenHash)}`,
     {
       method: "PATCH",
-      headers: {
-        Prefer: "return=minimal",
-      },
-      body: {
-        revoked_at: new Date().toISOString(),
-      },
+      headers: { Prefer: "return=minimal" },
+      body: { revoked_at: new Date().toISOString() },
     },
   );
 }
