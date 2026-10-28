@@ -1,5 +1,23 @@
 
-function getPublicSupabaseConfig() {
+function sendJson(res, status, data) {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+  });
+
+  res.end(JSON.stringify(data));
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+
+    return sendJson(res, 405, {
+      error: "Method not allowed",
+    });
+  }
+
   const url = process.env.SUPABASE_URL;
   const anonKey =
     process.env.SUPABASE_ANON_KEY ||
@@ -8,39 +26,16 @@ function getPublicSupabaseConfig() {
 
   if (
     !url ||
-    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) ||
     !anonKey ||
-    /\s/.test(anonKey)
+    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)
   ) {
-    return null;
-  }
-
-  return {
-    supabaseUrl: url,
-    supabaseAnonKey: anonKey,
-  };
-}
-
-export default function handler(req, res) {
-  res.setHeader("Cache-Control", "no-store");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
-
-    return res.status(405).json({
-      error: "Method not allowed",
+    return sendJson(res, 503, {
+      error: "Supabase Auth configuration missing",
     });
   }
 
-  const config = getPublicSupabaseConfig();
-
-  if (!config) {
-    return res.status(503).json({
-      error:
-        "Supabase Authの公開設定が不足しています。サーバー環境変数を確認してください。",
-    });
-  }
-
-  return res.status(200).json(config);
+  return sendJson(res, 200, {
+    url,
+    anonKey,
+  });
 }
