@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import authLogin from "./api/auth-login.js";
 import authMe from "./api/auth-me.js";
 import authLogout from "./api/auth-logout.js";
+import authCodeIssue from "./api/auth-code-issue.js";
 
 import motionWrite from "./api/motion-write.js";
 import motionRecord from "./api/motion-record.js";
@@ -31,6 +32,7 @@ const API_ROUTES = new Map([
   ["auth-login", { handler: authLogin, method: "POST" }],
   ["auth-me", { handler: authMe, method: "GET" }],
   ["auth-logout", { handler: authLogout, method: "POST" }],
+  ["auth-code-issue", { handler: authCodeIssue, method: "POST" }],
 
   ["motion-write", { handler: motionWrite, method: "POST" }],
   ["motion-record", { handler: motionRecord, method: "POST" }],
@@ -43,6 +45,8 @@ const API_ROUTES = new Map([
 ]);
 
 function sendJson(res, status, data) {
+  if (res.writableEnded) return;
+
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
@@ -76,9 +80,7 @@ async function readBody(req) {
     length += chunk.length;
 
     if (length > MAX_BODY_BYTES) {
-      const error = new Error(
-        "リクエストのデータ量が上限を超えています。",
-      );
+      const error = new Error("リクエストのデータ量が上限を超えています。");
       error.statusCode = 413;
       throw error;
     }
@@ -86,16 +88,12 @@ async function readBody(req) {
     chunks.push(chunk);
   }
 
-  if (!length) {
-    return undefined;
-  }
+  if (!length) return undefined;
 
   try {
     return JSON.parse(Buffer.concat(chunks).toString("utf8"));
   } catch {
-    const error = new Error(
-      "送信データの形式が正しくありません。",
-    );
+    const error = new Error("送信データの形式が正しくありません。");
     error.statusCode = 400;
     throw error;
   }
@@ -103,6 +101,10 @@ async function readBody(req) {
 
 function responseAdapter(res) {
   return {
+    get writableEnded() {
+      return res.writableEnded;
+    },
+
     get statusCode() {
       return res.statusCode;
     },
@@ -112,17 +114,17 @@ function responseAdapter(res) {
     },
 
     setHeader(name, value) {
-      res.setHeader(name, value);
+      if (!res.writableEnded) res.setHeader(name, value);
       return this;
     },
 
     writeHead(statusCode, headers = {}) {
-      res.writeHead(statusCode, headers);
+      if (!res.writableEnded) res.writeHead(statusCode, headers);
       return this;
     },
 
     end(data) {
-      res.end(data);
+      if (!res.writableEnded) res.end(data);
       return this;
     },
 
@@ -132,9 +134,7 @@ function responseAdapter(res) {
     },
 
     json(data) {
-      if (res.writableEnded) {
-        return this;
-      }
+      if (res.writableEnded) return this;
 
       res.setHeader(
         "Content-Type",
@@ -239,11 +239,7 @@ async function handleStatic(pathname, res, method = "GET") {
       "X-Content-Type-Options": "nosniff",
     });
 
-    if (method === "HEAD") {
-      res.end();
-    } else {
-      res.end(content);
-    }
+    res.end(method === "HEAD" ? undefined : content);
   } catch (error) {
     console.error("Page load failed:", error);
 
@@ -306,3 +302,4 @@ if (
     process.exitCode = 1;
   });
 }
+
