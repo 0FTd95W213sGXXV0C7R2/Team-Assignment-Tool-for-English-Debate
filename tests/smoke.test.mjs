@@ -3,24 +3,48 @@ import assert from "node:assert/strict";
 import { requireAdmin } from "../api/_admin.js";
 import motionWrite from "../api/motion-write.js";
 
+
 function mockResponse() {
   return {
     statusCode: 200,
     headers: {},
     body: undefined,
+    rawBody: undefined,
+
     setHeader(name, value) {
       this.headers[name] = value;
     },
+
+    writeHead(code, headers = {}) {
+      this.statusCode = code;
+      Object.assign(this.headers, headers);
+      return this;
+    },
+
+    end(data) {
+      this.rawBody = data;
+
+      if (typeof data === "string") {
+        try {
+          this.body = JSON.parse(data);
+        } catch {
+          this.body = data;
+        }
+      }
+    },
+
     status(code) {
       this.statusCode = code;
       return this;
     },
+
     json(data) {
       this.body = data;
       return this;
     }
   };
 }
+
 
 test("管理者トークンが必要", () => {
   const original = process.env.ADMIN_API_TOKEN;
