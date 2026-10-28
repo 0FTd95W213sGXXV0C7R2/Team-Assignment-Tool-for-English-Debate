@@ -4,483 +4,808 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>論題管理 | 英語ディベート</title>
+  <title>管理者画面 | 英語ディベート</title>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-      line-height: 1.6;
-      color: #222;
+    :root {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #1e293b;
+      background: #f8fafc;
     }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; }
+    main { max-width: 1050px; margin: auto; }
+    h1 { color: #1d4ed8; }
+    h2 { margin-top: 0; }
+    .panel {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 16px 0;
+      box-shadow: 0 2px 8px #00000008;
+    }
+    label { display: block; font-weight: 600; margin: 12px 0 5px; }
     input, textarea, button {
       box-sizing: border-box;
       font: inherit;
-      padding: 8px;
+      padding: 10px;
+      border-radius: 7px;
     }
-    input, textarea { width: 100%; margin: 4px 0 12px; }
-    button { cursor: pointer; margin: 4px 4px 4px 0; }
-    button:disabled { cursor: not-allowed; opacity: .5; }
-    .panel { border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin: 16px 0; }
-    .muted { color: #666; font-size: .9rem; overflow-wrap: anywhere; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      margin: 3px 0 10px;
+    }
+    textarea { resize: vertical; }
+    button {
+      border: 0;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      margin: 4px 4px 4px 0;
+    }
+    button.secondary { background: #64748b; }
+    button.danger { background: #b91c1c; }
+    button.success { background: #15803d; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .muted { color: #64748b; font-size: .9rem; overflow-wrap: anywhere; }
     .status { white-space: pre-wrap; overflow-wrap: anywhere; }
-    .motion { border-top: 1px solid #ddd; padding: 12px 0; }
-    .motion h3 { margin-bottom: 4px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 6px; }
-    .danger { color: #a00; }
-    .history-entry { border-left: 3px solid #aaa; padding: 8px 12px; margin: 12px 0; background: #f7f7f7; overflow-wrap: anywhere; }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
+    .notice {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      padding: 12px;
+      background: #eff6ff;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .error { color: #991b1b; }
+    .success-text { color: #166534; }
+    .item { border-top: 1px solid #e2e8f0; padding: 14px 0; overflow-wrap: anywhere; }
+    .history-entry { border-left: 3px solid #94a3b8; background: #f8fafc; padding: 10px 12px; margin: 12px 0; }
+    .actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .code-output { font-family: ui-monospace, monospace; word-break: break-all; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    @media (max-width: 650px) {
+      body { padding: 8px; }
+      .panel { padding: 13px; }
+      .grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <h1>論題管理</h1>
+<main>
+  <h1>管理者画面</h1>
   <p><a href="./index.html">チーム分け画面へ戻る</a></p>
 
-  <section class="panel">
-    <h2>管理者認証</h2>
-    <p class="muted">
-      管理者APIトークンを入力してください。URLやソースコードには保存しません。
-      このページを閉じるときはトークンを消去してください。
-    </p>
-    <label for="token">管理者APIトークン</label>
-    <input id="token" type="password" autocomplete="current-password">
-    <button id="connect">接続・一覧を取得</button>
-    <button id="logout">トークンを消去</button>
-    <p id="status" class="status" role="status">未接続</p>
-  </section>
-
-  <section class="panel">
-    <h2 id="formTitle">論題を追加</h2>
-    <form id="motionForm">
-      <label for="motion">論題（Motion）</label>
-      <textarea id="motion" rows="3" maxlength="1500" required placeholder="THW ..."></textarea>
-
-      <label for="tournament">大会名</label>
-      <input id="tournament" maxlength="180" required placeholder="大会名">
-
-      <label for="year">年</label>
-      <input id="year" type="number" min="2000" max="2099" required placeholder="2026">
-
-      <button id="save" type="submit">論題を追加</button>
-      <button id="cancelEdit" type="button" class="hidden">編集をキャンセル</button>
+  <section id="loginPanel" class="panel hidden">
+    <h2>管理者ログイン</h2>
+    <p class="muted">発行済みの個別ログインコードを入力してください。</p>
+    <form id="loginForm">
+      <label for="loginCode">ログインコード</label>
+      <input id="loginCode" type="password" autocomplete="current-password"
+        maxlength="256" required autocapitalize="none" spellcheck="false">
+      <button id="loginButton" type="submit">ログイン</button>
     </form>
-    <p class="muted">
-      編集・削除には revision による競合チェックを使用します。
-      同じ論題が別の操作で更新されていた場合は、再読み込みして確認してください。
-    </p>
+    <p id="loginStatus" class="status" role="status"></p>
   </section>
 
-  <section class="panel">
-    <h2>登録済み論題</h2>
-    <button id="reload">再読み込み</button>
-    <label for="filter">論題・大会名で検索</label>
-    <input id="filter" type="search" placeholder="検索語">
-    <div id="motions"><p>接続後に一覧を表示します。</p></div>
+  <section id="appPanel" class="hidden">
+    <section class="panel">
+      <div class="grid">
+        <div>
+          <h2>セッション</h2>
+          <p id="sessionInfo" class="muted"></p>
+        </div>
+        <div>
+          <button id="logoutButton" class="secondary" type="button">ログアウト</button>
+          <button id="refreshAllButton" type="button">全体を再読み込み</button>
+        </div>
+      </div>
+      <p id="globalStatus" class="status" role="status"></p>
+    </section>
+
+    <section class="panel">
+      <h2>管理者アカウント</h2>
+      <p class="muted">
+        新規アカウントを作成すると、そのアカウント用のログインコードが発行されます。
+        コードは発行時に一度だけ表示されるため、安全な場所に保管してください。
+      </p>
+      <button id="createAccountButton" type="button">新しい管理者アカウントを作成</button>
+      <div id="issuedCodeBox" class="notice hidden" aria-live="polite">
+        <strong id="issuedCodeTitle"></strong>
+        <p id="issuedCodeMessage"></p>
+        <label for="issuedCode">ログインコード</label>
+        <textarea id="issuedCode" class="code-output" rows="3" readonly></textarea>
+        <p id="issuedUserId" class="muted"></p>
+        <button id="copyCodeButton" type="button">コードをコピー</button>
+        <button id="hideCodeButton" class="secondary" type="button">コード表示を閉じる</button>
+      </div>
+
+      <h3>登録済みアカウント</h3>
+      <button id="reloadMembersButton" type="button">アカウント一覧を更新</button>
+      <p class="muted">
+        権限を停止すると、対象アカウントは管理者用APIを利用できなくなります。
+        ログイン自体や一般ユーザー向け機能の停止とは別の操作です。
+      </p>
+      <div id="membersList"><p>読み込み待ちです。</p></div>
+    </section>
+
+    <section class="panel">
+      <h2 id="formTitle">論題を追加</h2>
+      <form id="motionForm">
+        <label for="motion">論題（Motion）</label>
+        <textarea id="motion" rows="3" maxlength="1500" required placeholder="THW ..."></textarea>
+
+        <label for="tournament">大会名</label>
+        <input id="tournament" maxlength="180" required placeholder="大会名">
+
+        <label for="year">年</label>
+        <input id="year" type="number" min="2000" max="2099" required placeholder="2026">
+
+        <button id="saveMotionButton" type="submit">論題を追加</button>
+        <button id="cancelEditButton" class="secondary hidden" type="button">編集をキャンセル</button>
+      </form>
+      <p class="muted">
+        更新・削除では revision による競合チェックを行います。
+        競合が発生した場合は一覧を再読み込みして内容を確認してください。
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>登録済み論題</h2>
+      <button id="reloadMotionsButton" type="button">論題一覧を再読み込み</button>
+      <label for="motionFilter">論題・大会名・IDで検索</label>
+      <input id="motionFilter" type="search" placeholder="検索語">
+      <div id="motionsList"><p>読み込み待ちです。</p></div>
+    </section>
+
+    <section class="panel">
+      <h2>変更履歴</h2>
+      <p id="historyTitle" class="muted">論題の「履歴」を選択してください。</p>
+      <div id="historyList"></div>
+    </section>
   </section>
+</main>
 
-  <section class="panel">
-    <h2>変更履歴</h2>
-    <p id="historyTitle" class="muted">論題の「履歴」を選択してください。</p>
-    <div id="history"></div>
-  </section>
+<script>
+(() => {
+  "use strict";
 
-  <script>
-    const $ = (id) => document.getElementById(id);
-    const list = $("motions");
-    const historyBox = $("history");
+  const $ = (id) => document.getElementById(id);
+  let currentMotions = [];
+  let currentMembers = [];
+  let editingId = null;
+  let busy = false;
 
-    let currentMotions = [];
-    let editingId = null;
-    let historyMotion = null;
-    let busy = false;
+  function setStatus(message, isError = false) {
+    const node = $("globalStatus");
+    node.textContent = message;
+    node.className = "status" + (isError ? " error" : "");
+  }
 
-    function token() {
-      return $("token").value.trim();
+  function setBusy(value) {
+    busy = value;
+    document.querySelectorAll("button, input, textarea").forEach((node) => {
+      if (node.id !== "motionFilter") node.disabled = value;
+    });
+  }
+
+  async function api(url, options = {}) {
+    const headers = new Headers(options.headers || {});
+    if (options.body !== undefined) {
+      headers.set("Content-Type", "application/json");
     }
 
-    function setStatus(message) {
-      $("status").textContent = message;
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: "same-origin",
+      cache: "no-store"
+    });
+
+    const text = await response.text();
+    let data = null;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error("API応答を解析できません（HTTP " + response.status + "）");
     }
 
-    function setBusy(value) {
-      busy = value;
-      document.querySelectorAll("button").forEach((button) => {
-        button.disabled = value;
-      });
+    if (!response.ok) {
+      const messages = {
+        REVISION_CONFLICT: "別の操作で論題が更新されています。再読み込みしてください。",
+        "Revision conflict": "別の操作で論題が更新されています。再読み込みしてください。",
+        DUPLICATE_MOTION: "同じ論題がすでに登録されています。",
+        "Duplicate motion": "同じ論題がすでに登録されています。",
+        MOTION_DELETED: "この論題は削除済みです。再読み込みしてください。",
+        NOT_FOUND: "対象の論題が見つかりません。",
+        "Not found": "対象の論題が見つかりません。",
+        RATE_LIMITED: "操作回数の上限に達しました。時間をおいてください。",
+        Unauthorized: "ログイン状態を確認できません。再ログインしてください。"
+      };
+      throw new Error(messages[data?.error] || data?.error || ("HTTP " + response.status));
     }
 
-    async function api(url, options = {}) {
-      if (!token()) throw new Error("先に管理者APIトークンを入力してください");
+    return data;
+  }
 
-      const headers = new Headers(options.headers || {});
-      headers.set("Authorization", "Bearer " + token());
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    node.textContent = text == null ? "" : String(text);
+    if (className) node.className = className;
+    return node;
+  }
 
-      if (options.body !== undefined) {
-        headers.set("Content-Type", "application/json");
-      }
+  function formatDate(value) {
+    if (!value) return "日時不明";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("ja-JP");
+  }
 
-      const response = await fetch(url, { ...options, headers });
-      const text = await response.text();
-      let data = null;
+  function clearIssuedCode() {
+    $("issuedCode").value = "";
+    $("issuedUserId").textContent = "";
+    $("issuedCodeBox").classList.add("hidden");
+  }
 
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        throw new Error("API応答を解析できません（HTTP " + response.status + "）");
-      }
+  function resetMotionForm() {
+    editingId = null;
+    $("motionForm").reset();
+    $("formTitle").textContent = "論題を追加";
+    $("saveMotionButton").textContent = "論題を追加";
+    $("cancelEditButton").classList.add("hidden");
+  }
 
-      if (!response.ok) {
-        const messages = {
-          REVISION_CONFLICT: "別の操作で論題が更新されています。再読み込みしてください。",
-          "Revision conflict": "別の操作で論題が更新されています。再読み込みしてください。",
-          DUPLICATE_MOTION: "同じ論題がすでに登録されています。",
-          "Duplicate motion": "同じ論題がすでに登録されています。",
-          MOTION_DELETED: "この論題は削除済みです。再読み込みしてください。",
-          NOT_FOUND: "対象の論題が見つかりません。",
-          "Not found": "対象の論題が見つかりません。",
-          RATE_LIMITED: "操作回数の上限に達しました。時間をおいてください。",
-          Unauthorized: "認証に失敗しました。トークンを確認してください。"
-        };
-        throw new Error(messages[data?.error] || data?.error || ("HTTP " + response.status));
-      }
+  async function checkSession() {
+    $("loginPanel").classList.add("hidden");
+    $("appPanel").classList.add("hidden");
+    $("loginStatus").textContent = "ログイン状態を確認しています…";
 
-      return data;
-    }
+    try {
+      const result = await api("/api/auth-me");
 
-    function el(tag, text, className) {
-      const node = document.createElement(tag);
-      node.textContent = text == null ? "" : String(text);
-      if (className) node.className = className;
-      return node;
-    }
-
-    function formatDate(value) {
-      if (!value) return "日時不明";
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("ja-JP");
-    }
-
-    function resetForm() {
-      editingId = null;
-      $("motionForm").reset();
-      $("formTitle").textContent = "論題を追加";
-      $("save").textContent = "論題を追加";
-      $("cancelEdit").classList.add("hidden");
-    }
-
-    function startEdit(item) {
-      if (item.is_deleted) {
-        setStatus("削除済みの論題は直接編集できません。履歴から復元してください。");
+      if (!result?.authenticated) {
+        $("loginPanel").classList.remove("hidden");
+        $("loginStatus").textContent = "ログインしてください。";
         return;
       }
 
-      editingId = item.id;
-      $("motion").value = item.motion || "";
-      $("tournament").value = item.tournament || "";
-      $("year").value = item.year || "";
-      $("formTitle").textContent = "論題を編集";
-      $("save").textContent = "変更を保存";
-      $("cancelEdit").classList.remove("hidden");
-      $("motion").focus();
-      setStatus("編集中: " + item.id);
+      if (!result.isAdmin) {
+        $("loginPanel").classList.remove("hidden");
+        $("loginStatus").textContent =
+          "このアカウントには管理者権限がありません。別の管理者アカウントを使用してください。";
+        return;
+      }
+
+      $("appPanel").classList.remove("hidden");
+      $("sessionInfo").textContent =
+        "管理者としてログイン中 / セッション期限: " +
+        formatDate(result.expiresAt);
+
+      await Promise.all([loadMembers(), loadMotions()]);
+    } catch (error) {
+      $("loginPanel").classList.remove("hidden");
+      $("loginStatus").textContent =
+        "ログイン状態を確認できませんでした: " + error.message;
+    }
+  }
+
+  async function login(event) {
+    event.preventDefault();
+    if (busy) return;
+
+    const code = $("loginCode").value.trim();
+    if (!code) {
+      $("loginStatus").textContent = "ログインコードを入力してください。";
+      return;
     }
 
-    async function loadMotions() {
-      list.replaceChildren(el("p", "読み込み中…"));
+    $("loginButton").disabled = true;
+    $("loginStatus").textContent = "ログインしています…";
 
-      try {
-        const data = await api("/api/motion-admin-list");
-        const motions = Array.isArray(data) ? data : data?.motions;
+    try {
+      await api("/api/auth-login", {
+        method: "POST",
+        body: JSON.stringify({ code })
+      });
+      $("loginCode").value = "";
+      await checkSession();
+    } catch (error) {
+      $("loginStatus").textContent = "ログイン失敗: " + error.message;
+    } finally {
+      $("loginButton").disabled = false;
+    }
+  }
 
-        if (!Array.isArray(motions)) {
-          throw new Error("論題一覧の応答形式が不正です");
+  async function logout() {
+    if (busy) return;
+
+    try {
+      await api("/api/auth-logout", { method: "POST" });
+    } catch (error) {
+      setStatus("ログアウト処理でエラーが発生しました: " + error.message, true);
+    }
+
+    currentMembers = [];
+    currentMotions = [];
+    clearIssuedCode();
+    resetMotionForm();
+    $("membersList").replaceChildren();
+    $("motionsList").replaceChildren();
+    $("historyList").replaceChildren();
+    $("loginPanel").classList.remove("hidden");
+    $("appPanel").classList.add("hidden");
+    $("loginStatus").textContent = "ログアウトしました。";
+  }
+
+  async function issueCode(userId) {
+    if (busy) return;
+    const isNew = !userId;
+
+    if (isNew && !confirm("新しい管理者アカウントを作成し、ログインコードを発行しますか？")) {
+      return;
+    }
+
+    if (!isNew && !confirm("このアカウントのログインコードを再発行しますか？\n以前のコードは使用できなくなります。")) {
+      return;
+    }
+
+    setBusy(true);
+    clearIssuedCode();
+
+    try {
+      const payload = userId ? { userId } : {};
+      const result = await api("/api/auth-code-issue", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      $("issuedCodeTitle").textContent = isNew
+        ? "新しいアカウントのログインコード"
+        : "再発行されたログインコード";
+      $("issuedCodeMessage").textContent = result.message || "";
+      $("issuedCode").value = result.code || "";
+      $("issuedUserId").textContent = "ユーザーID: " + (result.userId || userId || "");
+      $("issuedCodeBox").classList.remove("hidden");
+
+      setStatus("ログインコードを発行しました。コードを安全な場所に保管してください。");
+      await loadMembers();
+    } catch (error) {
+      setStatus("コード発行失敗: " + error.message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadMembers() {
+    $("membersList").replaceChildren(element("p", "読み込み中…"));
+
+    try {
+      const data = await api("/api/admin-members");
+      if (!Array.isArray(data?.members)) {
+        throw new Error("アカウント一覧の応答形式が不正です。");
+      }
+      currentMembers = data.members;
+      renderMembers();
+    } catch (error) {
+      $("membersList").replaceChildren(element("p", error.message, "error"));
+    }
+  }
+
+  function renderMembers() {
+    const box = $("membersList");
+    box.replaceChildren();
+
+    if (!currentMembers.length) {
+      box.append(element("p", "アカウントがありません。"));
+      return;
+    }
+
+    for (const member of currentMembers) {
+      const card = document.createElement("article");
+      card.className = "item";
+
+      card.append(element("strong", member.userId));
+      card.append(element(
+        "p",
+        "登録日時: " + formatDate(member.joinedAt),
+        "muted"
+      ));
+
+      let status = member.accountRevoked
+        ? "アカウント停止中"
+        : !member.isAdmin
+          ? "管理者ロールなし"
+          : member.adminSuspended
+            ? "管理者権限停止中"
+            : "管理者権限有効";
+
+      card.append(element("p", "状態: " + status));
+
+      if (member.suspensionReason) {
+        card.append(element("p", "停止理由: " + member.suspensionReason));
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      if (!member.accountRevoked && member.isAdmin && !member.isCurrentUser) {
+        const codeButton = element("button", "ログインコード再発行");
+        codeButton.type = "button";
+        codeButton.addEventListener("click", () => issueCode(member.userId));
+        actions.append(codeButton);
+
+        if (member.adminSuspended) {
+          const reinstateButton = element("button", "権限を再有効化", "success");
+          reinstateButton.type = "button";
+          reinstateButton.addEventListener("click", () =>
+            changeAdminRole(member, "reinstate")
+          );
+          actions.append(reinstateButton);
+        } else {
+          const suspendButton = element("button", "管理者権限を停止", "danger");
+          suspendButton.type = "button";
+          suspendButton.addEventListener("click", () =>
+            changeAdminRole(member, "suspend")
+          );
+          actions.append(suspendButton);
         }
-
-        currentMotions = motions;
-        renderMotions();
-        setStatus("論題一覧を取得しました（" + motions.length + "件）");
-      } catch (error) {
-        list.replaceChildren(el("p", error.message, "danger"));
-        setStatus("取得失敗: " + error.message);
       }
-    }
 
-    function renderMotions() {
-      const query = $("filter").value.trim().toLowerCase();
-      const filtered = currentMotions.filter((item) => {
-        const text = [item.motion, item.tournament, item.year, item.id]
-          .filter(Boolean).join(" ").toLowerCase();
-        return text.includes(query);
+      card.append(actions);
+      box.append(card);
+    }
+  }
+
+  async function changeAdminRole(member, action) {
+    if (busy) return;
+
+    const isSuspend = action === "suspend";
+    const reason = isSuspend
+      ? prompt("停止理由（任意・最大500文字）を入力してください。", "") ?? null
+      : null;
+
+    if (isSuspend && reason === null) return;
+
+    if (!confirm(
+      isSuspend
+        ? "このアカウントの管理者権限を停止しますか？"
+        : "このアカウントの管理者権限を再有効化しますか？"
+    )) return;
+
+    setBusy(true);
+    try {
+      const result = await api("/api/admin-members", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: member.userId,
+          action,
+          reason
+        })
       });
 
-      list.replaceChildren();
+      setStatus(result.message || "権限を更新しました。");
+      await loadMembers();
+    } catch (error) {
+      setStatus("権限変更失敗: " + error.message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
-      if (!filtered.length) {
-        list.append(el("p", "該当する論題はありません。"));
+  async function loadMotions() {
+    $("motionsList").replaceChildren(element("p", "読み込み中…"));
+
+    try {
+      const data = await api("/api/motion-admin-list");
+      const motions = Array.isArray(data) ? data : data?.motions;
+
+      if (!Array.isArray(motions)) {
+        throw new Error("論題一覧の応答形式が不正です。");
+      }
+
+      currentMotions = motions;
+      renderMotions();
+      setStatus("論題一覧を取得しました（" + motions.length + "件）。");
+    } catch (error) {
+      $("motionsList").replaceChildren(element("p", error.message, "error"));
+      setStatus("論題一覧の取得失敗: " + error.message, true);
+    }
+  }
+
+  function startEdit(item) {
+    if (item.is_deleted) {
+      setStatus("削除済みの論題は直接編集できません。履歴から復元してください。", true);
+      return;
+    }
+
+    editingId = item.id;
+    $("motion").value = item.motion || "";
+    $("tournament").value = item.tournament || "";
+    $("year").value = item.year || "";
+    $("formTitle").textContent = "論題を編集";
+    $("saveMotionButton").textContent = "変更を保存";
+    $("cancelEditButton").classList.remove("hidden");
+    $("motion").focus();
+    setStatus("編集中: " + item.id);
+  }
+
+  function renderMotions() {
+    const query = $("motionFilter").value.trim().toLowerCase();
+    const filtered = currentMotions.filter((item) => {
+      const text = [item.motion, item.tournament, item.year, item.id]
+        .filter(Boolean).join(" ").toLowerCase();
+      return text.includes(query);
+    });
+
+    const box = $("motionsList");
+    box.replaceChildren();
+
+    if (!filtered.length) {
+      box.append(element("p", "該当する論題はありません。"));
+      return;
+    }
+
+    for (const item of filtered) {
+      const card = document.createElement("article");
+      card.className = "item";
+      card.append(element("h3", item.motion || "(論題なし)"));
+      card.append(element("p", [item.tournament, item.year].filter(Boolean).join(" / ")));
+      card.append(element(
+        "p",
+        "ID: " + item.id +
+        " / revision: " + (item.revision ?? "不明") +
+        " / 状態: " + (item.is_deleted ? "削除済み" : "有効"),
+        "muted"
+      ));
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const historyButton = element("button", "履歴", "secondary");
+      historyButton.type = "button";
+      historyButton.addEventListener("click", () => loadHistory(item));
+      actions.append(historyButton);
+
+      if (!item.is_deleted) {
+        const editButton = element("button", "編集");
+        editButton.type = "button";
+        editButton.addEventListener("click", () => startEdit(item));
+        actions.append(editButton);
+
+        const deleteButton = element("button", "論題を削除", "danger");
+        deleteButton.type = "button";
+        deleteButton.addEventListener("click", () => deleteMotion(item));
+        actions.append(deleteButton);
+      }
+
+      card.append(actions);
+      box.append(card);
+    }
+  }
+
+  async function loadHistory(item) {
+    $("historyTitle").textContent = "対象: " + (item.motion || item.id);
+    const box = $("historyList");
+    box.replaceChildren(element("p", "履歴を取得中…"));
+
+    try {
+      const data = await api(
+        "/api/motion-history?motionId=" + encodeURIComponent(item.id)
+      );
+      if (!Array.isArray(data?.history)) {
+        throw new Error("変更履歴の応答形式が不正です。");
+      }
+
+      box.replaceChildren();
+
+      if (!data.history.length) {
+        box.append(element("p", "変更履歴はありません。"));
         return;
       }
 
-      for (const item of filtered) {
-        const card = document.createElement("article");
-        card.className = "motion";
-
-        card.append(el("h3", item.motion || "(論題なし)"));
-        card.append(el("p", [item.tournament, item.year].filter(Boolean).join(" / ")));
-        card.append(el("p",
-          "ID: " + item.id +
-          " / revision: " + (item.revision ?? "不明") +
-          " / 状態: " + (item.is_deleted ? "削除済み" : "有効"),
+      for (const entry of data.history) {
+        const block = document.createElement("article");
+        block.className = "history-entry";
+        block.append(element(
+          "strong",
+          (entry.action || "変更") + " / " + formatDate(entry.changed_at)
+        ));
+        block.append(element(
+          "p",
+          "履歴ID: " + entry.audit_id + " / 論題ID: " + entry.motion_id,
           "muted"
         ));
 
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        const historyButton = el("button", "履歴");
-        historyButton.type = "button";
-        historyButton.addEventListener("click", () => loadHistory(item));
-
-        actions.append(historyButton);
-
-        if (!item.is_deleted) {
-          const editButton = el("button", "編集");
-          editButton.type = "button";
-          editButton.addEventListener("click", () => startEdit(item));
-          actions.append(editButton);
-
-          const deleteButton = el("button", "論題を削除", "danger");
-          deleteButton.type = "button";
-          deleteButton.addEventListener("click", () => deleteMotion(item));
-          actions.append(deleteButton);
+        if (entry.before_data) {
+          block.append(element("p", "変更前"));
+          block.append(element("pre", JSON.stringify(entry.before_data, null, 2)));
         }
 
-        card.append(actions);
-        list.append(card);
+        if (entry.after_data) {
+          block.append(element("p", "変更後"));
+          block.append(element("pre", JSON.stringify(entry.after_data, null, 2)));
+        }
+
+        const canRestore =
+          entry.before_data &&
+          ["UPDATE", "DELETE"].includes(String(entry.action || "").toUpperCase());
+
+        if (canRestore) {
+          const restoreButton = element("button", "この履歴の状態に復元");
+          restoreButton.type = "button";
+          restoreButton.addEventListener("click", () => restoreHistory(item, entry));
+          block.append(restoreButton);
+        }
+
+        box.append(block);
       }
+    } catch (error) {
+      box.replaceChildren(element("p", error.message, "error"));
+    }
+  }
+
+  async function deleteMotion(item) {
+    if (item.revision === undefined || item.revision === null) {
+      setStatus("revision がないため削除できません。", true);
+      return;
     }
 
-    async function loadHistory(item) {
-      historyMotion = item;
-      $("historyTitle").textContent = "対象: " + (item.motion || item.id);
-      historyBox.replaceChildren(el("p", "履歴を取得中…"));
+    if (!confirm(
+      "この論題を論理削除します。\n\n" + item.motion +
+      "\n\nデータベースから物理削除はしません。続行しますか？"
+    )) return;
 
-      try {
-        const data = await api(
-          "/api/motion-history?motionId=" + encodeURIComponent(item.id)
-        );
-        const entries = data?.history;
+    setBusy(true);
+    try {
+      await api("/api/motion-write", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "delete",
+          id: String(item.id),
+          expectedRevision: item.revision
+        })
+      });
 
-        if (!Array.isArray(entries)) {
-          throw new Error("変更履歴の応答形式が不正です");
-        }
+      if (String(editingId) === String(item.id)) resetMotionForm();
+      setStatus("論題を論理削除しました。");
+      await loadMotions();
+    } catch (error) {
+      setStatus("削除失敗: " + error.message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
-        historyBox.replaceChildren();
+  async function restoreHistory(item, entry) {
+    if (!confirm(
+      "履歴ID " + entry.audit_id + " の変更前データに復元します。\n" +
+      "現在の内容は変更履歴に残ります。続行しますか？"
+    )) return;
 
-        if (!entries.length) {
-          historyBox.append(el("p", "変更履歴はありません。"));
-          return;
-        }
+    setBusy(true);
+    try {
+      await api("/api/motion-restore", {
+        method: "POST",
+        body: JSON.stringify({
+          id: String(item.id),
+          auditId: entry.audit_id,
+          expectedRevision: item.revision
+        })
+      });
 
-        for (const entry of entries) {
-          const block = document.createElement("article");
-          block.className = "history-entry";
+      setStatus("復元リクエストが完了しました。");
+      await loadMotions();
 
-          block.append(el("strong", (entry.action || "変更") + " / " + formatDate(entry.changed_at)));
-          block.append(el("p", "履歴ID: " + entry.audit_id + " / 論題ID: " + entry.motion_id, "muted"));
+      const updated = currentMotions.find(
+        (motion) => String(motion.id) === String(item.id)
+      );
+      if (updated) await loadHistory(updated);
+    } catch (error) {
+      setStatus("復元失敗: " + error.message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
-          const before = entry.before_data;
-          const after = entry.after_data;
+  async function saveMotion(event) {
+    event.preventDefault();
+    if (busy) return;
 
-          if (before) {
-            block.append(el("p", "変更前"));
-            const pre = document.createElement("pre");
-            pre.textContent = JSON.stringify(before, null, 2);
-            block.append(pre);
-          }
+    const motion = $("motion").value.trim();
+    const tournament = $("tournament").value.trim();
+    const yearText = $("year").value.trim();
+    const year = Number(yearText);
 
-          if (after) {
-            block.append(el("p", "変更後"));
-            const pre = document.createElement("pre");
-            pre.textContent = JSON.stringify(after, null, 2);
-            block.append(pre);
-          }
-
-          const snapshot = entry.before_data;
-          const isRestorable =
-            snapshot &&
-            ["UPDATE", "DELETE"].includes(String(entry.action || "").toUpperCase());
-
-          if (isRestorable) {
-            const restoreButton = el("button", "この履歴の状態に復元");
-            restoreButton.type = "button";
-            restoreButton.addEventListener("click", () => restoreHistory(item, entry));
-            block.append(restoreButton);
-          }
-
-          historyBox.append(block);
-        }
-      } catch (error) {
-        historyBox.replaceChildren(el("p", error.message, "danger"));
-        setStatus("履歴取得失敗: " + error.message);
-      }
+    if (
+      !motion ||
+      motion.length > 1500 ||
+      !tournament ||
+      tournament.length > 180 ||
+      !/^\d{4}$/.test(yearText) ||
+      !Number.isInteger(year) ||
+      year < 2000 ||
+      year > 2099
+    ) {
+      setStatus("論題・大会名・2000〜2099の年を正しく入力してください。", true);
+      return;
     }
 
-    async function deleteMotion(item) {
-      if (item.revision === undefined || item.revision === null) {
-        setStatus("revision がないため削除できません。");
-        return;
-      }
+    const existing = editingId === null
+      ? null
+      : currentMotions.find((item) => String(item.id) === String(editingId));
 
-      if (!confirm(
-        "この論題を論理削除します。\n\n" + item.motion +
-        "\n\nデータベースから物理削除はしません。続行しますか？"
-      )) return;
-
-      setBusy(true);
-      try {
-        await api("/api/motion-write", {
-          method: "POST",
-          body: JSON.stringify({
-            action: "delete",
-            id: String(item.id),
-            expectedRevision: item.revision
-          })
-        });
-
-        if (editingId === item.id) resetForm();
-        setStatus("論題を論理削除しました。");
-        await loadMotions();
-      } catch (error) {
-        setStatus("削除失敗: " + error.message);
-      } finally {
-        setBusy(false);
-      }
+    if (editingId !== null && (!existing || existing.is_deleted)) {
+      setStatus("編集対象が見つからないか、削除済みです。再読み込みしてください。", true);
+      return;
     }
 
-    async function restoreHistory(item, entry) {
-      if (!confirm(
-        "履歴ID " + entry.audit_id + " の変更前データに復元します。\n" +
-        "現在の内容は変更履歴に残ります。続行しますか？"
-      )) return;
-
-      setBusy(true);
-      try {
-        await api("/api/motion-restore", {
-          method: "POST",
-          body: JSON.stringify({
-            id: String(item.id),
-            auditId: entry.audit_id,
-            expectedRevision: item.revision
-          })
-        });
-
-        setStatus("復元リクエストが完了しました。");
-        await loadMotions();
-
-        const updated = currentMotions.find((motion) => String(motion.id) === String(item.id));
-        if (updated) await loadHistory(updated);
-      } catch (error) {
-        setStatus("復元失敗: " + error.message);
-      } finally {
-        setBusy(false);
-      }
+    const isEdit = editingId !== null;
+    if (!confirm(isEdit ? "この論題の変更を保存しますか？" : "この論題を追加しますか？")) {
+      return;
     }
 
-    $("motionForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
+    const payload = {
+      action: isEdit ? "update" : "insert",
+      motion,
+      tournament,
+      year
+    };
 
-      const motion = $("motion").value.trim();
-      const tournament = $("tournament").value.trim();
-      const yearText = $("year").value.trim();
-      const year = Number(yearText);
+    if (isEdit) {
+      payload.id = String(existing.id);
+      payload.expectedRevision = existing.revision;
+      payload.history = Array.isArray(existing.history) ? existing.history : [];
+    }
 
-      if (!token()) {
-        setStatus("先に管理者APIトークンを入力してください。");
-        return;
-      }
+    setBusy(true);
+    try {
+      await api("/api/motion-write", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
 
-      if (
-        !motion ||
-        motion.length > 1500 ||
-        !tournament ||
-        tournament.length > 180 ||
-        !/^\d{4}$/.test(yearText) ||
-        !Number.isInteger(year) ||
-        year < 2000 ||
-        year > 2099
-      ) {
-        setStatus("論題・大会名・2000〜2099の年を正しく入力してください。");
-        return;
-      }
+      resetMotionForm();
+      setStatus(isEdit ? "変更を保存しました。" : "論題を追加しました。");
+      await loadMotions();
+    } catch (error) {
+      setStatus("保存失敗: " + error.message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
-      const existing = editingId === null
-        ? null
-        : currentMotions.find((item) => String(item.id) === String(editingId));
+  $("loginForm").addEventListener("submit", login);
+  $("logoutButton").addEventListener("click", logout);
+  $("createAccountButton").addEventListener("click", () => issueCode(null));
+  $("reloadMembersButton").addEventListener("click", loadMembers);
+  $("reloadMotionsButton").addEventListener("click", loadMotions);
+  $("refreshAllButton").addEventListener("click", async () => {
+    await checkSession();
+  });
+  $("motionFilter").addEventListener("input", renderMotions);
+  $("motionForm").addEventListener("submit", saveMotion);
+  $("cancelEditButton").addEventListener("click", () => {
+    resetMotionForm();
+    setStatus("編集をキャンセルしました。");
+  });
+  $("copyCodeButton").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($("issuedCode").value);
+      setStatus("ログインコードをコピーしました。");
+    } catch {
+      $("issuedCode").focus();
+      $("issuedCode").select();
+      setStatus("自動コピーできませんでした。選択されたコードを手動でコピーしてください。", true);
+    }
+  });
+  $("hideCodeButton").addEventListener("click", clearIssuedCode);
 
-      if (editingId !== null && (!existing || existing.is_deleted)) {
-        setStatus("編集対象が見つからないか、削除済みです。再読み込みしてください。");
-        return;
-      }
-
-      const isEdit = editingId !== null;
-
-      if (!confirm(
-        isEdit ? "この論題の変更を保存しますか？" : "この論題を追加しますか？"
-      )) return;
-
-      setBusy(true);
-      try {
-        const payload = {
-          action: isEdit ? "update" : "insert",
-          motion,
-          tournament,
-          year
-        };
-
-        if (isEdit) {
-          payload.id = String(existing.id);
-          payload.expectedRevision = existing.revision;
-          payload.history = Array.isArray(existing.history) ? existing.history : [];
-        }
-
-        await api("/api/motion-write", {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-
-        resetForm();
-        setStatus(isEdit ? "変更を保存しました。" : "論題を追加しました。");
-        await loadMotions();
-      } catch (error) {
-        setStatus("保存失敗: " + error.message);
-      } finally {
-        setBusy(false);
-      }
-    });
-
-    $("connect").addEventListener("click", loadMotions);
-    $("reload").addEventListener("click", loadMotions);
-    $("filter").addEventListener("input", renderMotions);
-    $("cancelEdit").addEventListener("click", () => {
-      resetForm();
-      setStatus("編集をキャンセルしました。");
-    });
-
-    $("logout").addEventListener("click", () => {
-      $("token").value = "";
-      currentMotions = [];
-      historyMotion = null;
-      resetForm();
-      list.replaceChildren(el("p", "接続後に一覧を表示します。"));
-      historyBox.replaceChildren();
-      $("historyTitle").textContent = "論題の「履歴」を選択してください。";
-      setStatus("トークンを消去しました。");
-    });
-  </script>
+  checkSession();
+})();
+</script>
 </body>
 </html>
-
-
-  
