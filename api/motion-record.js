@@ -1,10 +1,56 @@
+
 import { createHash } from "node:crypto";
 import { authorizeAdmin, supabase } from "./_admin.js";
+
+function send(res, status, body) {
+  return res.status(status).json(body);
+}
+
+function normalizeRevision(value) {
+  if (
+    value === undefined ||
+    value === null ||
+    !/^\d+$/.test(String(value))
+  ) {
+    return null;
+  }
+
+  try {
+    const revision = BigInt(value);
+
+    if (
+      revision < 0n ||
+      revision > 9223372036854775807n
+    ) {
+      return null;
+    }
+
+    return revision.toString();
+  } catch {
+    return null;
+  }
+}
+
+function getErrorMessage(error) {
+  return [
+    error?.data?.message,
+    error?.message,
+    error?.data?.details,
+    error?.data?.hint,
+  ]
+    .filter(
+      (value) =>
+        typeof value === "string" &&
+        value.length > 0
+    )
+    .join(" ");
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({
+
+    return send(res, 405, {
       error: "Method not allowed",
     });
   }
@@ -17,42 +63,33 @@ export default async function handler(req, res) {
 
   const body = req.body;
 
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return res.status(400).json({
-      error: "Invalid request",
-    });
-  }
-
-  const { id, expectedRevision } = body;
-
   if (
-    typeof id !== "string" ||
-    id.length < 1 ||
-    id.length > 100 ||
-    expectedRevision === undefined ||
-    expectedRevision === null ||
-    !/^\d+$/.test(String(expectedRevision))
+    !body ||
+    typeof body !== "object" ||
+    Array.isArray(body)
   ) {
-    return res.status(400).json({
+    return send(res, 400, {
       error: "Invalid request",
     });
   }
 
-  let revision;
+  const id =
+    typeof body.id === "string"
+      ? body.id.trim()
+      : "";
 
-  try {
-    revision = BigInt(expectedRevision);
+  if (!id || id.length > 100) {
+    return send(res, 400, {
+      error: "Invalid id",
+    });
+  }
 
-    if (
-      revision < 0n ||
-      revision > 9223372036854775807n
-    ) {
-      return res.status(400).json({
-        error: "Invalid revision",
-      });
-    }
-  } catch {
-    return res.status(400).json({
+  const expectedRevision = normalizeRevision(
+    body.expectedRevision
+  );
+
+  if (expectedRevision === null) {
+    return send(res, 400, {
       error: "Invalid revision",
     });
   }
@@ -60,7 +97,7 @@ export default async function handler(req, res) {
   const token = process.env.ADMIN_API_TOKEN;
 
   if (!token) {
-    return res.status(500).json({
+    return send(res, 500, {
       error: "Server configuration missing",
     });
   }
@@ -76,50 +113,44 @@ export default async function handler(req, res) {
         p_action: "record",
         p_id: id,
         p_row: null,
-        p_expected_revision: revision.toString(),
+        p_expected_revision: expectedRevision,
         p_client_hash: clientHash,
       },
     });
 
-    return res.status(200).json({
+    return send(res, 200, {
       ok: true,
       result,
     });
   } catch (error) {
-    const message = [
-      error?.data?.message,
-      error?.message,
-      error?.data?.details,
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const message = getErrorMessage(error);
 
     if (/REVISION_CONFLICT|revision/i.test(message)) {
-      return res.status(409).json({
+      return send(res, 409, {
         error: "REVISION_CONFLICT",
       });
     }
 
     if (/NOT_FOUND/i.test(message)) {
-      return res.status(404).json({
+      return send(res, 404, {
         error: "NOT_FOUND",
       });
     }
 
     if (/DELETED/i.test(message)) {
-      return res.status(409).json({
+      return send(res, 409, {
         error: "MOTION_DELETED",
       });
     }
 
     if (/RATE_LIMIT/i.test(message)) {
-      return res.status(429).json({
+      return send(res, 429, {
         error: "RATE_LIMITED",
       });
     }
 
     if (/INVALID_/i.test(message)) {
-      return res.status(400).json({
+      return send(res, 400, {
         error: "INVALID_REQUEST",
       });
     }
@@ -129,8 +160,9 @@ export default async function handler(req, res) {
       error?.status || "unknown"
     );
 
-    return res.status(500).json({
+    return send(res, 500, {
       error: "Failed to record motion",
     });
   }
 }
+
