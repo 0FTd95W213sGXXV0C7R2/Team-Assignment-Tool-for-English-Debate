@@ -5,6 +5,14 @@ const DEFAULT_LIMIT = 100;
 const MAX_OFFSET = 49999;
 
 function send(res, status, body) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Vary", "Authorization");
+
+  if (res.headersSent) {
+    return;
+  }
+
   return res.status(status).json(body);
 }
 
@@ -13,6 +21,7 @@ function getErrorMessage(error) {
     error?.data?.message,
     error?.message,
     error?.data?.details,
+    error?.data?.hint,
   ]
     .filter(
       (value) =>
@@ -26,6 +35,13 @@ function parseInteger(value, { min, max }) {
   if (
     typeof value !== "string" &&
     typeof value !== "number"
+  ) {
+    return null;
+  }
+
+  if (
+    typeof value === "number" &&
+    !Number.isSafeInteger(value)
   ) {
     return null;
   }
@@ -49,9 +65,24 @@ function parseInteger(value, { min, max }) {
   return number;
 }
 
+function getSingleQueryValue(query, key, defaultValue) {
+  const value = query[key];
+
+  if (value === undefined) {
+    return { value: defaultValue, valid: true };
+  }
+
+  if (Array.isArray(value) || typeof value !== "string") {
+    return { value: null, valid: false };
+  }
+
+  return { value, valid: true };
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("Pragma", "no-cache");
+  res.setHeader("Vary", "Authorization");
 
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -72,9 +103,9 @@ export default async function handler(req, res) {
       error?.status || "unknown"
     );
 
-    return send(res, 500, {
+    return send(res, 503, {
       error: "AUTHORIZATION_FAILED",
-      message: "管理者権限を確認できませんでした。",
+      message: "管理者権限を確認できませんでした。時間をおいて再試行してください。",
     });
   }
 
@@ -83,13 +114,14 @@ export default async function handler(req, res) {
   }
 
   const query = req.query || {};
-  const rawMotionId = query.motionId;
 
-  if (
-    Array.isArray(rawMotionId) ||
-    (rawMotionId !== undefined &&
-      typeof rawMotionId !== "string")
-  ) {
+  const motionIdResult = getSingleQueryValue(
+    query,
+    "motionId",
+    undefined
+  );
+
+  if (!motionIdResult.valid) {
     return send(res, 400, {
       error: "INVALID_MOTION_ID",
       message: "motionIdの指定が正しくありません。",
@@ -97,9 +129,9 @@ export default async function handler(req, res) {
   }
 
   const motionId =
-    rawMotionId === undefined
+    motionIdResult.value === undefined
       ? undefined
-      : rawMotionId.trim();
+      : motionIdResult.value.trim();
 
   if (
     motionId !== undefined &&
@@ -111,19 +143,20 @@ export default async function handler(req, res) {
     });
   }
 
-  const rawLimit = query.limit ?? String(DEFAULT_LIMIT);
+  const limitResult = getSingleQueryValue(
+    query,
+    "limit",
+    String(DEFAULT_LIMIT)
+  );
 
-  if (
-    Array.isArray(rawLimit) ||
-    typeof rawLimit !== "string"
-  ) {
+  if (!limitResult.valid) {
     return send(res, 400, {
       error: "INVALID_LIMIT",
       message: "limitの指定が正しくありません。",
     });
   }
 
-  const limit = parseInteger(rawLimit, {
+  const limit = parseInteger(limitResult.value, {
     min: 1,
     max: MAX_LIMIT,
   });
@@ -135,19 +168,20 @@ export default async function handler(req, res) {
     });
   }
 
-  const rawOffset = query.offset ?? "0";
+  const offsetResult = getSingleQueryValue(
+    query,
+    "offset",
+    "0"
+  );
 
-  if (
-    Array.isArray(rawOffset) ||
-    typeof rawOffset !== "string"
-  ) {
+  if (!offsetResult.valid) {
     return send(res, 400, {
       error: "INVALID_OFFSET",
       message: "offsetの指定が正しくありません。",
     });
   }
 
-  const offset = parseInteger(rawOffset, {
+  const offset = parseInteger(offsetResult.value, {
     min: 0,
     max: MAX_OFFSET,
   });
@@ -180,9 +214,7 @@ export default async function handler(req, res) {
     );
 
     if (!Array.isArray(result)) {
-      console.error(
-        "Motion history returned an invalid response."
-      );
+      console.error("Motion history returned an invalid response.");
 
       return send(res, 502, {
         error: "INVALID_AUDIT_RESPONSE",
@@ -200,10 +232,7 @@ export default async function handler(req, res) {
     const message = getErrorMessage(error);
 
     if (status === 401 || status === 403) {
-      console.error(
-        "Motion history access denied:",
-        status
-      );
+      console.error("Motion history access denied:", status);
 
       return send(res, 502, {
         error: "AUDIT_HISTORY_ACCESS_DENIED",
@@ -224,7 +253,7 @@ export default async function handler(req, res) {
       message ? message.slice(0, 300) : ""
     );
 
-    return send(res, 500, {
+    return send(res, status === 503 ? 503 : 500, {
       error: "MOTION_HISTORY_FAILED",
       message: "監査履歴を取得できませんでした。",
     });
