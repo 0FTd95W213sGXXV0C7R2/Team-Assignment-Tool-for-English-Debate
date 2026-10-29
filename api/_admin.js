@@ -1,4 +1,3 @@
-
 import { timingSafeEqual } from "node:crypto";
 
 const MAX_BIGINT = 9223372036854775807n;
@@ -10,23 +9,33 @@ const MAX_BIGINT = 9223372036854775807n;
 export function requireAdmin(req) {
   const secret = process.env.ADMIN_API_TOKEN;
   const header = req.headers?.authorization || "";
+
   const supplied = header.startsWith("Bearer ")
     ? header.slice(7)
     : "";
 
-  if (!secret || !supplied) {
+  if (
+    typeof secret !== "string" ||
+    !secret ||
+    !supplied
+  ) {
     return false;
   }
 
   const expectedBuffer = Buffer.from(secret);
   const suppliedBuffer = Buffer.from(supplied);
 
-  return (
-    expectedBuffer.length === suppliedBuffer.length &&
-    timingSafeEqual(expectedBuffer, suppliedBuffer)
-  );
+  if (expectedBuffer.length !== suppliedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(expectedBuffer, suppliedBuffer);
 }
 
+/**
+ * 0以上のPostgreSQL bigint値を10進文字列に正規化する。
+ * 数値型は安全整数の範囲内である場合のみ受け付ける。
+ */
 export function normalizeNonNegativeBigint(value) {
   if (
     typeof value !== "string" &&
@@ -36,7 +45,6 @@ export function normalizeNonNegativeBigint(value) {
     return null;
   }
 
-  // 数値型では安全整数を超えた値の精度が保証されない。
   if (
     typeof value === "number" &&
     !Number.isSafeInteger(value)
@@ -71,24 +79,51 @@ function parseSupabaseJson(text) {
   try {
     return JSON.parse(text);
   } catch {
-    return { message: text };
+    return {
+      message: text,
+    };
   }
 }
 
 /**
  * Supabase REST APIをサーバー側から呼び出す。
+ *
  * SUPABASE_SERVICE_ROLE_KEYはサーバー環境変数からのみ取得する。
+ * クライアント側へ返却したり、ログに出力したりしないこと。
  */
 export async function supabase(path, options = {}) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (
+    typeof url !== "string" ||
+    typeof key !== "string" ||
     !url ||
-    !key ||
-    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)
+    !key
   ) {
     throw new Error("Server configuration missing");
+  }
+
+  let parsedUrl;
+
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    throw new Error("Invalid Supabase URL");
+  }
+
+  if (
+    parsedUrl.protocol !== "https:" ||
+    !/^([a-z0-9-]+\.)?supabase\.co$/i.test(
+      parsedUrl.hostname
+    ) ||
+    parsedUrl.username ||
+    parsedUrl.password ||
+    parsedUrl.search ||
+    parsedUrl.hash ||
+    parsedUrl.pathname !== "/"
+  ) {
+    throw new Error("Invalid Supabase URL");
   }
 
   if (
@@ -96,9 +131,20 @@ export async function supabase(path, options = {}) {
     !path ||
     path.startsWith("/") ||
     path.includes("://") ||
-    path.split("/").some((part) => part === "..")
+    path.includes("\\") ||
+    path.split("/").some(
+      (part) => part === "." || part === ".."
+    )
   ) {
     throw new Error("Invalid Supabase REST path");
+  }
+
+  if (
+    !options ||
+    typeof options !== "object" ||
+    Array.isArray(options)
+  ) {
+    throw new Error("Invalid Supabase request options");
   }
 
   const headers = new Headers(options.headers || {});
@@ -122,10 +168,18 @@ export async function supabase(path, options = {}) {
     requestOptions.body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(
-    `${url}/rest/v1/${path}`,
-    requestOptions
-  );
+  let response;
+
+  try {
+    response = await fetch(
+      `${parsedUrl.origin}/rest/v1/${path}`,
+      requestOptions
+    );
+  } catch {
+    const error = new Error("Supabase network request failed");
+    error.status = 503;
+    throw error;
+  }
 
   const text = await response.text();
   const data = parseSupabaseJson(text);
@@ -147,13 +201,13 @@ export async function supabase(path, options = {}) {
 
 /**
  * 認証済みユーザーの管理APIアクセスを検証する。
- * 認証済みユーザー全員を管理者とする現行仕様。
+ *
+ * 現行仕様：ログイン済みユーザーを管理APIの利用対象とする。
+ * 管理者を特定ユーザーに限定する場合は、ここに許可リストの
+ * 検証を追加し、auth-me.js側の判定とも統一する。
  */
 export async function authorizeAdmin(req, res) {
-  const {
-    getSession,
-    sendSessionJson,
-  } = await import("./_session.js");
+  const { getSession } = await import("./_session.js");
 
   let session;
 
@@ -165,17 +219,23 @@ export async function authorizeAdmin(req, res) {
       error?.status || "unknown"
     );
 
-    sendSessionJson(res, 503, {
-      error: "認証サービスを一時的に利用できません。",
-    });
+    if (!res.headersSent) {
+      return res.status(503).json({
+        error: "AUTHENTICATION_UNAVAILABLE",
+        message: "認証サービスを一時的に利用できません。",
+      });
+    }
 
     return null;
   }
 
   if (!session) {
-    sendSessionJson(res, 401, {
-      error: "ログインが必要です。",
-    });
+    if (!res.headersSent) {
+      res.status(401).json({
+        error: "UNAUTHORIZED",
+        message: "ログインが必要です。",
+      });
+    }
 
     return null;
   }
@@ -192,7 +252,8 @@ export function reject(req, res) {
     res.setHeader("Allow", "POST");
 
     res.status(405).json({
-      error: "Method not allowed",
+      error: "METHOD_NOT_ALLOWED",
+      message: "POSTリクエストのみ利用できます。",
     });
 
     return true;
@@ -200,7 +261,8 @@ export function reject(req, res) {
 
   if (!requireAdmin(req)) {
     res.status(401).json({
-      error: "Unauthorized",
+      error: "UNAUTHORIZED",
+      message: "認証が必要です。",
     });
 
     return true;
