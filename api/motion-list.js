@@ -7,69 +7,105 @@ import {
 const PAGE_SIZE = 1000;
 const MAX_OFFSET = 49999;
 
+function sendError(res, status, error, message) {
+  return sendSessionJson(res, status, {
+    error,
+    message,
+  });
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("Pragma", "no-cache");
+  res.setHeader("Vary", "Authorization");
 
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
 
-    return sendSessionJson(res, 405, {
-      error: "METHOD_NOT_ALLOWED",
-      message: "GETリクエストのみ利用できます。",
-    });
+    return sendError(
+      res,
+      405,
+      "METHOD_NOT_ALLOWED",
+      "GETリクエストのみ利用できます。"
+    );
   }
-
-  let session;
 
   try {
-    session = await requireSession(req, res);
+    await requireSession(req);
   } catch (error) {
+    const status =
+      error?.status === 401
+        ? 401
+        : error?.status === 503
+          ? 503
+          : 502;
+
     console.error(
       "Motion list authentication failed:",
-      error?.status || "unknown"
+      status
     );
 
-    return sendSessionJson(res, error?.status || 500, {
-      error: error?.status === 401
+    return sendError(
+      res,
+      status,
+      status === 401
         ? "UNAUTHORIZED"
         : "AUTHENTICATION_FAILED",
-      message: error?.status === 401
+      status === 401
         ? "ログインが必要です。"
-        : "ログイン状態を確認できませんでした。",
-    });
-  }
-
-  if (!session) {
-    return;
+        : "ログイン状態を確認できませんでした。"
+    );
   }
 
   try {
     const url = new URL(req.url, "http://localhost");
 
-    const rawOffset =
-      req.query?.offset ??
-      url.searchParams.get("offset") ??
-      "0";
+    const queryOffset = url.searchParams.getAll("offset");
+    const requestOffset = req.query?.offset;
 
     if (
-      Array.isArray(rawOffset) ||
-      typeof rawOffset === "object" ||
-      rawOffset === null
+      queryOffset.length > 1 ||
+      (Array.isArray(requestOffset) &&
+        requestOffset.length !== 1)
     ) {
-      return sendSessionJson(res, 400, {
-        error: "INVALID_OFFSET",
-        message: "offset の指定が正しくありません。",
-      });
+      return sendError(
+        res,
+        400,
+        "INVALID_OFFSET",
+        "offset の指定が正しくありません。"
+      );
+    }
+
+    const rawOffset =
+      requestOffset !== undefined
+        ? Array.isArray(requestOffset)
+          ? requestOffset[0]
+          : requestOffset
+        : queryOffset.length === 1
+          ? queryOffset[0]
+          : "0";
+
+    if (
+      typeof rawOffset !== "string" &&
+      typeof rawOffset !== "number"
+    ) {
+      return sendError(
+        res,
+        400,
+        "INVALID_OFFSET",
+        "offset の指定が正しくありません。"
+      );
     }
 
     const offsetText = String(rawOffset);
 
     if (!/^(0|[1-9]\d*)$/.test(offsetText)) {
-      return sendSessionJson(res, 400, {
-        error: "INVALID_OFFSET",
-        message: "offset の指定が正しくありません。",
-      });
+      return sendError(
+        res,
+        400,
+        "INVALID_OFFSET",
+        "offset の指定が正しくありません。"
+      );
     }
 
     const offset = Number(offsetText);
@@ -79,18 +115,17 @@ export default async function handler(req, res) {
       offset < 0 ||
       offset > MAX_OFFSET
     ) {
-      return sendSessionJson(res, 400, {
-        error: "OFFSET_OUT_OF_RANGE",
-        message: `offset は0以上${MAX_OFFSET}以下で指定してください。`,
-      });
+      return sendError(
+        res,
+        400,
+        "OFFSET_OUT_OF_RANGE",
+        `offset は0以上${MAX_OFFSET}以下で指定してください。`
+      );
     }
 
     /*
      * 削除済み論題も取得する。
-     * 履歴からの復元機能で必要になるため、
-     * is_deleted による絞り込みは行わない。
-     *
-     * PAGE_SIZE と MAX_OFFSET は既存仕様を維持する。
+     * 復元機能で利用するため、is_deletedでは絞り込まない。
      */
     const rows = await supabase(
       "motions?select=id,motion,tournament,year,history,revision,is_deleted" +
@@ -101,10 +136,12 @@ export default async function handler(req, res) {
     if (!Array.isArray(rows)) {
       console.error("Motion list returned an invalid response.");
 
-      return sendSessionJson(res, 502, {
-        error: "INVALID_MOTION_DATA",
-        message: "論題データの形式が正しくありません。",
-      });
+      return sendError(
+        res,
+        502,
+        "INVALID_MOTION_DATA",
+        "論題データの形式が正しくありません。"
+      );
     }
 
     return sendSessionJson(res, 200, {
@@ -113,14 +150,23 @@ export default async function handler(req, res) {
       limit: PAGE_SIZE,
     });
   } catch (error) {
+    const status =
+      error?.status === 503
+        ? 503
+        : error?.status === 502
+          ? 502
+          : 500;
+
     console.error(
       "Motion list retrieval failed:",
-      error?.status || "unknown"
+      status
     );
 
-    return sendSessionJson(res, 500, {
-      error: "MOTION_LIST_FAILED",
-      message: "論題一覧を取得できませんでした。",
-    });
+    return sendError(
+      res,
+      status,
+      "MOTION_LIST_FAILED",
+      "論題一覧を取得できませんでした。"
+    );
   }
 }
