@@ -24,6 +24,7 @@ function getBearerToken(req) {
 
 function getSupabasePublicConfig() {
   const url = process.env.SUPABASE_URL;
+
   const key =
     process.env.SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
@@ -75,12 +76,10 @@ export function sendSessionJson(res, status, data, headers = {}) {
 
 /**
  * Supabase Authでアクセストークンを検証する。
- * メールアドレスが確認済みであることを必須とする。
  *
- * Google IDを持つユーザーは、確認済みメールアドレスが
- * 許可ドメインに完全一致する場合に限りアクセスできる。
- *
- * メール・パスワード登録ユーザーにはドメイン制限を設けない。
+ * 学校ドメインによる制限は設けない。
+ * メールアドレスが確認済みの認証済みユーザーに
+ * 管理者権限を付与する。
  */
 export async function getSession(req) {
   const token = getBearerToken(req);
@@ -126,6 +125,7 @@ export async function getSession(req) {
     return null;
   }
 
+  // メールアドレスの確認要件は維持する
   if (!user.email_confirmed_at) {
     return null;
   }
@@ -134,35 +134,6 @@ export async function getSession(req) {
 
   if (!email) {
     return null;
-  }
-
-  const identities = Array.isArray(user.identities)
-    ? user.identities
-    : [];
-
-  const hasGoogleIdentity =
-    user.app_metadata?.provider === "google" ||
-    identities.some(
-      (identity) => identity?.provider === "google"
-    );
-
-  if (hasGoogleIdentity) {
-    const allowedDomains = new Set([
-      "st.spec.ed.jp",
-      "spec.ed.jp",
-    ]);
-
-    const separator = email.lastIndexOf("@");
-
-    if (separator < 1) {
-      return null;
-    }
-
-    const domain = email.slice(separator + 1);
-
-    if (!allowedDomains.has(domain)) {
-      return null;
-    }
   }
 
   return {
