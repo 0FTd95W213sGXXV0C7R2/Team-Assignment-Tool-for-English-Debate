@@ -1240,32 +1240,18 @@ async function loginWithGoogle() {
         }
       });
 
-      supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (!authInitialized) return;
+     
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (!authInitialized) return;
 
-        if (event === "SIGNED_OUT") {
-          currentUser = null;
-          motions = [];
-          showAuth();
-          return;
-        }
-
-        if (
-          session &&
-          ["SIGNED_IN", "TOKEN_REFRESHED", "USER_UPDATED", "PASSWORD_RECOVERY"].includes(event)
-        ) {
-          // Supabaseの認証コールバック内でAPI通信を直接行わない。
-          setTimeout(async () => {
-            try {
-              const valid = await validateCurrentSession(session);
-              if (valid) showApp(session.user);
-            } catch (error) {
-              console.error("Auth state verification failed:", error);
-              showAuth("認証状態を確認できませんでした。再度ログインしてください。", "error");
-            }
-          }, 0);
-        }
-      });
+  if (event === "SIGNED_OUT") {
+    currentUser = null;
+    motions = [];
+    selectedMotion = null;
+    showAuth();
+  }
+});
+ 
 
       authInitialized = true;
       await checkSession();
