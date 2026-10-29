@@ -1,85 +1,64 @@
+const SUPABASE_URL =
+  process.env.SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  "";
 
-export const SESSION_COOKIE = "debate_session";
-export const SESSION_TTL_SECONDS = 180 * 24 * 60 * 60;
+const SUPABASE_PUBLIC_KEY =
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  "";
 
 function getBearerToken(req) {
-  const header = req.headers?.authorization || "";
+  const authorization = req?.headers?.authorization ||
+    req?.headers?.Authorization;
 
-  if (!header.startsWith("Bearer ")) {
+  if (typeof authorization !== "string") {
     return null;
   }
 
-  const token = header.slice(7).trim();
+  const match = authorization.match(/^Bearer\s+(\S+)$/i);
+  return match ? match[1] : null;
+}
 
-  if (
-    !token ||
-    token.length > 8192 ||
-    /\s/.test(token)
-  ) {
-    return null;
+function getSupabaseConfig() {
+  if (!SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
+    throw new Error("Supabaseのサーバー設定が不足しています。");
   }
 
-  return token;
-}
+  let parsedUrl;
 
-function getSupabasePublicConfig() {
-  const url = process.env.SUPABASE_URL;
-
-  const key =
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_PUBLISHABLE_KEY;
-
-  if (
-    !url ||
-    !key ||
-    !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)
-  ) {
-    throw new Error("Supabase Auth configuration missing");
+  try {
+    parsedUrl = new URL(SUPABASE_URL);
+  } catch {
+    throw new Error("SUPABASE_URLの形式が正しくありません。");
   }
 
-  return { url, key };
-}
+  if (
+    parsedUrl.protocol !== "https:" &&
+    parsedUrl.hostname !== "localhost" &&
+    parsedUrl.hostname !== "127.0.0.1"
+  ) {
+    throw new Error("Supabase URLにはHTTPSを使用してください。");
+  }
 
-export function sessionCookie(token) {
-  const secure =
-    process.env.NODE_ENV === "production" ? "; Secure" : "";
-
-  return (
-    `${SESSION_COOKIE}=${encodeURIComponent(token)}; ` +
-    `Max-Age=${SESSION_TTL_SECONDS}; ` +
-    `Path=/; HttpOnly; SameSite=Lax${secure}`
-  );
-}
-
-export function clearSessionCookie() {
-  const secure =
-    process.env.NODE_ENV === "production" ? "; Secure" : "";
-
-  return (
-    `${SESSION_COOKIE}=; Max-Age=0; ` +
-    `Expires=Thu, 01 Jan 1970 00:00:00 GMT; ` +
-    `Path=/; HttpOnly; SameSite=Lax${secure}`
-  );
-}
-
-export function sendSessionJson(res, status, data, headers = {}) {
-  res.writeHead(status, {
-    "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": "no-store",
-    "X-Content-Type-Options": "nosniff",
-    ...headers,
-  });
-
-  res.end(JSON.stringify(data));
+  return {
+    url: parsedUrl.origin,
+    publicKey: SUPABASE_PUBLIC_KEY
+  };
 }
 
 /**
- * Supabase Authでアクセストークンを検証する。
+ * AuthorizationヘッダーのBearerトークンを検証する。
  *
- * 学校ドメインによる制限は設けない。
- * メールアドレスが確認済みの認証済みユーザーに
- * 管理者権限を付与する。
+ * 戻り値：
+ * - 有効なセッション：Supabaseのユーザーオブジェクト
+ * - トークンなし、無効、未確認メール：null
+ * - 設定不備、通信障害、予期しない応答：例外
+ *
+ * 注意：
+ * この関数は管理者権限そのものを判定しない。
+ * 管理者判定は呼び出し側で別途実施する。
  */
 export async function getSession(req) {
   const token = getBearerToken(req);
@@ -88,17 +67,29 @@ export async function getSession(req) {
     return null;
   }
 
-  const { url, key } = getSupabasePublicConfig();
+  const { url, publicKey } = getSupabaseConfig();
 
-  const response = await fetch(`${url}/auth/v1/user`, {
-    method: "GET",
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-    signal: AbortSignal.timeout(10000),
-  });
+  let response;
+
+  try {
+    response = await fetch(`${url}/auth/v1/user`, {
+      method: "GET",
+      headers: {
+        apikey: publicKey,
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000)
+    });
+  } catch (error) {
+    const networkError = new Error(
+      "Supabaseの認証サーバーに接続できませんでした。"
+    );
+
+    networkError.cause = error;
+    throw networkError;
+  }
 
   if (response.status === 401 || response.status === 403) {
     return null;
@@ -106,90 +97,60 @@ export async function getSession(req) {
 
   if (!response.ok) {
     const error = new Error(
-      `Supabase Auth verification failed: ${response.status}`
+      `Supabaseの認証確認に失敗しました（HTTP ${response.status}）。`
     );
 
     error.status = response.status;
     throw error;
   }
 
-  const user = await response.json();
+  let user;
+
+  try {
+    user = await response.json();
+  } catch {
+    throw new Error("Supabaseから不正な認証応答が返されました。");
+  }
 
   if (
     !user ||
+    typeof user !== "object" ||
     typeof user.id !== "string" ||
-    !user.id ||
-    typeof user.email !== "string" ||
-    !user.email
+    !user.id
+  ) {
+    throw new Error("Supabaseのユーザー情報が不正です。");
+  }
+
+  /*
+   * メール認証を必須にする構成では、
+   * 未確認のメールアカウントを拒否する。
+   * Google OAuthなどでは通常、確認済みメールが返される。
+   */
+  if (
+    user.email &&
+    !user.email_confirmed_at &&
+    !user.confirmed_at
   ) {
     return null;
   }
 
-  // メールアドレスの確認要件は維持する
-  if (!user.email_confirmed_at) {
-    return null;
-  }
-
-  const email = user.email.trim().toLowerCase();
-
-  if (!email) {
-    return null;
-  }
-
-  return {
-    userId: user.id,
-    email,
-    expiresAt: null,
-    tokenHash: null,
-    provider: user.app_metadata?.provider || null,
-    isAdmin: true,
-  };
+  return user;
 }
 
 /**
- * ログイン必須API用の共通ガード。
+ * 有効なログインセッションを要求する。
+ *
+ * @returns {Promise<object>} Supabaseのユーザーオブジェクト
+ * @throws {Error} セッションが無効、または認証確認に失敗した場合
  */
-export async function requireSession(req, res) {
-  try {
-    const session = await getSession(req);
+export async function requireSession(req) {
+  const user = await getSession(req);
 
-    if (!session) {
-      sendSessionJson(res, 401, {
-        error: "ログインが必要です。",
-      });
-
-      return null;
-    }
-
-    return session;
-  } catch (error) {
-    console.error(
-      "Session verification failed:",
-      error?.status || "unknown"
-    );
-
-    sendSessionJson(res, 503, {
-      error: "認証サービスを一時的に利用できません。",
-    });
-
-    return null;
+  if (!user) {
+    const error = new Error("ログインが必要です。");
+    error.status = 401;
+    throw error;
   }
-}
 
-/**
- * 旧APIとの互換性のために残す。
- * 独自セッションの新規作成は許可しない。
- */
-export async function createSession() {
-  throw new Error(
-    "Legacy session creation is disabled. Use Supabase Auth."
-  );
-}
-
-/**
- * Supabase Authのサインアウトはクライアント側で行う。
- * 旧APIとの互換性のために関数を残す。
- */
-export async function revokeSession() {
-  return;
+  return user;
 }
