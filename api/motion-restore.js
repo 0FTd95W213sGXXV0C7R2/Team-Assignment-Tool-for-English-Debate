@@ -4,7 +4,17 @@ import {
   normalizeNonNegativeBigint,
 } from "./_admin.js";
 
+const MAX_ID_LENGTH = 100;
+
 function send(res, status, body) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Vary", "Authorization");
+
+  if (res.headersSent) {
+    return;
+  }
+
   return res.status(status).json(body);
 }
 
@@ -26,6 +36,7 @@ function getErrorMessage(error) {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("Pragma", "no-cache");
+  res.setHeader("Vary", "Authorization");
 
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -46,9 +57,10 @@ export default async function handler(req, res) {
       error?.status || "unknown"
     );
 
-    return send(res, 500, {
+    return send(res, 503, {
       error: "AUTHORIZATION_FAILED",
-      message: "管理者権限を確認できませんでした。",
+      message:
+        "管理者権限を確認できませんでした。時間をおいて再試行してください。",
     });
   }
 
@@ -84,7 +96,7 @@ export default async function handler(req, res) {
 
   if (
     !id ||
-    id.length > 100 ||
+    id.length > MAX_ID_LENGTH ||
     !/^[a-zA-Z0-9_-]+$/.test(id) ||
     auditKey === null ||
     auditKey === "0" ||
@@ -92,7 +104,8 @@ export default async function handler(req, res) {
   ) {
     return send(res, 400, {
       error: "INVALID_REQUEST",
-      message: "論題ID、監査ID、またはリビジョンが正しくありません。",
+      message:
+        "論題ID、監査ID、またはリビジョンが正しくありません。",
     });
   }
 
@@ -119,21 +132,24 @@ export default async function handler(req, res) {
     if (/DUPLICATE_MOTION|duplicate/i.test(message)) {
       return send(res, 409, {
         error: "DUPLICATE_MOTION",
-        message: "復元すると同じ論題が重複するため、復元できません。",
+        message:
+          "復元すると同じ論題が重複するため、復元できません。",
       });
     }
 
     if (/REVISION_CONFLICT/i.test(message)) {
       return send(res, 409, {
         error: "REVISION_CONFLICT",
-        message: "論題が別の操作で更新されています。再読み込みしてください。",
+        message:
+          "論題が別の操作で更新されています。再読み込みしてください。",
       });
     }
 
     if (/NOT_FOUND|SNAPSHOT_NOT_FOUND/i.test(message)) {
       return send(res, 404, {
         error: "NOT_FOUND",
-        message: "復元対象の論題または履歴が見つかりません。",
+        message:
+          "復元対象の論題または履歴が見つかりません。",
       });
     }
 
@@ -147,7 +163,8 @@ export default async function handler(req, res) {
     if (/RATE_LIMIT/i.test(message)) {
       return send(res, 429, {
         error: "RATE_LIMITED",
-        message: "操作回数の上限に達しました。時間をおいて再試行してください。",
+        message:
+          "操作回数の上限に達しました。時間をおいて再試行してください。",
       });
     }
 
@@ -156,7 +173,10 @@ export default async function handler(req, res) {
       error?.status || "unknown"
     );
 
-    return send(res, 500, {
+    const status =
+      error?.status === 503 ? 503 : 500;
+
+    return send(res, status, {
       error: "RESTORE_FAILED",
       message: "論題の復元に失敗しました。",
     });
