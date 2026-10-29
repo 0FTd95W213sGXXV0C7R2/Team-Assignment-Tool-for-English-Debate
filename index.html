@@ -70,7 +70,7 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     <button id="loginButton" class="full" type="submit" style="margin-top:14px">ログイン</button>
   </form>
   <button id="signupButton" class="secondary full" type="button" style="margin-top:10px">新規アカウントを登録</button>
-  <p class="muted">新規登録後は確認メールのリンクを開いてください。Googleログインは学校の許可ドメインに限られます。</p>
+  <p class="muted">新規登録後は確認メールのリンクを開いてください。Googleアカウント、またはメールアドレスとパスワードでログインできます。利用にはアプリ側の権限設定が適用されます。</p>
   <div id="authStatus" class="notice hidden" role="status" aria-live="polite"></div>
 </section>
 
@@ -483,24 +483,28 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
     }
   }
 
-  async function loginWithGoogle() {
-    if (busy || !supabaseClient) return;
-    setAuthBusy(true);
-    setMessage("authStatus", "Google のログイン画面へ移動しています…");
-    try {
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin + window.location.pathname,
-          queryParams: { hd: "st.spec.ed.jp" }
-        }
-      });
-      if (error) throw error;
-    } catch (error) {
-      setMessage("authStatus", getAuthErrorMessage(error), "error");
-      setAuthBusy(false);
-    }
+ 
+async function loginWithGoogle() {
+  if (busy || !supabaseClient) return;
+
+  setAuthBusy(true);
+  setMessage("authStatus", "Google のログイン画面へ移動しています…");
+
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    setMessage("authStatus", getAuthErrorMessage(error), "error");
+    setAuthBusy(false);
   }
+}
+
 
   async function logout() {
     if (busy || !supabaseClient) return;
