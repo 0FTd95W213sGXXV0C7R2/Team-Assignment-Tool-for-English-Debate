@@ -2,17 +2,34 @@ import { timingSafeEqual } from "node:crypto";
 
 const MAX_BIGINT = 9223372036854775807n;
 
+function sendJson(res, status, body) {
+  if (res.headersSent) {
+    return;
+  }
+
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Pragma", "no-cache");
+
+  return res.status(status).json(body);
+}
+
 /**
  * 旧APIとの互換性を維持するためのトークン検証。
- * 使用箇所の監査が終わるまでは残す。
+ * ADMIN_API_TOKENを使用する旧API専用。
  */
 export function requireAdmin(req) {
   const secret = process.env.ADMIN_API_TOKEN;
-  const header = req.headers?.authorization || "";
+  const header =
+    req?.headers?.authorization ??
+    req?.headers?.Authorization ??
+    "";
 
-  const supplied = header.startsWith("Bearer ")
-    ? header.slice(7)
-    : "";
+  const match =
+    typeof header === "string"
+      ? header.match(/^Bearer\s+(\S+)$/)
+      : null;
+
+  const supplied = match ? match[1] : "";
 
   if (
     typeof secret !== "string" ||
@@ -25,16 +42,14 @@ export function requireAdmin(req) {
   const expectedBuffer = Buffer.from(secret);
   const suppliedBuffer = Buffer.from(supplied);
 
-  if (expectedBuffer.length !== suppliedBuffer.length) {
-    return false;
-  }
-
-  return timingSafeEqual(expectedBuffer, suppliedBuffer);
+  return (
+    expectedBuffer.length === suppliedBuffer.length &&
+    timingSafeEqual(expectedBuffer, suppliedBuffer)
+  );
 }
 
 /**
- * 0以上のPostgreSQL bigint値を10進文字列に正規化する。
- * 数値型は安全整数の範囲内である場合のみ受け付ける。
+ * 非負の整数をPostgreSQL BIGINTの範囲内で正規化する。
  */
 export function normalizeNonNegativeBigint(value) {
   if (
@@ -79,51 +94,53 @@ function parseSupabaseJson(text) {
   try {
     return JSON.parse(text);
   } catch {
-    return {
-      message: text,
-    };
+    return { message: text };
   }
+}
+
+function getSupabaseUrl() {
+  const value = process.env.SUPABASE_URL;
+
+  if (typeof value !== "string" || !value) {
+    throw new Error("SUPABASE_URL is not configured");
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("SUPABASE_URL is invalid");
+  }
+
+  if (
+    parsed.protocol !== "https:" ||
+    !/^[a-z0-9-]+\.supabase\.co$/i.test(parsed.hostname) ||
+    parsed.username ||
+    parsed.password ||
+    parsed.port ||
+    parsed.pathname !== "/" ||
+    parsed.search ||
+    parsed.hash
+  ) {
+    throw new Error("SUPABASE_URL is invalid");
+  }
+
+  return parsed.origin;
 }
 
 /**
  * Supabase REST APIをサーバー側から呼び出す。
- *
- * SUPABASE_SERVICE_ROLE_KEYはサーバー環境変数からのみ取得する。
- * クライアント側へ返却したり、ログに出力したりしないこと。
+ * Service Roleキーはクライアントへ返さない。
  */
 export async function supabase(path, options = {}) {
-  const url = process.env.SUPABASE_URL;
+  const url = getSupabaseUrl();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (
-    typeof url !== "string" ||
-    typeof key !== "string" ||
-    !url ||
-    !key
-  ) {
-    throw new Error("Server configuration missing");
-  }
-
-  let parsedUrl;
-
-  try {
-    parsedUrl = new URL(url);
-  } catch {
-    throw new Error("Invalid Supabase URL");
-  }
-
-  if (
-    parsedUrl.protocol !== "https:" ||
-    !/^([a-z0-9-]+\.)?supabase\.co$/i.test(
-      parsedUrl.hostname
-    ) ||
-    parsedUrl.username ||
-    parsedUrl.password ||
-    parsedUrl.search ||
-    parsedUrl.hash ||
-    parsedUrl.pathname !== "/"
-  ) {
-    throw new Error("Invalid Supabase URL");
+  if (typeof key !== "string" || !key) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is not configured"
+    );
   }
 
   if (
@@ -132,19 +149,13 @@ export async function supabase(path, options = {}) {
     path.startsWith("/") ||
     path.includes("://") ||
     path.includes("\\") ||
+    path.includes("?") ||
+    path.includes("#") ||
     path.split("/").some(
       (part) => part === "." || part === ".."
     )
   ) {
     throw new Error("Invalid Supabase REST path");
-  }
-
-  if (
-    !options ||
-    typeof options !== "object" ||
-    Array.isArray(options)
-  ) {
-    throw new Error("Invalid Supabase request options");
   }
 
   const headers = new Headers(options.headers || {});
@@ -159,6 +170,7 @@ export async function supabase(path, options = {}) {
   const requestOptions = {
     ...options,
     headers,
+    cache: "no-store",
   };
 
   if (
@@ -172,12 +184,13 @@ export async function supabase(path, options = {}) {
 
   try {
     response = await fetch(
-      `${parsedUrl.origin}/rest/v1/${path}`,
+      `${url}/rest/v1/${path}`,
       requestOptions
     );
-  } catch {
-    const error = new Error("Supabase network request failed");
+  } catch (cause) {
+    const error = new Error("Supabase request failed");
     error.status = 503;
+    error.cause = cause;
     throw error;
   }
 
@@ -200,11 +213,50 @@ export async function supabase(path, options = {}) {
 }
 
 /**
- * 認証済みユーザーの管理APIアクセスを検証する。
+ * 管理者の判定。
  *
- * 現行仕様：ログイン済みユーザーを管理APIの利用対象とする。
- * 管理者を特定ユーザーに限定する場合は、ここに許可リストの
- * 検証を追加し、auth-me.js側の判定とも統一する。
+ * ADMIN_USER_IDSまたはADMIN_EMAILSに登録されたユーザーのみ許可。
+ * 両方が設定されている場合は、いずれかに一致すれば許可する。
+ * どちらも未設定の場合は、管理者を許可しない。
+ */
+export function isAdminUser(user) {
+  if (
+    !user ||
+    typeof user.id !== "string" ||
+    !user.id
+  ) {
+    return false;
+  }
+
+  const allowedIds = (
+    process.env.ADMIN_USER_IDS || ""
+  )
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const allowedEmails = (
+    process.env.ADMIN_EMAILS || ""
+  )
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  const idMatches = allowedIds.includes(user.id);
+
+  const email =
+    typeof user.email === "string"
+      ? user.email.trim().toLowerCase()
+      : "";
+
+  const emailMatches =
+    email !== "" && allowedEmails.includes(email);
+
+  return idMatches || emailMatches;
+}
+
+/**
+ * ログイン状態と管理者権限を検証する。
  */
 export async function authorizeAdmin(req, res) {
   const { getSession } = await import("./_session.js");
@@ -219,23 +271,28 @@ export async function authorizeAdmin(req, res) {
       error?.status || "unknown"
     );
 
-    if (!res.headersSent) {
-      return res.status(503).json({
-        error: "AUTHENTICATION_UNAVAILABLE",
-        message: "認証サービスを一時的に利用できません。",
-      });
-    }
+    sendJson(res, 503, {
+      error: "認証サービスを一時的に利用できません。",
+      code: "AUTH_SERVICE_UNAVAILABLE",
+    });
 
     return null;
   }
 
   if (!session) {
-    if (!res.headersSent) {
-      res.status(401).json({
-        error: "UNAUTHORIZED",
-        message: "ログインが必要です。",
-      });
-    }
+    sendJson(res, 401, {
+      error: "ログインが必要です。",
+      code: "AUTH_REQUIRED",
+    });
+
+    return null;
+  }
+
+  if (!isAdminUser(session)) {
+    sendJson(res, 403, {
+      error: "管理者権限が必要です。",
+      code: "ADMIN_REQUIRED",
+    });
 
     return null;
   }
@@ -245,24 +302,22 @@ export async function authorizeAdmin(req, res) {
 
 /**
  * 旧API用の互換関数。
- * 使用箇所の監査が完了するまで残す。
+ * Bearerトークンによる管理者認証を維持する。
  */
 export function reject(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
 
-    res.status(405).json({
-      error: "METHOD_NOT_ALLOWED",
-      message: "POSTリクエストのみ利用できます。",
+    sendJson(res, 405, {
+      error: "Method not allowed",
     });
 
     return true;
   }
 
   if (!requireAdmin(req)) {
-    res.status(401).json({
-      error: "UNAUTHORIZED",
-      message: "認証が必要です。",
+    sendJson(res, 401, {
+      error: "Unauthorized",
     });
 
     return true;
