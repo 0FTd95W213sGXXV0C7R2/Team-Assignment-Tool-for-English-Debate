@@ -1,4 +1,3 @@
-
 import { createHash } from "node:crypto";
 import { authorizeAdmin, supabase } from "./_admin.js";
 
@@ -46,16 +45,44 @@ function getErrorMessage(error) {
     .join(" ");
 }
 
+function getRpcErrorStatus(error) {
+  const status = Number(error?.status);
+
+  return Number.isInteger(status) &&
+    status >= 400 &&
+    status <= 599
+    ? status
+    : null;
+}
+
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
 
     return send(res, 405, {
-      error: "Method not allowed",
+      error: "METHOD_NOT_ALLOWED",
+      message: "POSTリクエストのみ利用できます。",
     });
   }
 
-  const session = await authorizeAdmin(req, res);
+  let session;
+
+  try {
+    session = await authorizeAdmin(req, res);
+  } catch (error) {
+    console.error(
+      "Motion record authorization failed:",
+      error?.status || "unknown"
+    );
+
+    return send(res, 500, {
+      error: "AUTHORIZATION_FAILED",
+      message: "管理者権限を確認できませんでした。",
+    });
+  }
 
   if (!session) {
     return;
@@ -69,7 +96,8 @@ export default async function handler(req, res) {
     Array.isArray(body)
   ) {
     return send(res, 400, {
-      error: "Invalid request",
+      error: "INVALID_REQUEST",
+      message: "リクエスト形式が正しくありません。",
     });
   }
 
@@ -80,7 +108,8 @@ export default async function handler(req, res) {
 
   if (!id || id.length > 100) {
     return send(res, 400, {
-      error: "Invalid id",
+      error: "INVALID_ID",
+      message: "論題IDの指定が正しくありません。",
     });
   }
 
@@ -90,15 +119,24 @@ export default async function handler(req, res) {
 
   if (expectedRevision === null) {
     return send(res, 400, {
-      error: "Invalid revision",
+      error: "INVALID_REVISION",
+      message: "revisionの指定が正しくありません。",
     });
   }
 
   const token = process.env.ADMIN_API_TOKEN;
 
-  if (!token) {
+  if (
+    typeof token !== "string" ||
+    token.length === 0
+  ) {
+    console.error(
+      "Motion record configuration missing: ADMIN_API_TOKEN"
+    );
+
     return send(res, 500, {
-      error: "Server configuration missing",
+      error: "SERVER_CONFIGURATION_ERROR",
+      message: "サーバー設定に問題があります。",
     });
   }
 
@@ -124,45 +162,53 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     const message = getErrorMessage(error);
+    const status = getRpcErrorStatus(error);
 
-    if (/REVISION_CONFLICT|revision/i.test(message)) {
+    if (/REVISION_CONFLICT/i.test(message)) {
       return send(res, 409, {
         error: "REVISION_CONFLICT",
+        message: "論題が別の操作で更新されています。最新の情報を再取得してください。",
       });
     }
 
     if (/NOT_FOUND/i.test(message)) {
       return send(res, 404, {
         error: "NOT_FOUND",
+        message: "対象の論題が見つかりません。",
       });
     }
 
     if (/DELETED/i.test(message)) {
       return send(res, 409, {
         error: "MOTION_DELETED",
+        message: "削除済みの論題は記録できません。",
       });
     }
 
     if (/RATE_LIMIT/i.test(message)) {
       return send(res, 429, {
         error: "RATE_LIMITED",
+        message: "操作回数の上限に達しました。時間をおいて再試行してください。",
       });
     }
 
     if (/INVALID_/i.test(message)) {
       return send(res, 400, {
         error: "INVALID_REQUEST",
+        message: "リクエスト内容が正しくありません。",
       });
     }
 
+    // 認証・権限・競合などの既知エラーを上で処理した後、
+    // その他のエラーは内部情報を公開せず返す。
     console.error(
       "motion-record failed:",
-      error?.status || "unknown"
+      status || "unknown"
     );
 
     return send(res, 500, {
-      error: "Failed to record motion",
+      error: "MOTION_RECORD_FAILED",
+      message: "論題の記録に失敗しました。",
     });
   }
 }
-
