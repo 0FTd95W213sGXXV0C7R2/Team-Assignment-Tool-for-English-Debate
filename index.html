@@ -379,35 +379,72 @@ header{position:sticky;top:0;z-index:10;background:#f8fafc;padding:5px 0 10px}
   }
 
   async function validateCurrentSession(session) {
-    if (!session?.access_token) return false;
+  if (!session?.access_token || !session?.user) {
+    showAuth("ログインセッションがありません。再度ログインしてください。", "error");
+    return false;
+  }
+
+  try {
     const result = await api("/api/auth-me");
-    if (!result.authenticated || !result.isAdmin) {
-      await supabaseClient.auth.signOut();
-      showAuth("認証状態を確認できませんでした。再度ログインしてください。", "error");
+
+    if (!result.authenticated) {
+      showAuth(
+        "ログイン状態をサーバーで確認できませんでした。設定と通信状態を確認してください。",
+        "error"
+      );
       return false;
     }
-    return true;
-  }
 
-  async function checkSession() {
-    if (authCheckInProgress) return;
-    authCheckInProgress = true;
-    try {
-      const { data, error } = await supabaseClient.auth.getSession();
-      if (error) throw error;
-      if (!data.session) {
-        showAuth();
-        return;
-      }
-      if (await validateCurrentSession(data.session)) showApp(data.session.user);
-    } catch (error) {
-      console.error("Session check failed:", error);
-      showAuth("ログイン状態を確認できませんでした。設定と通信状態を確認してください。", "error");
-    } finally {
-      authCheckInProgress = false;
+    if (!result.isAdmin) {
+      showAuth(
+        "ログインはできましたが、このアカウントには管理者権限がありません。",
+        "error"
+      );
+      return false;
     }
-  }
 
+    return true;
+  } catch (error) {
+    console.error("Session validation failed:", error);
+    showAuth(
+      "ログインセッションの確認に失敗しました。通信状態とサーバー設定を確認してください。",
+      "error"
+    );
+    return false;
+  }
+}
+async function checkSession() {
+  if (authCheckInProgress || !supabaseClient) return;
+
+  authCheckInProgress = true;
+
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+
+    const session = data.session;
+
+    if (!session) {
+      showAuth();
+      return;
+    }
+
+    const valid = await validateCurrentSession(session);
+
+    if (valid) {
+      showApp(session.user);
+    }
+  } catch (error) {
+    console.error("Session check failed:", error);
+    showAuth(
+      "ログイン状態を確認できませんでした。設定と通信状態を確認してください。",
+      "error"
+    );
+  } finally {
+    authCheckInProgress = false;
+  }
+}
+  
   async function login(event) {
     event.preventDefault();
     if (busy || !supabaseClient) return;
