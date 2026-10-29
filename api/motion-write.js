@@ -9,6 +9,13 @@ const MAX_ID_LENGTH = 100;
 const DEFAULT_DONE_DATE = "2024-01-01";
 
 function send(res, status, body) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+
+  if (res.headersSent) {
+    return;
+  }
+
   return res.status(status).json(body);
 }
 
@@ -17,6 +24,13 @@ function normalizeRevision(value) {
     typeof value !== "string" &&
     typeof value !== "number" &&
     typeof value !== "bigint"
+  ) {
+    return null;
+  }
+
+  if (
+    typeof value === "number" &&
+    !Number.isSafeInteger(value)
   ) {
     return null;
   }
@@ -95,17 +109,18 @@ function mapRpcError(error, res) {
     });
   }
 
-  if (/INVALID_|INVALID REQUEST/i.test(message)) {
+  if (
+    /INVALID_|INVALID REQUEST|HISTORY_LIMIT/i.test(message)
+  ) {
     return send(res, 400, {
       error: "INVALID_REQUEST",
       message: "入力内容が正しくありません。",
     });
   }
 
-  console.error(
-    "motion-write RPC failed:",
-    error?.status || "unknown"
-  );
+  console.error("motion-write RPC failed:", {
+    status: error?.status || null,
+  });
 
   return send(res, 500, {
     error: "WRITE_FAILED",
@@ -266,7 +281,6 @@ function historyFromLegacyFields(existingHistory, body) {
 
   const normalizedDate = `${date}T00:00:00.000Z`;
 
-  // 同じ日付の履歴があれば重複追加しない。
   const alreadyExists = history.some(
     (item) => item.slice(0, 10) === date
   );
@@ -328,7 +342,6 @@ export default async function handler(req, res) {
     });
   }
 
-  // 旧フロントエンドの create も受け付ける。
   const action =
     body.action === "create"
       ? "insert"
@@ -465,10 +478,7 @@ export default async function handler(req, res) {
 
   const token = process.env.ADMIN_API_TOKEN;
 
-  if (
-    typeof token !== "string" ||
-    token.length === 0
-  ) {
+  if (typeof token !== "string" || token.length === 0) {
     console.error(
       "Motion write configuration missing: ADMIN_API_TOKEN"
     );
