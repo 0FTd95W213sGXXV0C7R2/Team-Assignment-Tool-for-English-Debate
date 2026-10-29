@@ -1,8 +1,12 @@
-
 import { createHash } from "node:crypto";
 import { authorizeAdmin, supabase } from "./_admin.js";
 
 const MAX_BIGINT = 9223372036854775807n;
+const MAX_HISTORY_ITEMS = 500;
+const MAX_MOTION_LENGTH = 1500;
+const MAX_TOURNAMENT_LENGTH = 180;
+const MAX_ID_LENGTH = 100;
+const DEFAULT_DONE_DATE = "2024-01-01";
 
 function send(res, status, body) {
   return res.status(status).json(body);
@@ -43,7 +47,11 @@ function errorText(error) {
     error?.data?.details,
     error?.data?.hint,
   ]
-    .filter(Boolean)
+    .filter(
+      (value) =>
+        typeof value === "string" &&
+        value.length > 0
+    )
     .join(" ");
 }
 
@@ -53,7 +61,8 @@ function mapRpcError(error, res) {
   if (/REVISION_CONFLICT/i.test(message)) {
     return send(res, 409, {
       error: "REVISION_CONFLICT",
-      message: "他の操作によってデータが更新されています。再読み込みしてください。",
+      message:
+        "他の操作によってデータが更新されています。再読み込みしてください。",
     });
   }
 
@@ -81,7 +90,8 @@ function mapRpcError(error, res) {
   if (/RATE_LIMIT/i.test(message)) {
     return send(res, 429, {
       error: "RATE_LIMITED",
-      message: "操作回数の上限に達しました。時間をおいて再試行してください。",
+      message:
+        "操作回数の上限に達しました。時間をおいて再試行してください。",
     });
   }
 
@@ -103,9 +113,36 @@ function mapRpcError(error, res) {
   });
 }
 
+function normalizeHistory(history) {
+  if (
+    !Array.isArray(history) ||
+    history.length > MAX_HISTORY_ITEMS
+  ) {
+    return null;
+  }
+
+  const normalized = [];
+
+  for (const item of history) {
+    if (
+      typeof item !== "string" ||
+      item.length > 40 ||
+      Number.isNaN(Date.parse(item))
+    ) {
+      return null;
+    }
+
+    normalized.push(item);
+  }
+
+  return normalized;
+}
+
 function validateRow(body) {
   const motion =
-    typeof body.motion === "string" ? body.motion.trim() : "";
+    typeof body.motion === "string"
+      ? body.motion.trim()
+      : "";
 
   const tournament =
     typeof body.tournament === "string"
@@ -113,34 +150,46 @@ function validateRow(body) {
       : "";
 
   const year =
-    typeof body.year === "string" || typeof body.year === "number"
+    typeof body.year === "string" ||
+    (typeof body.year === "number" &&
+      Number.isSafeInteger(body.year))
       ? String(body.year).trim()
       : "";
 
-  if (!motion || motion.length > 1500) {
-    return { error: "論題は1～1500文字で入力してください。" };
-  }
-
-  if (!tournament || tournament.length > 180) {
-    return { error: "大会名は1～180文字で入力してください。" };
-  }
-
-  if (!/^\d{4}$/.test(year)) {
-    return { error: "年度は4桁の西暦で入力してください。" };
+  if (
+    !motion ||
+    motion.length > MAX_MOTION_LENGTH
+  ) {
+    return {
+      error: `論題は1～${MAX_MOTION_LENGTH}文字で入力してください。`,
+    };
   }
 
   if (
-    body.history !== undefined &&
-    (!Array.isArray(body.history) ||
-      body.history.length > 500 ||
-      body.history.some(
-        (item) =>
-          typeof item !== "string" ||
-          item.length > 40 ||
-          Number.isNaN(Date.parse(item))
-      ))
+    !tournament ||
+    tournament.length > MAX_TOURNAMENT_LENGTH
   ) {
-    return { error: "実施履歴の形式が正しくありません。" };
+    return {
+      error: `大会名は1～${MAX_TOURNAMENT_LENGTH}文字で入力してください。`,
+    };
+  }
+
+  if (!/^\d{4}$/.test(year)) {
+    return {
+      error: "年度は4桁の西暦で入力してください。",
+    };
+  }
+
+  let history = [];
+
+  if (body.history !== undefined) {
+    history = normalizeHistory(body.history);
+
+    if (history === null) {
+      return {
+        error: "実施履歴の形式が正しくありません。",
+      };
+    }
   }
 
   return {
@@ -148,7 +197,7 @@ function validateRow(body) {
       motion,
       tournament,
       year,
-      history: body.history || [],
+      history,
     },
   };
 }
@@ -160,7 +209,9 @@ async function getExistingHistory(id) {
     limit: "1",
   });
 
-  const rows = await supabase(`motions?${params.toString()}`);
+  const rows = await supabase(
+    `motions?${params.toString()}`
+  );
 
   if (!Array.isArray(rows) || rows.length === 0) {
     return null;
@@ -169,14 +220,32 @@ async function getExistingHistory(id) {
   return rows[0];
 }
 
+function validateDate(date) {
+  if (
+    typeof date !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(date)
+  ) {
+    return false;
+  }
+
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === date
+  );
+}
+
 function historyFromLegacyFields(existingHistory, body) {
-  const history = Array.isArray(existingHistory)
-    ? existingHistory.filter(
-        (item) =>
-          typeof item === "string" &&
-          !Number.isNaN(Date.parse(item))
-      )
-    : [];
+  const history = normalizeHistory(
+    Array.isArray(existingHistory)
+      ? existingHistory
+      : []
+  );
+
+  if (history === null) {
+    throw new Error("INVALID_HISTORY");
+  }
 
   if (typeof body.done !== "boolean") {
     return history;
@@ -189,25 +258,24 @@ function historyFromLegacyFields(existingHistory, body) {
   const date =
     typeof body.date === "string" && body.date
       ? body.date
-      : "2024-01-01";
+      : DEFAULT_DONE_DATE;
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  if (!validateDate(date)) {
     throw new Error("INVALID_DATE");
   }
 
-  const parsed = new Date(`${date}T00:00:00.000Z`);
-
-  if (
-    Number.isNaN(parsed.getTime()) ||
-    parsed.toISOString().slice(0, 10) !== date
-  ) {
-    throw new Error("INVALID_DATE");
-  }
-
-  // 同じ日付の既存履歴を重複追加しない。
   const normalizedDate = `${date}T00:00:00.000Z`;
 
-  if (!history.some((item) => item.slice(0, 10) === date)) {
+  // 同じ日付の履歴があれば重複追加しない。
+  const alreadyExists = history.some(
+    (item) => item.slice(0, 10) === date
+  );
+
+  if (!alreadyExists) {
+    if (history.length >= MAX_HISTORY_ITEMS) {
+      throw new Error("HISTORY_LIMIT");
+    }
+
     history.push(normalizedDate);
   }
 
@@ -215,15 +283,33 @@ function historyFromLegacyFields(existingHistory, body) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
 
     return send(res, 405, {
-      error: "Method not allowed",
+      error: "METHOD_NOT_ALLOWED",
+      message: "POSTリクエストのみ利用できます。",
     });
   }
 
-  const session = await authorizeAdmin(req, res);
+  let session;
+
+  try {
+    session = await authorizeAdmin(req, res);
+  } catch (error) {
+    console.error(
+      "Motion write authorization failed:",
+      error?.status || "unknown"
+    );
+
+    return send(res, 500, {
+      error: "AUTHORIZATION_FAILED",
+      message: "管理者権限を確認できませんでした。",
+    });
+  }
 
   if (!session) {
     return;
@@ -231,15 +317,22 @@ export default async function handler(req, res) {
 
   const body = req.body;
 
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
+  if (
+    !body ||
+    typeof body !== "object" ||
+    Array.isArray(body)
+  ) {
     return send(res, 400, {
       error: "INVALID_REQUEST",
       message: "リクエストの形式が正しくありません。",
     });
   }
 
-  // フロントエンドの旧操作名 create も受け付ける。
-  const action = body.action === "create" ? "insert" : body.action;
+  // 旧フロントエンドの create も受け付ける。
+  const action =
+    body.action === "create"
+      ? "insert"
+      : body.action;
 
   if (!["insert", "update", "delete"].includes(action)) {
     return send(res, 400, {
@@ -249,13 +342,15 @@ export default async function handler(req, res) {
   }
 
   const id =
-    typeof body.id === "string" || typeof body.id === "number"
+    typeof body.id === "string" ||
+    (typeof body.id === "number" &&
+      Number.isSafeInteger(body.id))
       ? String(body.id).trim()
       : "";
 
   if (
     action !== "insert" &&
-    (!id || id.length > 100)
+    (!id || id.length > MAX_ID_LENGTH)
   ) {
     return send(res, 400, {
       error: "INVALID_ID",
@@ -266,19 +361,24 @@ export default async function handler(req, res) {
   let expectedRevision = null;
 
   if (action !== "insert") {
-    expectedRevision = normalizeRevision(body.expectedRevision);
+    expectedRevision = normalizeRevision(
+      body.expectedRevision
+    );
 
     if (expectedRevision === null) {
       return send(res, 400, {
         error: "INVALID_REVISION",
-        message: "更新前のリビジョンが必要です。再読み込みしてください。",
+        message:
+          "更新前のリビジョンが必要です。再読み込みしてください。",
       });
     }
   } else if (
     body.expectedRevision !== undefined &&
     body.expectedRevision !== null
   ) {
-    expectedRevision = normalizeRevision(body.expectedRevision);
+    expectedRevision = normalizeRevision(
+      body.expectedRevision
+    );
 
     if (expectedRevision === null) {
       return send(res, 400, {
@@ -337,6 +437,20 @@ export default async function handler(req, res) {
         });
       }
 
+      if (error?.message === "INVALID_HISTORY") {
+        return send(res, 400, {
+          error: "INVALID_HISTORY",
+          message: "既存の実施履歴が正しくありません。",
+        });
+      }
+
+      if (error?.message === "HISTORY_LIMIT") {
+        return send(res, 400, {
+          error: "HISTORY_LIMIT",
+          message: "実施履歴が上限に達しています。",
+        });
+      }
+
       console.error(
         "Existing motion retrieval failed:",
         error?.status || "unknown"
@@ -351,7 +465,14 @@ export default async function handler(req, res) {
 
   const token = process.env.ADMIN_API_TOKEN;
 
-  if (!token) {
+  if (
+    typeof token !== "string" ||
+    token.length === 0
+  ) {
+    console.error(
+      "Motion write configuration missing: ADMIN_API_TOKEN"
+    );
+
     return send(res, 500, {
       error: "SERVER_CONFIGURATION_ERROR",
       message: "サーバー設定が不足しています。",
